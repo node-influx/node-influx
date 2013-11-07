@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "0.10"
+  - "0.8"
+  - "0.6"
+before_script:
+  - wget http://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb
+  - sudo dpkg -i influxdb_latest_amd64.deb
