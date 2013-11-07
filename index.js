@@ -101,7 +101,13 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
   var datum = { points: [], name: seriesName, columns: [] };
   point     = [];
 
+  var query = options.query || {};
+
   _.each(values, function(v, k) {
+    if(k === 'time' && v instanceof Date) {
+      v = v.valueOf();
+      query.time_precision = 'm';
+    }
     point.push(v);
     datum.columns.push(k);
   });
@@ -109,7 +115,7 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
   datum.points.push(point);
   data = [datum];
   request.post({
-    uri: this.seriesUrl(this.options.database),
+    uri: this.seriesUrl(this.options.database, query),
     headers: {
       'content-type': 'application/json'
     },

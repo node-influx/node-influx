@@ -19,6 +19,9 @@ describe("InfluxDB", function() {
       name:     'test_db',
       username: 'johnsmith',
       password: 'johnjohn'
+    },
+    series: {
+      name: 'response_time'
     }
   };
 
@@ -68,8 +71,11 @@ describe("InfluxDB", function() {
   });
 
   describe("#writePoint", function() {
-    it("should write a point into the database", function (done) {
-      dbClient.writePoint("foo", {a: 1, b: 2}, done);
+    it("should write a generic point into the database", function (done) {
+      dbClient.writePoint(info.series.stars, {username: 'reallytrial', value: 232}, done);
+    });
+    it("should write a point with time into the database", function (done) {
+      dbClient.writePoint(info.series.stars, {time: new Date(), value: 232}, done);
     });
   });
 
