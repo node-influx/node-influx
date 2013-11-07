@@ -18,7 +18,7 @@ var influx = require('influx');
 var client = influx(host, port, username, password, database);
 ```
 
-As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/blog/2012/04/learn-to-read-the-source-luke.html). If you're still stuck, read the `./example/*` files and the `./test.js` file.
+As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/blog/2012/04/learn-to-read-the-source-luke.html). If you're still stuck, read the `./examples/*` files and the `./test.js` file.
 
 
 ## Licence
