@@ -3,13 +3,14 @@ var request = require('request');
 var url     = require('url');
 var _       = require('underscore');
 
-var InfluxDB = function(host, port, username, password) {
+var InfluxDB = function(host, port, username, password, database) {
 
   this.options = {
     host:     host     || 'localhost',
     port:     port     || 8086,
     username: username || 'root',
-    password: password || 'root'
+    password: password || 'root',
+    database: database
   };
 
   return this;
@@ -20,7 +21,7 @@ InfluxDB.prototype._parseCallback = function(callback) {
     if(err) {
       return callback(err);
     }
-    if(res.statusCode === 401) {
+    if(res.statusCode < 200 || res.statusCode >= 300) {
       return callback(new Error(body));
     }
     return callback(null, body);
@@ -57,7 +58,7 @@ InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
   request({
     method: 'DELETE',
     url:this.url('db/' + databaseName)
-  }, callback);
+  }, this._parseCallback(callback));
 };
 
 InfluxDB.prototype.getDatabaseNames = function(callback) {
@@ -75,11 +76,14 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
   request.post({
     url: this.url('db/' + databaseName + '/users'),
-    data: {
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
       username: username,
       password: password
-    }
-  }, callback);
+    }, null)
+  }, this._parseCallback(callback));
 };
 
 InfluxDB.prototype.readPoint = function(fieldNames, seriesNames, callback) {
@@ -89,7 +93,7 @@ InfluxDB.prototype.readPoint = function(fieldNames, seriesNames, callback) {
   });
 };
 
-InfluxDB.prototype.writePoints = function(seriesName, values, options, callback) {
+InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) {
   if(typeof options === 'function') {
     callback = options;
     options  = {};
@@ -97,16 +101,18 @@ InfluxDB.prototype.writePoints = function(seriesName, values, options, callback)
   var datum = { points: [], name: seriesName, columns: [] };
   point     = [];
 
-  _.each(values, function(k, v) {
+  _.each(values, function(v, k) {
     point.push(v);
     datum.columns.push(k);
   });
 
   datum.points.push(point);
   data = [datum];
-
   request.post({
     uri: this.seriesUrl(this.options.database),
+    headers: {
+      'content-type': 'application/json'
+    },
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
 };
@@ -116,5 +122,12 @@ InfluxDB.prototype.seriesUrl  = function(databaseName, query) {
 };
 
 
+var createClient = function() {
+  var args = arguments;
+  var client = function () { return InfluxDB.apply(this, args); };
+  client.prototype = InfluxDB.prototype;
+  return new client();
+};
 
-module.exports = InfluxDB;
+module.exports = createClient;
+module.exports.InfluxDB = InfluxDB;

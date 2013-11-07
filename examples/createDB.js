@@ -5,7 +5,7 @@ var username = 'root';
 var password = 'root';
 var database = 'example_app_db';
 
-var client = new Influx('localhost', 8086, username, password, database);
+var client = influx('localhost', 8086, username, password, database);
 
 
 client.createDatabase('123', function(err) {
