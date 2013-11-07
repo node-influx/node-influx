@@ -6,6 +6,10 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bencevans/node-influx.git"
+  },
   "keywords": [
     "influx",
     "influxdb",
