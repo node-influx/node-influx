@@ -58,6 +58,17 @@ describe("InfluxDB", function() {
     });
   });
 
+  describe("#getDatabaseNames", function() {
+    it('should return array of database names', function(done) {
+      client.getDatabaseNames(function(err, dbs) {
+        if(err) return done(err);
+        assert(dbs instanceof Array);
+        assert.notEqual(dbs.indexOf(info.db.name), -1);
+        done();
+      });
+    });
+  });
+
   describe('#createUser', function(done) {
     it('should create a user without error', function(done) {
       client.createUser(info.db.name, info.db.username, info.db.password, done);
