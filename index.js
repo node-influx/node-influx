@@ -86,13 +86,6 @@ InfluxDB.prototype.createUser = function(databaseName, username, password, callb
   }, this._parseCallback(callback));
 };
 
-InfluxDB.prototype.readPoint = function(fieldNames, seriesNames, callback) {
-  var query = 'SELECT ' + fieldNames + ' FROM ' + seriesNames;
-  var seriesUrl = this.url('db/' + this.database + '/series', {
-    q: encodeURIComponent(query)
-  });
-};
-
 InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) {
   if(typeof options === 'function') {
     callback = options;
