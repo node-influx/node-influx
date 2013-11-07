@@ -80,9 +80,7 @@ describe("InfluxDB", function() {
   });
 
   describe("#readPoint", function() {
-    it("should read a point from the database", function () {
-      client.readPoint();
-    });
+    it("should read a point from the database");
   });
 
   describe("#deleteDatabase", function() {
