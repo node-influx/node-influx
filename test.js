@@ -7,6 +7,7 @@ describe("InfluxDB", function() {
 
   var client;
   var dbClient;
+  var failClient;
 
   var info = {
     server: {
@@ -35,6 +36,7 @@ describe("InfluxDB", function() {
     it('should create an instance without error', function() {
       client = influx(info.server.host, info.server.port, info.server.username, info.server.password);
       dbClient = influx(info.server.host, info.server.port, info.db.username, info.db.password, info.db.name);
+      failClient = influx(info.server.host, 6465, info.db.username, info.db.password, info.db.name);
       assert(client instanceof influx.InfluxDB);
     });
   });
@@ -64,6 +66,12 @@ describe("InfluxDB", function() {
         if(err) return done(err);
         assert(dbs instanceof Array);
         assert.notEqual(dbs.indexOf(info.db.name), -1);
+        done();
+      });
+    });
+    it('should bubble errors through', function(done) {
+      failClient.getDatabaseNames(function(err) {
+        assert(err instanceof Error);
         done();
       });
     });
