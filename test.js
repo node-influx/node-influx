@@ -34,7 +34,7 @@ describe("InfluxDB", function() {
 
   describe('create client', function() {
     it('should create an instance without error', function() {
-      client = influx(info.server.host, info.server.port, info.server.username, info.server.password);
+      client = influx(info.server.host, info.server.port, info.server.username, info.server.password, info.db.name);
       dbClient = influx(info.server.host, info.server.port, info.db.username, info.db.password, info.db.name);
       failClient = influx(info.server.host, 6465, info.db.username, info.db.password, info.db.name);
       assert(client instanceof influx.InfluxDB);
@@ -91,15 +91,24 @@ describe("InfluxDB", function() {
 
   describe("#writePoint", function() {
     it("should write a generic point into the database", function (done) {
-      dbClient.writePoint(info.series.stars, {username: 'reallytrial', value: 232}, done);
+      dbClient.writePoint(info.series.name, {username: 'reallytrial', value: 232}, done);
     });
     it("should write a point with time into the database", function (done) {
-      dbClient.writePoint(info.series.stars, {time: new Date(), value: 232}, done);
+      dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, done);
     });
   });
 
-  describe("#readPoint", function() {
-    it("should read a point from the database");
+  describe("#readPoints", function() {
+    it("should read a point from the database", function(done) {
+      dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+        assert.equal(err, null);
+        assert(res instanceof Array);
+        assert.equal(res.length, 1);
+        assert.equal(res[0].name, info.series.name);
+        assert(res[0].points.length >= 2);
+        done();
+      });
+    });
   });
 
   describe("#deleteDatabase", function() {
@@ -114,4 +123,15 @@ describe("InfluxDB", function() {
     });
   });
 
+});
+
+describe('Helpers', function() {
+
+  describe('parseResult()', function() {
+    assert.deepEqual(influx.parseResult({
+      "name":"response_time",
+      "columns":["time","sequence_number","value"],
+      "points":[[1383934015207,23169,232],[1383934015205,23168,232]]
+    }), [{time: 1383934015207, sequence_number: 23169, value: 232}, {time: 1383934015205, sequence_number: 23168, value: 232}]);
+  });
 });

@@ -116,6 +116,13 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.readPoints = function(query, callback) {
+  request({
+    url: this.url('db/' + this.options.database + '/series', { q: query }),
+    json: true
+  }, this._parseCallback(callback));
+};
+
 InfluxDB.prototype.seriesUrl  = function(databaseName, query) {
   return this.url('db/' + databaseName + '/series');
 };
@@ -128,5 +135,17 @@ var createClient = function() {
   return new client();
 };
 
+
+var parseResult = function(res) {
+  return _.map(res.points, function(point) {
+    var objectPoint = {};
+    _.each(res.columns, function(name, n) {
+      objectPoint[name] = point[n];
+    });
+    return objectPoint;
+  });
+};
+
 module.exports = createClient;
+module.exports.parseResult = parseResult;
 module.exports.InfluxDB = InfluxDB;
