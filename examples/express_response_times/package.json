@@ -1,0 +1,14 @@
+{
+  "name": "express_response_times",
+  "version": "0.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "~3.4.4"
+  }
+}
