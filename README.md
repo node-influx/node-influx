@@ -22,41 +22,54 @@ var client = influx(host, port, username, password, database);
 
 ## Functions
 
+###createDatabase
+Creates a new database - requires cluster admin privileges
+
 ```js
 createDatabase(databaseName, callback) { }
 ```
-Creates a new database - requires cluster admin privileges
+
+###deleteDatabase
+Deletes a database - requires cluster admin privileges
 
 ```js
 deleteDatabase(databaseName, callback) { }
 ```
-Deletes a database - requires cluster admin privileges
 
-```js
-getDatabaseNames(callback) { }
-```
+###getDatabseNames
 Returns array of database names - requires cluster admin privileges
 
 ```js
-getSeriesNames(databaseName, callback) { }
+getDatabaseNames(function(err,arrayDatabaseNames){}) { }
 ```
+
+###getSeriesNames
 Returns array of series names from given database - requires database admin privileges
 
+```js
+getSeriesNames(databaseName, function(err,arraySeriesNames){} ) { }
+```
+
+###createUser
+Creates a new database user - requires cluster admin privileges
 
 ```js
 createUser(databaseName, username, password, callback) { }
 ```
-Creates a new database user - requires cluster admin privileges
+
+###writePoint
+Writes point to database - requires database user privileges
 
 ```js
 writePoint(seriesName, values, options, callback) { }
 ```
-Writes point to database - requires database user privileges
+
+###readPoints
+Reads points from a database - requires database user privileges
 
 ```js
 readPoints(query, callback) { }
 ```
-Reads points from a database - requires database user privileges
 
 
 
