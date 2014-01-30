@@ -127,6 +127,7 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
     headers: {
       'content-type': 'application/json'
     },
+    pool : options.pool ? options.pool : {},
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
 };
