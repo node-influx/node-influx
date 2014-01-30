@@ -36,7 +36,7 @@ Deletes a database - requires cluster admin privileges
 deleteDatabase(databaseName, callback) { }
 ```
 
-###getDatabseNames
+###getDatabaseNames
 Returns array of database names - requires cluster admin privileges
 
 ```js
