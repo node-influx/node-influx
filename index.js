@@ -101,27 +101,42 @@ InfluxDB.prototype.createUser = function(databaseName, username, password, callb
   }, this._parseCallback(callback));
 };
 
-InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) {
+
+InfluxDB.prototype.writeSeries = function(series, options, callback) {
   if(typeof options === 'function') {
     callback = options;
     options  = {};
   }
-  var datum = { points: [], name: seriesName, columns: [] };
-  point     = [];
 
   var query = options.query || {};
+  var data = [];
 
-  _.each(values, function(v, k) {
-    if(k === 'time' && v instanceof Date) {
-      v = v.valueOf();
-      query.time_precision = 'm';
-    }
-    point.push(v);
-    datum.columns.push(k);
+  _.each(series, function(dataPoints, seriesName) {
+    var datum = { points: [], name: seriesName, columns: [] };
+    // Collect column names first
+    var columns = {};
+    _.each(dataPoints, function(values) {
+      _.each(values, function(_, k) {
+        columns[k] = true;
+      });
+    });
+    datum.columns = _.keys(columns);
+    // Add point values with null where needed
+    _.each(dataPoints, function(values) {
+      var point = [];
+      _.each(datum.columns, function(k) {
+        var v = typeof values[k] === 'undefined' ? null : values[k];
+        if(k === 'time' && v instanceof Date) {
+          v = v.valueOf();
+          query.time_precision = 'm';
+        }
+        point.push(v);
+      });
+      datum.points.push(point);
+    });
+    data.push(datum);
   });
 
-  datum.points.push(point);
-  data = [datum];
   request.post({
     uri: this.seriesUrl(this.options.database, query),
     headers: {
@@ -130,6 +145,18 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
     pool : 'undefined' != typeof options.pool ? options.pool : {},
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
+};
+
+InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) {
+  var data = {};
+  data[seriesName] = [values];
+  this.writeSeries(data, options, callback);
+};
+
+InfluxDB.prototype.writePoints = function(seriesName, points, options, callback) {
+  var data = {};
+  data[seriesName] = points;
+  this.writeSeries(data, options, callback);
 };
 
 InfluxDB.prototype.readPoints = function(query, callback) {

@@ -22,12 +22,12 @@
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
   "license": "MIT",
   "dependencies": {
-    "request": "~2.29.0",
+    "request": "~2.33.0",
     "underscore": "~1.5.2"
   },
   "devDependencies": {
-    "mocha": "~1.14.0",
-    "istanbul": "~0.1.44",
-    "coveralls": "~2.3.0"
+    "mocha": "~1.17.1",
+    "istanbul": "~0.2.4",
+    "coveralls": "~2.7.0"
   }
 }
