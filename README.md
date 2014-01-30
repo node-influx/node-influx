@@ -40,7 +40,7 @@ Returns array of database names - requires cluster admin privileges
 ```js
 getSeriesNames(databaseName, callback) { }
 ```
-Returns array of series names from given dataBase- requires database admin privileges
+Returns array of series names from given database - requires database admin privileges
 
 
 ```js
