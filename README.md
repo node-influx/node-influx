@@ -89,6 +89,19 @@ writeSeries(series, options, callback) { }
 ```
 *Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
 
+###query
+Queries the database - requires database user privileges
+
+```js
+var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
+query(query, callback) { }
+
+
+var query = 'DELETE FROM myseries WHERE time < now() - 24h';
+query(query, callback) { }
+
+```
+
 
 ###readPoints
 Reads points from a database - requires database user privileges
@@ -96,7 +109,7 @@ Reads points from a database - requires database user privileges
 ```js
 readPoints(query, callback) { }
 ```
-
+*readPoints() has been replaced with query(), please upgrade *
 
 
 

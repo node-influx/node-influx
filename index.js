@@ -159,11 +159,16 @@ InfluxDB.prototype.writePoints = function(seriesName, points, options, callback)
   this.writeSeries(data, options, callback);
 };
 
-InfluxDB.prototype.readPoints = function(query, callback) {
+InfluxDB.prototype.query = function(query, callback) {
   request({
     url: this.url('db/' + this.options.database + '/series', { q: query }),
     json: true
   }, this._parseCallback(callback));
+};
+
+// legacy function
+InfluxDB.prototype.readPoints = function(query, callback) {
+    this.query(query,callback);
 };
 
 InfluxDB.prototype.seriesUrl  = function(databaseName, query) {
