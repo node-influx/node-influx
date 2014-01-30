@@ -22,41 +22,80 @@ var client = influx(host, port, username, password, database);
 
 ## Functions
 
+###createDatabase
+Creates a new database - requires cluster admin privileges
+
 ```js
 createDatabase(databaseName, callback) { }
 ```
-Creates a new database - requires cluster admin privileges
+
+###deleteDatabase
+Deletes a database - requires cluster admin privileges
 
 ```js
 deleteDatabase(databaseName, callback) { }
 ```
-Deletes a database - requires cluster admin privileges
 
-```js
-getDatabaseNames(callback) { }
-```
+###getDatabseNames
 Returns array of database names - requires cluster admin privileges
 
 ```js
-getSeriesNames(databaseName, callback) { }
+getDatabaseNames(function(err,arrayDatabaseNames){}) { }
 ```
+
+###getSeriesNames
 Returns array of series names from given database - requires database admin privileges
 
+```js
+getSeriesNames(databaseName, function(err,arraySeriesNames){} ) { }
+```
+
+###createUser
+Creates a new database user - requires cluster admin privileges
 
 ```js
 createUser(databaseName, username, password, callback) { }
 ```
-Creates a new database user - requires cluster admin privileges
+
+###writePoint
+Writes a point to a series - requires database user privileges
 
 ```js
-writePoint(seriesName, values, options, callback) { }
+var point = { attr : value, time : new Date()};
+writePoint(seriesName, point, options, callback) { }
 ```
-Writes point to database - requires database user privileges
+
+###writePoints
+Writes multiple point to a series - requires database user privileges
+
+```js
+var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
+writePoint(seriesName, points, options, callback) { }
+```
+
+###writeSeries
+Writes multiple point to multiple series - requires database user privileges
+
+```js
+var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
+var points2 = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
+
+var series = {
+    series_name_one : points,
+    series_name_two : points2
+};
+
+writeSeries(series, options, callback) { }
+```
+*Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
+
+
+###readPoints
+Reads points from a database - requires database user privileges
 
 ```js
 readPoints(query, callback) { }
 ```
-Reads points from a database - requires database user privileges
 
 
 
