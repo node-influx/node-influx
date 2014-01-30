@@ -19,6 +19,49 @@ var influx = require('influx');
 var client = influx(host, port, username, password, database);
 ```
 
+
+## Functions
+
+```js
+createDatabase(databaseName, callback) { }
+```
+Creates a new database - requires cluster admin privileges
+
+```js
+deleteDatabase(databaseName, callback) { }
+```
+Deletes a database - requires cluster admin privileges
+
+```js
+getDatabaseNames(callback) { }
+```
+Returns array of database names - requires cluster admin privileges
+
+```js
+getSeriesNames(databaseName, callback) { }
+```
+Returns array of series names from given dataBase- requires database admin privileges
+
+
+```js
+createUser(databaseName, username, password, callback) { }
+```
+Creates a new database user - requires cluster admin privileges
+
+```js
+writePoint(seriesName, values, options, callback) { }
+```
+Writes point to database - requires database user privileges
+
+```js
+readPoints(query, callback) { }
+```
+Reads points from a database - requires database user privileges
+
+
+
+
+
 As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/blog/2012/04/learn-to-read-the-source-luke.html). If you're still stuck, read the `./examples/*` files and the `./test.js` file.
 
 
