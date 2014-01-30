@@ -89,13 +89,13 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
 
 
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
-  request.post({
+    request.post({
     url: this.url('db/' + databaseName + '/users'),
     headers: {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      username: username,
+      name: username,
       password: password
     }, null)
   }, this._parseCallback(callback));
