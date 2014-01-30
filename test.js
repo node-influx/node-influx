@@ -98,6 +98,52 @@ describe("InfluxDB", function() {
     });
   });
 
+  describe("#writePoints", function() {
+    it("should write multiple points to the same time series, same column names", function (done) {
+      var points = [
+        {username: 'reallytrial', value: 232},
+        {username: 'welovefashion', value: 232},
+        {username: 'welovefashion', value: 4711}
+      ];
+      dbClient.writePoints(info.series.name, points, done);
+    });
+    it("should write multiple points to the same time series, differing column names", function (done) {
+      var points = [
+        {username: 'reallytrial', value: 232},
+        {username: 'welovefashion', othervalue: 232},
+        {otherusername: 'welovefashion', value: 4711}
+      ];
+      dbClient.writePoints(info.series.name, points, done);
+    });
+  });
+
+  describe("#writeSeries", function() {
+    it("should write multiple points to multiple time series, same column names", function (done) {
+      var points = [
+        {username: 'reallytrial', value: 232},
+        {username: 'welovefashion', value: 232},
+        {username: 'welovefashion', value: 4711}
+      ];
+      var data = {
+        series1: points,
+        series2: points
+      };
+      dbClient.writeSeries(data, done);
+    });
+    it("should write multiple points to multiple time series, differing column names", function (done) {
+      var points = [
+        {username: 'reallytrial', value: 232},
+        {username: 'welovefashion', othervalue: 232},
+        {otherusername: 'welovefashion', value: 4711}
+      ];
+      var data = {
+        series1: points,
+        series2: points
+      };
+      dbClient.writeSeries(data, done);
+    });
+  });
+
   describe("#readPoints", function() {
     it("should read a point from the database", function(done) {
       dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
@@ -110,6 +156,23 @@ describe("InfluxDB", function() {
       });
     });
   });
+
+    describe("#getSeriesNames", function() {
+        it('should return array of series names', function(done) {
+            client.getSeriesNames(info.db.name, function(err, series) {
+                if(err) return done(err);
+                assert(series instanceof Array);
+                assert.notEqual(series.indexOf(info.series.name), -1);
+                done();
+            });
+        });
+        it('should bubble errors through', function(done) {
+            failClient.getSeriesNames(info.db.name, function(err) {
+                assert(err instanceof Error);
+                done();
+            });
+        });
+    });
 
   describe("#deleteDatabase", function() {
     it('should delete the database without error', function (done) {
