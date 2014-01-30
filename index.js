@@ -63,7 +63,7 @@ InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
 
 InfluxDB.prototype.getDatabaseNames = function(callback) {
   request({
-    url: this.url('dbs'),
+    url: this.url('db'),
     json: true
   }, this._parseCallback(function(err, dbs) {
     if(err) {
