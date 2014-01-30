@@ -58,11 +58,36 @@ createUser(databaseName, username, password, callback) { }
 ```
 
 ###writePoint
-Writes point to database - requires database user privileges
+Writes a point to a series - requires database user privileges
 
 ```js
 writePoint(seriesName, values, options, callback) { }
 ```
+
+###writePoints
+Writes multiple point to a series - requires database user privileges
+
+```js
+var points = [ {attr : value}, {attr : value2}];
+writePoint(seriesName, points, options, callback) { }
+```
+
+###writeSeries
+Writes multiple point to multiple series - requires database user privileges
+
+```js
+var points = [ {attr : value}, {attr : value2}];
+var points2 = [ {attr : value}, {attr : value2}];
+
+var series = {
+    series_name_one : points,
+    series_name_two : points2
+};
+
+writeSeries(series, options, callback) { }
+```
+*Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
+
 
 ###readPoints
 Reads points from a database - requires database user privileges
