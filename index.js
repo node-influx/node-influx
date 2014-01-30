@@ -63,7 +63,7 @@ InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
 
 InfluxDB.prototype.getDatabaseNames = function(callback) {
   request({
-    url: this.url('dbs'),
+    url: this.url('db'),
     json: true
   }, this._parseCallback(function(err, dbs) {
     if(err) {
@@ -73,14 +73,29 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
   }));
 };
 
+
+InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
+    request({
+        url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
+        json: true
+    }, this._parseCallback(function(err, series) {
+        if(err) {
+            return callback(err, series);
+        }
+        return callback(err, _.map(series, function(series) { return series.name; }));
+    }));
+};
+
+
+
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
-  request.post({
+    request.post({
     url: this.url('db/' + databaseName + '/users'),
     headers: {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      username: username,
+      name: username,
       password: password
     }, null)
   }, this._parseCallback(callback));
@@ -112,6 +127,7 @@ InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) 
     headers: {
       'content-type': 'application/json'
     },
+    pool : 'undefined' != typeof options.pool ? options.pool : {},
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
 };
