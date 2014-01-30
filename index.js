@@ -50,7 +50,7 @@ InfluxDB.prototype.createDatabase = function(databaseName, callback) {
     },
     body: JSON.stringify({
       name: databaseName
-    }, null),
+    }, null)
   }, this._parseCallback(callback));
 };
 
@@ -159,12 +159,20 @@ InfluxDB.prototype.writePoints = function(seriesName, points, options, callback)
   this.writeSeries(data, options, callback);
 };
 
+// legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
+    this.query(query,callback);
+};
+
+InfluxDB.prototype.query = function(query, callback) {
   request({
     url: this.url('db/' + this.options.database + '/series', { q: query }),
     json: true
   }, this._parseCallback(callback));
 };
+
+
+
 
 InfluxDB.prototype.seriesUrl  = function(databaseName, query) {
   return this.url('db/' + databaseName + '/series');

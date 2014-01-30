@@ -98,6 +98,19 @@ describe("InfluxDB", function() {
     });
   });
 
+    describe("#query", function() {
+        it("should read a point from the database", function(done) {
+            dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+                assert.equal(err, null);
+                assert(res instanceof Array);
+                assert.equal(res.length, 1);
+                assert.equal(res[0].name, info.series.name);
+                assert(res[0].points.length >= 2);
+                done();
+            });
+        });
+    });
+
   describe("#writePoints", function() {
     it("should write multiple points to the same time series, same column names", function (done) {
       var points = [
@@ -144,18 +157,6 @@ describe("InfluxDB", function() {
     });
   });
 
-  describe("#readPoints", function() {
-    it("should read a point from the database", function(done) {
-      dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
-        assert.equal(err, null);
-        assert(res instanceof Array);
-        assert.equal(res.length, 1);
-        assert.equal(res[0].name, info.series.name);
-        assert(res[0].points.length >= 2);
-        done();
-      });
-    });
-  });
 
     describe("#getSeriesNames", function() {
         it('should return array of series names', function(done) {
@@ -175,6 +176,7 @@ describe("InfluxDB", function() {
     });
 
   describe("#deleteDatabase", function() {
+    this.timeout(3500);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
     });
