@@ -3,6 +3,6 @@ node_js:
   - "0.10"
   - "0.8"
 before_script:
-  - wget http://s3.amazonaws.com/influxdb/influxdb_0.0.9_amd64.deb
-  - sudo dpkg -i influxdb_0.0.9_amd64.deb
+  - wget http://s3.amazonaws.com/influxdb/influxdb_0.4.0_amd64.deb
+  - sudo dpkg -i influxdb_0.4.0_amd64.deb
 script: npm run travis-test
