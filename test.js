@@ -111,6 +111,23 @@ describe("InfluxDB", function() {
     });
   });
 
+    describe("#getSeriesNames", function() {
+        it('should return array of series names', function(done) {
+            client.getSeriesNames(info.db.name, function(err, series) {
+                if(err) return done(err);
+                assert(series instanceof Array);
+                assert.notEqual(series.indexOf(info.series.name), -1);
+                done();
+            });
+        });
+        it('should bubble errors through', function(done) {
+            failClient.getSeriesNames(info.db.name, function(err) {
+                assert(err instanceof Error);
+                done();
+            });
+        });
+    });
+
   describe("#deleteDatabase", function() {
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
