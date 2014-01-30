@@ -62,7 +62,7 @@ Writes a point to a series - requires database user privileges
 
 ```js
 var point = { attr : value, time : new Date()};
-writePoint(seriesName, values, options, callback) { }
+writePoint(seriesName, point, options, callback) { }
 ```
 
 ###writePoints
