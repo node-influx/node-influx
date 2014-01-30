@@ -61,6 +61,7 @@ createUser(databaseName, username, password, callback) { }
 Writes a point to a series - requires database user privileges
 
 ```js
+var point = { attr : value, time : new Date()};
 writePoint(seriesName, values, options, callback) { }
 ```
 
@@ -68,7 +69,7 @@ writePoint(seriesName, values, options, callback) { }
 Writes multiple point to a series - requires database user privileges
 
 ```js
-var points = [ {attr : value}, {attr : value2}];
+var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
 writePoint(seriesName, points, options, callback) { }
 ```
 
@@ -76,8 +77,8 @@ writePoint(seriesName, points, options, callback) { }
 Writes multiple point to multiple series - requires database user privileges
 
 ```js
-var points = [ {attr : value}, {attr : value2}];
-var points2 = [ {attr : value}, {attr : value2}];
+var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
+var points2 = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
 
 var series = {
     series_name_one : points,
