@@ -97,7 +97,6 @@ var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
 query(query, callback) { }
 
 
-var query = 'DELETE FROM myseries WHERE time < now() - 24h';
 query(query, callback) { }
 
 ```

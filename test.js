@@ -188,7 +188,7 @@ describe("InfluxDB", function() {
     });
 
   describe("#deleteDatabase", function() {
-    this.timeout(3500);
+    this.timeout(4500);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
     });

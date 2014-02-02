@@ -6,11 +6,12 @@ var _       = require('underscore');
 var InfluxDB = function(host, port, username, password, database) {
 
   this.options = {
-    host:     host     || 'localhost',
-    port:     port     || 8086,
-    username: username || 'root',
-    password: password || 'root',
-    database: database
+    host        :     host     || 'localhost',
+    port        :     port     || 8086,
+    username    :     username || 'root',
+    password    :     password || 'root',
+    database    :     database,
+    devmode     :     'development' == process.env.NODE_ENV
   };
 
   return this;
@@ -168,6 +169,7 @@ InfluxDB.prototype.query = function(query, callback) {
 
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
+    if (this.options.devmode) console.log('influx.readPoints() has been depreciated, please use influx.query()');
     this.query(query,callback);
 };
 
