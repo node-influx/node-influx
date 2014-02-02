@@ -11,7 +11,7 @@ var InfluxDB = function(host, port, username, password, database, logFunction) {
     username            : username || 'root',
     password            : password || 'root',
     database            : database,
-    depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development' || logFunction)
+    depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction)
                           ? logFunction || console.log : false
   };
 
