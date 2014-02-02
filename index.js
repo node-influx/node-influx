@@ -3,15 +3,16 @@ var request = require('request');
 var url     = require('url');
 var _       = require('underscore');
 
-var InfluxDB = function(host, port, username, password, database) {
+var InfluxDB = function(host, port, username, password, database, logFunction) {
 
   this.options = {
-    host        :     host     || 'localhost',
-    port        :     port     || 8086,
-    username    :     username || 'root',
-    password    :     password || 'root',
-    database    :     database,
-    devmode     :     'development' == process.env.NODE_ENV
+    host                : host     || 'localhost',
+    port                : port     || 8086,
+    username            : username || 'root',
+    password            : password || 'root',
+    database            : database,
+    depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development' || logFunction)
+                          ? logFunction || console.log : false
   };
 
   return this;
@@ -169,7 +170,7 @@ InfluxDB.prototype.query = function(query, callback) {
 
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
-    if (this.options.devmode) console.log('influx.readPoints() has been depreciated, please use influx.query()');
+    if (false !== this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
     this.query(query,callback);
 };
 
