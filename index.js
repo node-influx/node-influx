@@ -52,7 +52,7 @@ InfluxDB.prototype.createDatabase = function(databaseName, callback) {
     },
     body: JSON.stringify({
       name: databaseName
-    }, null),
+    }, null)
   }, this._parseCallback(callback));
 };
 
@@ -170,7 +170,7 @@ InfluxDB.prototype.query = function(query, callback) {
 
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
-    if (false !== this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
+    if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
     this.query(query,callback);
 };
 
