@@ -179,6 +179,14 @@ describe("InfluxDB", function() {
                 done();
             });
         });
+        it('should return array of series names from the db defined on connection', function(done) {
+          client.getSeriesNames(function(err, series) {
+            if(err) return done(err);
+            assert(series instanceof Array);
+            assert.notEqual(series.indexOf(info.series.name), -1);
+            done();
+          })
+        })
         it('should bubble errors through', function(done) {
             failClient.getSeriesNames(info.db.name, function(err) {
                 assert(err instanceof Error);

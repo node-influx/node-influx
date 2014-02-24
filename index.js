@@ -77,6 +77,12 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
 
 
 InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
+    // if database defined on connection level use it unless overwritten
+    if ( this.options.database && typeof databaseName == "function" ) {
+      callback = databaseName;
+      databaseName = this.options.database;
+    }
+
     request({
         url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
         json: true
@@ -174,7 +180,8 @@ InfluxDB.prototype.readPoints = function(query, callback) {
     this.query(query,callback);
 };
 
-InfluxDB.prototype.seriesUrl  = function(databaseName, query) {
+InfluxDB.prototype.seriesUrl  = function(databaseName) {
+  if ( !databaseName ) databaseName = this.options.database;
   return this.url('db/' + databaseName + '/series');
 };
 
