@@ -146,7 +146,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
   });
 
   request.post({
-    uri: this.seriesUrl(this.options.database, query),
+    uri: this.seriesUrl(this.options.database),
     headers: {
       'content-type': 'application/json'
     },
