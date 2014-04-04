@@ -184,9 +184,15 @@ InfluxDB.prototype.query = function(query, callback) {
   }, this._parseCallback(callback));
 };
 
-InfluxDB.prototype.dropSeries  = function(seriesName, callback) {
+InfluxDB.prototype.dropSeries  = function(databaseName, seriesName, callback) {
+    if ('function' === typeof seriesName)
+    {
+        callback=seriesName;
+        seriesName = databaseName;
+        databaseName = this.options.database;
+    }
     request({
-        url: this.url('db/' + this.options.database + '/series/' + seriesName),
+        url: this.url('db/' + databaseName + '/series/' + seriesName),
         method : 'DELETE',
         json: true
     }, this._parseCallback(callback));
