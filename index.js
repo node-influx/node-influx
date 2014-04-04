@@ -98,17 +98,27 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
 
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
     request.post({
-    url: this.url('db/' + databaseName + '/users'),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: username,
-      password: password
-    }, null)
-  }, this._parseCallback(callback));
+        url: this.url('db/' + databaseName + '/users'),
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: username,
+          password: password
+        }, null)
+    }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
+{
+    request.post({
+        url: this.url('db/' + databaseName + '/users/' + userName),
+        headers: {
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify(options, null)
+    }, this._parseCallback(callback));
+};
 
 InfluxDB.prototype.writeSeries = function(series, options, callback) {
   if(typeof options === 'function') {
