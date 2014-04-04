@@ -1,6 +1,6 @@
 {
   "name": "influx",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "InfluxDB Client",
   "main": "index.js",
   "scripts": {
@@ -22,12 +22,12 @@
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
   "license": "MIT",
   "dependencies": {
-    "request": "~2.33.0",
-    "underscore": "~1.5.2"
+    "request": "~2.34.0",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
     "istanbul": "~0.2.4",
-    "coveralls": "~2.7.0"
+    "coveralls": "~2.8.0"
   }
 }

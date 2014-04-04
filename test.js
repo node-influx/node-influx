@@ -144,9 +144,9 @@ describe("InfluxDB", function() {
     });
   });
 
-  describe("#readPoints", function() {
+  describe("#query", function() {
     it("should read a point from the database", function(done) {
-      dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+      dbClient.query('SELECT value FROM ' + info.series.name + ';', function(err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
@@ -157,6 +157,19 @@ describe("InfluxDB", function() {
     });
   });
 
+    describe("#readPoints", function() {
+        it("should read a point from the database", function(done) {
+            dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+                assert.equal(err, null);
+                assert(res instanceof Array);
+                assert.equal(res.length, 1);
+                assert.equal(res[0].name, info.series.name);
+                assert(res[0].points.length >= 2);
+                done();
+            });
+        });
+    });
+
     describe("#getSeriesNames", function() {
         it('should return array of series names', function(done) {
             client.getSeriesNames(info.db.name, function(err, series) {
@@ -166,6 +179,14 @@ describe("InfluxDB", function() {
                 done();
             });
         });
+        it('should return array of series names from the db defined on connection', function(done) {
+          client.getSeriesNames(function(err, series) {
+            if(err) return done(err);
+            assert(series instanceof Array);
+            assert.notEqual(series.indexOf(info.series.name), -1);
+            done();
+          })
+        })
         it('should bubble errors through', function(done) {
             failClient.getSeriesNames(info.db.name, function(err) {
                 assert(err instanceof Error);
@@ -175,6 +196,7 @@ describe("InfluxDB", function() {
     });
 
   describe("#deleteDatabase", function() {
+    this.timeout(4500);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
     });
