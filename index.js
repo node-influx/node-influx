@@ -174,6 +174,15 @@ InfluxDB.prototype.query = function(query, callback) {
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.dropSeries  = function(seriesName, callback) {
+    request({
+        url: this.url('db/' + this.options.database + '/series/' + seriesName),
+        method : 'DELETE',
+        json: true
+    }, this._parseCallback(callback));
+};
+
+
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
     if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');

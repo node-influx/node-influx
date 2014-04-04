@@ -44,7 +44,7 @@ describe("InfluxDB", function() {
   describe("#url", function() {
     it("should build a properly formatted url", function() {
       var url = client.url(info.db.name);
-      assert.equal(url, 'http://localhost:8086/' + info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
+      assert.equal(url, 'http://'+info.server.host+':8086/' + info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
     });
   });
 
@@ -195,8 +195,30 @@ describe("InfluxDB", function() {
         });
     });
 
+    describe('#dropSeries',function() {
+        this.timeout(20000);
+       it('should drop series',function(done) {
+          client.dropSeries(info.series.name,function(err)
+          {
+              if (err) return done(err);
+              assert(err === null);
+              done();
+          });
+           it('should bubble errors through', function(done) {
+               failClient.dropSeries(info.series.name, function(err) {
+                   assert(err instanceof Error);
+                   done();
+               });
+           });
+
+       });
+
+
+
+    });
+
   describe("#deleteDatabase", function() {
-    this.timeout(4500);
+    this.timeout(20000);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
     });
