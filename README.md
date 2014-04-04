@@ -57,6 +57,18 @@ Creates a new database user - requires cluster admin privileges
 createUser(databaseName, username, password, callback) { }
 ```
 
+###updateUser
+Updates database user - requires cluster admin privileges
+
+```js
+updateUser(databaseName, username, options, callback) { }
+
+e.g.:
+// adds database admin privilege
+influxDB.updateUser('myDatabase','johndoe',{admin:true},callback);
+```
+
+
 ###writePoint
 Writes a point to a series - requires database user privileges
 
@@ -109,6 +121,29 @@ Reads points from a database - requires database user privileges
 readPoints(query, callback) { }
 ```
 *readPoints() has been replaced with query(), please upgrade *
+
+
+###getContinuousQueries
+Fetches all continuous queries from a database - requires database admin privileges
+
+```js
+getContinuousQueries( [databaseName,] callback) { }
+```
+
+###dropContinuousQuery
+Drops a continuous query from a database - requires database admin privileges
+
+```js
+dropContinuousQuery( [databaseName,] queryID, callback) { }
+```
+
+
+###dropSeries
+Drops a series from a database - requires database admin privileges
+
+```js
+query ( [databaseName ,] seriesName, callback) { }
+```
 
 
 
