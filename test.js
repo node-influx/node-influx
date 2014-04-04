@@ -89,7 +89,21 @@ describe("InfluxDB", function() {
     });
   });
 
-  describe("#writePoint", function() {
+
+    describe('#updateUser', function(done) {
+        it('should update user without error', function(done) {
+            client.updateUser(info.db.name, info.db.username, {admin : true}, done);
+        });
+        it('should error when updating non existing user', function(done) {
+            client.updateUser(info.db.name, 'johndoe', {admin : false}, function(err) {
+                assert(err instanceof Error);
+                done();
+            });
+        });
+    });
+
+
+    describe("#writePoint", function() {
     it("should write a generic point into the database", function (done) {
       dbClient.writePoint(info.series.name, {username: 'reallytrial', value: 232}, done);
     });
@@ -157,6 +171,40 @@ describe("InfluxDB", function() {
     });
   });
 
+    describe("#query", function() {
+        it("should create a continuous query", function(done) {
+            dbClient.query('SELECT MEDIAN(value) as value FROM ' + info.series.name + ' INTO ' + info.series.name + '.downsampled;', function(err, res) {
+                assert.equal(err, null);
+                assert(res instanceof Array);
+                assert.equal(res.length, 0);
+                done();
+            });
+        });
+    });
+    describe("#getContinuousQueries", function() {
+        it("should fetch all continuous queries from the database", function(done) {
+            dbClient.getContinuousQueries(info.db.name, function(err, res) {
+                assert.equal(err, null);
+                assert(res instanceof Array);
+                assert.equal(res.length, 1);
+                done();
+            });
+        });
+    });
+
+    describe("#dropContinuousQuery", function() {
+        it("should fetch all continuous queries from the database", function(done) {
+            dbClient.getContinuousQueries(info.db.name, function(err, res) {
+                dbClient.dropContinuousQuery(res[0].id,function(err,res)
+                {
+                    assert.equal(err, null);
+                    done();
+                });
+            });
+        });
+    });
+
+
     describe("#readPoints", function() {
         it("should read a point from the database", function(done) {
             dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
@@ -186,7 +234,7 @@ describe("InfluxDB", function() {
             assert.notEqual(series.indexOf(info.series.name), -1);
             done();
           })
-        })
+        });
         it('should bubble errors through', function(done) {
             failClient.getSeriesNames(info.db.name, function(err) {
                 assert(err instanceof Error);
@@ -201,7 +249,7 @@ describe("InfluxDB", function() {
           client.dropSeries(info.series.name,function(err)
           {
               if (err) return done(err);
-              assert(err === null);
+              assert.equal(err, null);
               done();
           });
            it('should bubble errors through', function(done) {
@@ -212,9 +260,6 @@ describe("InfluxDB", function() {
            });
 
        });
-
-
-
     });
 
   describe("#deleteDatabase", function() {
