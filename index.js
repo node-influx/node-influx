@@ -182,6 +182,33 @@ InfluxDB.prototype.dropSeries  = function(seriesName, callback) {
     }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
+{
+    if ('function' === typeof databaseName)
+    {
+        callback=databaseName;
+        databaseName = this.options.database;
+    }
+    request({
+        url: this.url('db/' + databaseName + '/continuous_queries'),
+        json: true
+    }, this._parseCallback(callback));
+}
+
+
+InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callback) {
+    if ('function' === typeof queryID)
+    {
+        callback=queryID;
+        queryID = databaseName;
+        databaseName = this.options.database;
+    }
+    request({
+        url: this.url('db/' + databaseName + '/continuous_queries/' + queryID ),
+        method : 'DELETE',
+        json: true
+    }, this._parseCallback(callback));
+};
 
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
