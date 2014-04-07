@@ -26,7 +26,7 @@ InfluxDB.prototype._parseCallback = function(callback) {
     if(res.statusCode < 200 || res.statusCode >= 300) {
       return callback(new Error(body));
     }
-    return callback(null, body);
+    return callback(null, body, res.statusCode);
   };
 };
 
@@ -60,6 +60,13 @@ InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
   request({
     method: 'DELETE',
     url:this.url('db/' + databaseName)
+  }, this._parseCallback(callback));
+};
+
+InfluxDB.prototype.deleteSeries = function(seriesName, callback) {
+  request({
+    method: 'DELETE',
+    url:this.url('db/' + this.options.database + '/series/' + seriesName)
   }, this._parseCallback(callback));
 };
 

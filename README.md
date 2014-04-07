@@ -36,6 +36,13 @@ Deletes a database - requires cluster admin privileges
 deleteDatabase(databaseName, callback) { }
 ```
 
+###deleteSeries
+Deletes an entire series
+
+```js
+deleteSeries(seriesName, callback) { }
+```
+
 ###getDatabaseNames
 Returns array of database names - requires cluster admin privileges
 

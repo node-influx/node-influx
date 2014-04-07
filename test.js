@@ -195,6 +195,22 @@ describe("InfluxDB", function() {
         });
     });
 
+  describe("#deleteSeries", function() {
+    this.timeout(4500);
+    it('should delete the series with 204', function (done) {
+      client.deleteSeries(info.series.name, function(err, body, statusCode){
+        assert(statusCode === 204);
+        done();
+      });
+    });
+    it('should also 204 if series didn\'t exist', function (done) {
+      client.deleteSeries(info.series.name, function(err, body, statusCode){
+        assert(statusCode === 204);
+        done();
+      });
+    });
+  });
+
   describe("#deleteDatabase", function() {
     this.timeout(4500);
     it('should delete the database without error', function (done) {
