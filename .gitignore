@@ -1,4 +1,7 @@
 node_modules
+*.swp
+*.swo
+.DS_Store
 temp.js
 coverage
 .idea
