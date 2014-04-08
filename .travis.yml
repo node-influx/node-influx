@@ -2,8 +2,11 @@ language: node_js
 node_js:
   - "0.10"
   - "0.8"
+env:
+  - INFLUX=0.5.5
+  - INFLUX=0.4.0
 before_script:
-  - wget http://s3.amazonaws.com/influxdb/influxdb_0.5.5_amd64.deb
-  - sudo dpkg -i influxdb_0.5.5_amd64.deb
+  - wget "http://s3.amazonaws.com/influxdb/influxdb_$(echo $INFLUX)_amd64.deb"
+  - sudo dpkg -i "influxdb_$(echo $INFLUX)_amd64.deb"
   - sleep 15
 script: npm run travis-test
