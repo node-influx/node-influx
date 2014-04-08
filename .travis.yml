@@ -5,4 +5,5 @@ node_js:
 before_script:
   - wget http://s3.amazonaws.com/influxdb/influxdb_0.5.5_amd64.deb
   - sudo dpkg -i influxdb_0.5.5_amd64.deb
+  - sleep 15
 script: npm run travis-test
