@@ -77,27 +77,27 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
 
 
 InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
-    // if database defined on connection level use it unless overwritten
-    if ( this.options.database && typeof databaseName == "function" ) {
-      callback = databaseName;
-      databaseName = this.options.database;
-    }
+  // if database defined on connection level use it unless overwritten
+  if ( this.options.database && typeof databaseName == "function" ) {
+    callback = databaseName;
+    databaseName = this.options.database;
+  }
 
-    request({
-        url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
-        json: true
-    }, this._parseCallback(function(err, series) {
-        if(err) {
-            return callback(err, series);
-        }
-        return callback(err, _.map(series, function(series) { return series.name; }));
-    }));
+  request({
+    url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
+    json: true
+  }, this._parseCallback(function(err, series) {
+    if(err) {
+      return callback(err, series);
+    }
+    return callback(err, _.map(series, function(series) { return series.name; }));
+  }));
 };
 
 
 
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
-    request.post({
+  request.post({
     url: this.url('db/' + databaseName + '/users'),
     headers: {
       'content-type': 'application/json'
@@ -109,6 +109,16 @@ InfluxDB.prototype.createUser = function(databaseName, username, password, callb
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
+{
+  request.post({
+    url: this.url('db/' + databaseName + '/users/' + userName),
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(options, null)
+  }, this._parseCallback(callback));
+};
 
 InfluxDB.prototype.writeSeries = function(series, options, callback) {
   if(typeof options === 'function') {
@@ -174,10 +184,52 @@ InfluxDB.prototype.query = function(query, callback) {
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.dropSeries  = function(databaseName, seriesName, callback) {
+  if ('function' === typeof seriesName)
+  {
+    callback=seriesName;
+    seriesName = databaseName;
+    databaseName = this.options.database;
+  }
+  request({
+    url: this.url('db/' + databaseName + '/series/' + seriesName),
+    method : 'DELETE',
+    json: true
+  }, this._parseCallback(callback));
+};
+
+InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
+{
+  if ('function' === typeof databaseName)
+  {
+    callback=databaseName;
+    databaseName = this.options.database;
+  }
+  request({
+    url: this.url('db/' + databaseName + '/continuous_queries'),
+    json: true
+  }, this._parseCallback(callback));
+};
+
+
+InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callback) {
+  if ('function' === typeof queryID)
+  {
+    callback=queryID;
+    queryID = databaseName;
+    databaseName = this.options.database;
+  }
+  request({
+    url: this.url('db/' + databaseName + '/continuous_queries/' + queryID ),
+    method : 'DELETE',
+    json: true
+  }, this._parseCallback(callback));
+};
+
 // legacy function
 InfluxDB.prototype.readPoints = function(query, callback) {
-    if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
-    this.query(query,callback);
+  if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
+  this.query(query,callback);
 };
 
 InfluxDB.prototype.seriesUrl  = function(databaseName) {
