@@ -113,6 +113,8 @@ describe("InfluxDB", function() {
   });
 
   describe("#writePoints", function() {
+   this.timeout(10000);
+
     it("should write multiple points to the same time series, same column names", function (done) {
       var points = [
         {username: 'reallytrial', value: 232},
