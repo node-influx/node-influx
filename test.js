@@ -174,6 +174,8 @@ describe("InfluxDB", function() {
     describe("#query", function() {
         it("should create a continuous query", function(done) {
             dbClient.query('SELECT MEDIAN(value) as value FROM ' + info.series.name + ' INTO ' + info.series.name + '.downsampled;', function(err, res) {
+                //debug
+                console.log('error',err);
                 assert.equal(err, null);
                 assert(res instanceof Array);
                 assert.equal(res.length, 0);
