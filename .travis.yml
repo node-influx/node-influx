@@ -10,3 +10,5 @@ before_script:
   - sudo dpkg -i "influxdb_$(echo $INFLUX)_amd64.deb"
   - sleep 15
 script: npm run travis-test
+after_script:
+  - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && rm -rf ./coverage
