@@ -3,10 +3,10 @@ var request = require('request');
 var url     = require('url');
 var _       = require('underscore');
 
-var InfluxDB = function(host, port, username, password, database, logFunction) {
+var InfluxDB = function(hosts, port, username, password, database, logFunction) {
 
   this.options = {
-    host                : host     || 'localhost',
+    hosts                : hosts     || ['localhost'],
     port                : port     || 8086,
     username            : username || 'root',
     password            : password || 'root',
@@ -32,9 +32,11 @@ InfluxDB.prototype._parseCallback = function(callback) {
 
 
 InfluxDB.prototype.url = function(database, query) {
+  host = this.options.hosts.shift();
+  this.options.hosts.push(host);
   return url.format({
     protocol: 'http:',
-    hostname: this.options.host,
+    hostname: host,
     port: this.options.port,
     pathname: database,
     query: _.extend({

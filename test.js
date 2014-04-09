@@ -11,7 +11,7 @@ describe("InfluxDB", function() {
 
   var info = {
     server: {
-      host:     'localhost',
+      hosts:     ['localhost'],
       port:     8086,
       username: 'root',
       password: 'root'
@@ -34,9 +34,9 @@ describe("InfluxDB", function() {
 
   describe('create client', function() {
     it('should create an instance without error', function() {
-      client = influx(info.server.host, info.server.port, info.server.username, info.server.password, info.db.name);
-      dbClient = influx(info.server.host, info.server.port, info.db.username, info.db.password, info.db.name);
-      failClient = influx(info.server.host, 6465, info.db.username, info.db.password, info.db.name);
+      client = influx(info.server.hosts, info.server.port, info.server.username, info.server.password, info.db.name);
+      dbClient = influx(info.server.hosts, info.server.port, info.db.username, info.db.password, info.db.name);
+      failClient = influx(info.server.hosts, 6465, info.db.username, info.db.password, info.db.name);
       assert(client instanceof influx.InfluxDB);
     });
   });
@@ -44,7 +44,7 @@ describe("InfluxDB", function() {
   describe("#url", function() {
     it("should build a properly formatted url", function() {
       var url = client.url(info.db.name);
-      assert.equal(url, 'http://'+info.server.host+':8086/' + info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
+      assert.equal(url, 'http://'+info.server.hosts[0]+':8086/' + info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
     });
   });
 
