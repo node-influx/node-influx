@@ -17,8 +17,12 @@ Create a client instance (`database` not required for all methods):
 ```js
 var influx = require('influx');
 var client = influx(host, port, username, password, database);
+var client = influx([host1,host2], port, username, password, database);
 ```
 
+You can either pass a single hostname, or an array of hostnames. Node-influx uses round-robin balancing to distribute
+the requests to all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
+host and disables the failed host for 30seconds. If all servers fail to respond, node-influx raises an error.
 
 ## Functions
 
