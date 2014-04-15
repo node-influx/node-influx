@@ -251,6 +251,15 @@ InfluxDB.prototype.seriesUrl  = function(databaseName) {
   return this.url('db/' + databaseName + '/series');
 };
 
+InfluxDB.prototype.getHostsAvailable = function()
+{
+ return this.request.getHostsAvailable();
+};
+
+InfluxDB.prototype.getHostsDisabled = function()
+{
+  return this.request.getHostsDisabled();
+};
 
 var createClient = function() {
   var args = arguments;
