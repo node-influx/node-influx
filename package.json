@@ -1,11 +1,11 @@
 {
   "name": "influx",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "description": "InfluxDB Client",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha -R dot",
-    "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && rm -rf ./coverage"
+    "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,12 @@
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
   "license": "MIT",
   "dependencies": {
-    "request": "~2.33.0",
-    "underscore": "~1.5.2"
+    "request": "~2.34.0",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
     "istanbul": "~0.2.4",
-    "coveralls": "~2.7.0"
+    "coveralls": "~2.8.0"
   }
 }

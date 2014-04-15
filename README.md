@@ -17,8 +17,12 @@ Create a client instance (`database` not required for all methods):
 ```js
 var influx = require('influx');
 var client = influx(host, port, username, password, database);
+var client = influx([host1,host2], port, username, password, database);
 ```
 
+You can either pass a single hostname, or an array of hostnames. Node-influx uses round-robin balancing to distribute
+the requests to all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
+host and disables the failed host for 30seconds. If all servers fail to respond, node-influx raises an error.
 
 ## Functions
 
@@ -57,6 +61,18 @@ Creates a new database user - requires cluster admin privileges
 createUser(databaseName, username, password, callback) { }
 ```
 
+###updateUser
+Updates database user - requires cluster admin privileges
+
+```js
+updateUser(databaseName, username, options, callback) { }
+
+e.g.:
+// adds database admin privilege
+influxDB.updateUser('myDatabase','johndoe',{admin:true},callback);
+```
+
+
 ###writePoint
 Writes a point to a series - requires database user privileges
 
@@ -89,6 +105,18 @@ writeSeries(series, options, callback) { }
 ```
 *Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
 
+###query
+Queries the database - requires database user privileges
+
+```js
+var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
+query(query, callback) { }
+
+
+query(query, callback) { }
+
+```
+
 
 ###readPoints
 Reads points from a database - requires database user privileges
@@ -96,7 +124,30 @@ Reads points from a database - requires database user privileges
 ```js
 readPoints(query, callback) { }
 ```
+*readPoints() has been replaced with query(), please upgrade *
 
+
+###getContinuousQueries
+Fetches all continuous queries from a database - requires database admin privileges
+
+```js
+getContinuousQueries( [databaseName,] callback) { }
+```
+
+###dropContinuousQuery
+Drops a continuous query from a database - requires database admin privileges
+
+```js
+dropContinuousQuery( [databaseName,] queryID, callback) { }
+```
+
+
+###dropSeries
+Drops a series from a database - requires database admin privileges
+
+```js
+query ( [databaseName ,] seriesName, callback) { }
+```
 
 
 
