@@ -1,19 +1,35 @@
 
-var request = require('request');
-var url     = require('url');
-var _       = require('underscore');
+var influxRequest = require('./lib/InfluxRequest.js');
+var url           = require('url');
+var _             = require('underscore');
 
-var InfluxDB = function(host, port, username, password, database, logFunction) {
+var InfluxDB = function(hosts, port, username, password, database, logFunction) {
+
+  this.request = new influxRequest();
 
   this.options = {
-    host                : host     || 'localhost',
+    hosts               : [],
+    disabled_hosts      : [],
     port                : port     || 8086,
     username            : username || 'root',
     password            : password || 'root',
     database            : database,
     depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction)
-                          ? logFunction || console.log : false
+        ? logFunction || console.log : false
   };
+
+  if ( !_.isArray(hosts) && 'string' == typeof hosts)
+  {
+    this.request.addHost(hosts,this.options.port);
+  }
+  if (_.isArray(hosts))
+  {
+    var self = this;
+    _.each(hosts,function(host){
+      this.request.addHost(host,self.options.port);
+    });
+  }
+
 
   return this;
 };
@@ -32,10 +48,8 @@ InfluxDB.prototype._parseCallback = function(callback) {
 
 
 InfluxDB.prototype.url = function(database, query) {
+
   return url.format({
-    protocol: 'http:',
-    hostname: this.options.host,
-    port: this.options.port,
     pathname: database,
     query: _.extend({
       u: this.options.username,
@@ -45,7 +59,7 @@ InfluxDB.prototype.url = function(database, query) {
 };
 
 InfluxDB.prototype.createDatabase = function(databaseName, callback) {
-  request.post({
+  this.request.post({
     url: this.url('db'),
     headers: {
       'content-type': 'application/json'
@@ -57,14 +71,14 @@ InfluxDB.prototype.createDatabase = function(databaseName, callback) {
 };
 
 InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
-  request({
+  this.request.get({
     method: 'DELETE',
     url:this.url('db/' + databaseName)
   }, this._parseCallback(callback));
 };
 
 InfluxDB.prototype.getDatabaseNames = function(callback) {
-  request({
+  this.request.get({
     url: this.url('db'),
     json: true
   }, this._parseCallback(function(err, dbs) {
@@ -83,7 +97,7 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
     databaseName = this.options.database;
   }
 
-  request({
+  this.request.get({
     url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
     json: true
   }, this._parseCallback(function(err, series) {
@@ -97,7 +111,7 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
 
 
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
-  request.post({
+  this.request.post({
     url: this.url('db/' + databaseName + '/users'),
     headers: {
       'content-type': 'application/json'
@@ -111,7 +125,7 @@ InfluxDB.prototype.createUser = function(databaseName, username, password, callb
 
 InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
 {
-  request.post({
+  this.request.post({
     url: this.url('db/' + databaseName + '/users/' + userName),
     headers: {
       'content-type': 'application/json'
@@ -155,8 +169,8 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
     data.push(datum);
   });
 
-  request.post({
-    uri: this.seriesUrl(this.options.database),
+  this.request.post({
+    url: this.seriesUrl(this.options.database),
     headers: {
       'content-type': 'application/json'
     },
@@ -178,7 +192,7 @@ InfluxDB.prototype.writePoints = function(seriesName, points, options, callback)
 };
 
 InfluxDB.prototype.query = function(query, callback) {
-  request({
+  this.request.get({
     url: this.url('db/' + this.options.database + '/series', { q: query }),
     json: true
   }, this._parseCallback(callback));
@@ -191,7 +205,7 @@ InfluxDB.prototype.dropSeries  = function(databaseName, seriesName, callback) {
     seriesName = databaseName;
     databaseName = this.options.database;
   }
-  request({
+  this.request.get({
     url: this.url('db/' + databaseName + '/series/' + seriesName),
     method : 'DELETE',
     json: true
@@ -205,7 +219,7 @@ InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
     callback=databaseName;
     databaseName = this.options.database;
   }
-  request({
+  this.request.get({
     url: this.url('db/' + databaseName + '/continuous_queries'),
     json: true
   }, this._parseCallback(callback));
@@ -219,7 +233,7 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
     queryID = databaseName;
     databaseName = this.options.database;
   }
-  request({
+  this.request.get({
     url: this.url('db/' + databaseName + '/continuous_queries/' + queryID ),
     method : 'DELETE',
     json: true
