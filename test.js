@@ -8,6 +8,7 @@ describe("InfluxDB", function() {
   var client;
   var dbClient;
   var failClient;
+  var failoverClient;
 
   var info = {
     server: {
@@ -37,6 +38,7 @@ describe("InfluxDB", function() {
       client = influx(info.server.host, info.server.port, info.server.username, info.server.password, info.db.name);
       dbClient = influx(info.server.host, info.server.port, info.db.username, info.db.password, info.db.name);
       failClient = influx(info.server.host, 6465, info.db.username, info.db.password, info.db.name);
+      failoverClient = influx(['192.168.1.1','192.168.1.2','192.168.1.3','192.168.2.4',info.server.host], info.server.port, info.db.username, info.db.password, info.db.name);
       assert(client instanceof influx.InfluxDB);
     });
   });
@@ -223,7 +225,7 @@ describe("InfluxDB", function() {
   });
 
   describe("#dropContinuousQuery", function() {
-    it("should fetch all continuous queries from the database", function(done) {
+    it("should drop the continuous query from the database", function(done) {
       dbClient.getContinuousQueries(info.db.name, function(err, res) {
         dbClient.dropContinuousQuery(res[0].id,function(err,res)
         {
@@ -238,6 +240,31 @@ describe("InfluxDB", function() {
   describe("#readPoints", function() {
     it("should read a point from the database", function(done) {
       dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+        assert.equal(err, null);
+        assert(res instanceof Array);
+        assert.equal(res.length, 1);
+        assert.equal(res[0].name, info.series.name);
+        assert(res[0].points.length >= 2);
+        done();
+      });
+    });
+  });
+
+
+  describe("#query failover", function() {
+    this.timeout(30000);
+    it("should exceed retry limit", function(done) {
+      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function(err, res) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+  });
+
+  describe("#query  failover", function() {
+    this.timeout(20000);
+    it("should read a point from the database after the failed servers have been removed", function(done) {
+      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function(err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
