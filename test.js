@@ -50,6 +50,12 @@ describe("InfluxDB", function () {
     });
   });
 
+  describe("#setFailoverTimeout", function () {
+    it("should set the default request timeout value", function () {
+      var timeout= failoverClient.setFailoverTimeout(2000);
+      assert.equal(timeout,2000);
+    });
+  });
 
   describe("#url", function () {
     it("should build a properly formatted url", function () {

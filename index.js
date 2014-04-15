@@ -51,6 +51,12 @@ InfluxDB.prototype.setRequestTimeout = function (value)
   return this.request.setRequestTimeout(value);
 };
 
+InfluxDB.prototype.setFailoverTimeout = function (value)
+{
+  return this.request.setFailoverTimeout(value);
+};
+
+
 InfluxDB.prototype.url = function(database, query) {
 
   return url.format({
