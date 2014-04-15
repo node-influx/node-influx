@@ -48,6 +48,24 @@ describe("InfluxDB", function() {
     });
   });
 
+  describe('#availableHosts', function() {
+    it("should return one host", function(done)
+    {
+      var hosts = client.getHostsAvailable();
+      assert.equal(hosts.length,1);
+      done();
+    });
+  });
+
+  describe('#disabledHosts', function() {
+    it("should return empty array", function(done)
+    {
+      var hosts = client.getHostsDisabled();
+      assert.equal(hosts.length,0);
+      done();
+    });
+  });
+
   describe("#createDatabase", function() {
     it("should create a new database without error", function (done) {
       client.createDatabase(info.db.name, done);
@@ -74,6 +92,16 @@ describe("InfluxDB", function() {
         assert(err instanceof Error);
         done();
       });
+    });
+  });
+
+  describe('#disabledHosts', function() {
+    it("should return failed host", function(done)
+    {
+      var hosts = failClient.getHostsDisabled();
+      assert.equal(hosts.length,1);
+      assert.equal(hosts[0].name,info.server.host);
+      done();
     });
   });
 
