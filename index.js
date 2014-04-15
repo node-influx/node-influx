@@ -46,6 +46,10 @@ InfluxDB.prototype._parseCallback = function(callback) {
   };
 };
 
+InfluxDB.prototype.setRequestTimeout = function (value)
+{
+  return this.request.setRequestTimeout(value);
+};
 
 InfluxDB.prototype.url = function(database, query) {
 
