@@ -228,7 +228,7 @@ describe("InfluxDB", function () {
 
   describe("#getContinuousQueries", function () {
     it("should fetch all continuous queries from the database", function (done) {
-      dbClient.getContinuousQueries(info.db.name, function (err, res) {
+      dbClient.getContinuousQueries( function (err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
@@ -320,11 +320,11 @@ describe("InfluxDB", function () {
         assert.equal(err, null);
         done();
       });
-      it('should bubble errors through', function (done) {
-        failClient.dropSeries(info.series.name, function (err) {
-          assert(err instanceof Error);
-          done();
-        });
+    });
+    it('should bubble errors through', function (done) {
+      failClient.dropSeries(info.series.name, function (err) {
+        assert(err instanceof Error);
+        done();
       });
     });
   });
