@@ -26,7 +26,7 @@ var InfluxDB = function(hosts, port, username, password, database, logFunction) 
   {
     var self = this;
     _.each(hosts,function(host){
-      this.request.addHost(host,self.options.port);
+      self.request.addHost(host,self.options.port);
     });
   }
 
