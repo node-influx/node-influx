@@ -17,10 +17,50 @@ Create a client instance (`database` not required for all methods):
 ```js
 var influx = require('influx');
 var client = influx(host, port, username, password, database);
+var client = influx([host1,host2], port, username, password, database);
 ```
+
+You can either pass a single hostname or an array of hostnames. Node-influx uses round-robin balancing to distribute
+the requests across all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
+host and disables the failed host for 60 seconds. If all servers fail to respond, node-influx raises an error.
+
+
 
 
 ## Functions
+
+
+###setRequestTimeout
+Sets the default timeout for a request. When a request times out the host is removed from the list of available hosts
+and the request is resubmitted to the next configured host. The default value is ```null``` (will wait forever for a respose).
+
+Be careful with this setting. If the value is too low, slow queries might disable all configured hosts.
+
+```js
+setRequestTimeout( value ) { }
+```
+
+###setFailoverTimeout
+Sets the failover timeout for a host. After a host has been removed from balancing, it will be re-enabled after 60
+seconds (default). You can configure the timeout value using this function.
+
+```js
+setFailoverTimeout( value ) { }
+```
+
+###getHostsAvailable
+Returns an array of available hosts.
+
+```js
+getHostsAvailable( ) { }
+```
+
+###getHostsDisabled
+Returns an array of disabled hosts. This can be useful to check whether a host is unresponsive or not.
+```js
+getHostsDisabled( ) { }
+```
+
 
 ###createDatabase
 Creates a new database - requires cluster admin privileges
