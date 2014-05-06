@@ -14,11 +14,10 @@ var InfluxDB = function(hosts, port, username, password, database, logFunction) 
     username            : username || 'root',
     password            : password || 'root',
     database            : database,
-    depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction)
-        ? logFunction || console.log : false
+    depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction) ? logFunction || console.log : false
   };
 
-  if ( !_.isArray(hosts) && 'string' == typeof hosts)
+  if ( !_.isArray(hosts) && 'string' === typeof hosts)
   {
     this.request.addHost(hosts,this.options.port);
   }
@@ -102,7 +101,7 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
 
 InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
   // if database defined on connection level use it unless overwritten
-  if ( this.options.database && typeof databaseName == "function" ) {
+  if ( this.options.database && typeof databaseName === 'function' ) {
     callback = databaseName;
     databaseName = this.options.database;
   }
@@ -184,7 +183,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
     headers: {
       'content-type': 'application/json'
     },
-    pool : 'undefined' != typeof options.pool ? options.pool : {},
+    pool : 'undefined' !== typeof options.pool ? options.pool : {},
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
 };
@@ -226,7 +225,7 @@ InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
 {
   if ('function' === typeof databaseName)
   {
-    callback=databaseName;
+    callback = databaseName;
     databaseName = this.options.database;
   }
   this.request.get({
@@ -273,9 +272,9 @@ InfluxDB.prototype.getHostsDisabled = function()
 
 var createClient = function() {
   var args = arguments;
-  var client = function () { return InfluxDB.apply(this, args); };
-  client.prototype = InfluxDB.prototype;
-  return new client();
+  var Client = function () { return InfluxDB.apply(this, args); };
+  Client.prototype = InfluxDB.prototype;
+  return new Client();
 };
 
 

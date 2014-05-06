@@ -1,0 +1,27 @@
+{
+  "node": true,
+
+
+  "strict": false,
+  "undef": true,
+  "unused": true,
+  "latedef": true,
+  "immed": true,
+  "noarg": true,
+  "indent": 2,
+  "trailing": true,
+  "quotmark": "single",
+  "camelcase": false,
+  "newcap": true,
+  "eqeqeq": true,
+  "globals" : {
+    /* MOCHA */
+    "describe" : false,
+    "it" : false,
+    "before" : false,
+    "beforeEach" : false,
+    "after" : false,
+    "afterEach" : false
+  }
+
+}

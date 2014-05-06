@@ -1,5 +1,5 @@
 
-var Influx = require('../');
+var influx = require('../');
 
 var username = 'root';
 var password = 'root';

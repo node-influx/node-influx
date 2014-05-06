@@ -1,5 +1,5 @@
 
-var Influx = require('../');
+var influx = require('../');
 
 var username = 'root';
 var password = 'root';
@@ -18,7 +18,7 @@ client.getDatabaseNames(function(err, dbs) {
         if(err) {
           throw err;
         }
-        console.log('Deleted Database: ' + dbs[i]);
+        console.log('Deleted Database: ' + dbName);
       };
   };
 
