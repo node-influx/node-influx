@@ -2,9 +2,12 @@
 
 An [InfluxDB](http://influxdb.org/) Node.js Client
 
-[![Build Status](https://travis-ci.org/bencevans/node-influx.png?branch=master)](https://travis-ci.org/bencevans/node-influx)
-[![Coverage Status](https://coveralls.io/repos/bencevans/node-influx/badge.png?branch=master)](https://coveralls.io/r/bencevans/node-influx?branch=master)
+[![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
+[![build](http://img.shields.io/travis/bencevans/node-influx/master.svg)](https://travis-ci.org/bencevans/node-influx)
+[![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/bencevans/node-influx?branch=master)
+[![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/bencevans/node-influx)
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
+[![gittip](https://img.shields.io/gittip/bencevans.svg)](https://www.gittip.com/bencevans/)
 
 ## Installation
 
