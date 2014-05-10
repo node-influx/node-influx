@@ -9,15 +9,22 @@ var defaultOptions = {
   username            : 'root',
   password            : 'root',
   port                : 8086,
-  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false
+  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
+  failoverTimeout     : 60000,
+  requestTimeout      : null,
+  maxRetries          : 2
 };
 
 var InfluxDB = function(options) {
 
-  this.request = new influxRequest();
 
   this.options = _.extend(defaultOptions,options);
 
+  this.request = new influxRequest({
+    failoverTimeout   : this.options.failoverTimeout,
+    maxRetries        : this.options.maxRetries,
+    requestTimeout    : this.options.requestTimeout
+  });
 
   if ( !_.isArray(options.hosts) && 'string' === typeof options.host)
   {
