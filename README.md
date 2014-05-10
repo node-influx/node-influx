@@ -199,7 +199,7 @@ query(query, callback) { }
 ```
 
 
-###readPoints
+###readPoints ( <= v0.4.0)
 Reads points from a database - requires database user privileges
 
 ```js
