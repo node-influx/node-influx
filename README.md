@@ -17,7 +17,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Create a client instance (`database` not required for all methods):
 
-### Versions >= 0.4.0
+### Versions >= 0.5.0
 
 ```
 var client = influx(
@@ -58,13 +58,13 @@ host and disables the failed host for 60 seconds. If all servers fail to respond
 ### Configuration options
 
 | Option        | Description   |
-| ------------- |:-------------|
-| username      | Database username |
+|:------------- |:-------------|
+| username      | username |
 | password      | password      |
 | database | database name |
 | host | hostname, e.g. 'localhost' |
 | port [optional] |  influxdb port, default: 8086 |
-| hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional]
+| hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
 | depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
 | requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
