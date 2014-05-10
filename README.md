@@ -58,7 +58,7 @@ host and disables the failed host for 60 seconds. If all servers fail to respond
 ### Configuration options
 
 | Option        | Description   |
-| ------------- |:-------------:|
+| ------------- |:-------------|
 | username      | Database username |
 | password      | password      |
 | database | database name |
