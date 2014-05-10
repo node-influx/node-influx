@@ -3,29 +3,31 @@ var influxRequest = require('./lib/InfluxRequest.js');
 var url           = require('url');
 var _             = require('underscore');
 
-var InfluxDB = function(hosts, port, username, password, database, logFunction) {
+var defaultOptions = {
+  hosts               : [],
+  disabled_hosts      : [],
+  username            : 'root',
+  password            : 'root',
+  port                : 8086,
+  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false
+};
+
+var InfluxDB = function(options) {
 
   this.request = new influxRequest();
 
-  this.options = {
-    hosts               : [],
-    disabled_hosts      : [],
-    port                : port     || 8086,
-    username            : username || 'root',
-    password            : password || 'root',
-    database            : database,
-    depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction) ? logFunction || console.log : false
-  };
+  this.options = _.extend(defaultOptions,options);
 
-  if ( !_.isArray(hosts) && 'string' === typeof hosts)
+
+  if ( !_.isArray(options.hosts) && 'string' === typeof options.host)
   {
-    this.request.addHost(hosts,this.options.port);
+    this.request.addHost(options.host,this.options.port);
   }
-  if (_.isArray(hosts))
+  if (_.isArray(this.options.hosts) && 0 < this.options.hosts.length)
   {
     var self = this;
-    _.each(hosts,function(host){
-      self.request.addHost(host,self.options.port);
+    _.each(this.options.hosts,function(host){
+      self.request.addHost(host.host, host.port || self.options.port);
     });
   }
 
@@ -249,11 +251,6 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
   }, this._parseCallback(callback));
 };
 
-// legacy function
-InfluxDB.prototype.readPoints = function(query, callback) {
-  if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
-  this.query(query,callback);
-};
 
 InfluxDB.prototype.seriesUrl  = function(databaseName) {
   if ( !databaseName ) databaseName = this.options.database;
