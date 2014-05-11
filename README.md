@@ -17,7 +17,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Create a client instance (`database` not required for all methods):
 
-### Versions >= 0.5.0
+### Versions >= 1.0.0
 
 ```
 var client = influx(
@@ -43,7 +43,7 @@ var client = influx(
 A list of all configuration values can be found below.
 
 
-### Versions <= 0.4.0
+### Versions < 1.0.0
 ```js
 var influx = require('influx');
 var client = influx(host, port, username, password, database);
@@ -199,7 +199,7 @@ query(query, callback) { }
 ```
 
 
-###readPoints ( <= v0.4.0)
+###readPoints ( <= v1.0)
 Reads points from a database - requires database user privileges
 
 ```js
