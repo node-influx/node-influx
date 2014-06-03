@@ -17,42 +17,33 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Create a client instance (`database` not required for all methods):
 
-### Versions >= 1.0.0
+   ```
+   var client = influx(
 
-```
-var client = influx(
+       //cluster configuration
+       hosts : [
+           {
+               host : 'localhost',
+               port : 8060 //optional. default 8086
+           }
+       ],
+       // or single-host configuration
+       host : 'localhost',
+       port : 8086, // optional, default 8086
+       username : 'dbuser',
+       password : 'f4ncyp4ass',
+       database : 'my_database'
+       }
+   );
 
-    //cluster configuration
-    hosts : [
-        {
-            host : 'localhost',
-            port : 8060 //optional. default 8086
-        }
-    ],
-    // or single-host configuration
-    host : 'localhost',
-    port : 8086, // optional, default 8086
-    username : 'dbuser',
-    password : 'f4ncyp4ass',
-    database : 'my_database'
-    }
-);
-
-```
+   ```
 
 A list of all configuration values can be found below.
 
 
-### Versions < 1.0.0
-```js
-var influx = require('influx');
-var client = influx(host, port, username, password, database);
-var client = influx([host1,host2], port, username, password, database);
-```
-
 You can either pass a single hostname or an array of hostnames. Node-influx uses round-robin balancing to distribute
 the requests across all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
-host and disables the failed host for 60 seconds. If all servers fail to respond, node-influx raises an error.
+host and disables the failed host for 60 seconds (timeout value is configurable). If all servers fail to respond, node-influx raises an error.
 
 
 ### Configuration options
@@ -198,16 +189,6 @@ query(query, callback) { }
 
 ```
 
-
-###readPoints ( <= v1.0)
-Reads points from a database - requires database user privileges
-
-```js
-readPoints(query, callback) { }
-```
-*readPoints() has been replaced with query(), please upgrade *
-
-
 ###getContinuousQueries
 Fetches all continuous queries from a database - requires database admin privileges
 
@@ -229,7 +210,6 @@ Drops a series from a database - requires database admin privileges
 ```js
 query ( [databaseName ,] seriesName, callback) { }
 ```
-
 
 
 
