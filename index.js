@@ -188,7 +188,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
   });
 
   this.request.post({
-    url: this.seriesUrl(this.options.database),
+    url: this.seriesUrl(this.options.database,query),
     headers: {
       'content-type': 'application/json'
     },
@@ -259,9 +259,9 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
 };
 
 
-InfluxDB.prototype.seriesUrl  = function(databaseName) {
+InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
   if ( !databaseName ) databaseName = this.options.database;
-  return this.url('db/' + databaseName + '/series');
+  return this.url('db/' + databaseName + '/series',query);
 };
 
 InfluxDB.prototype.getHostsAvailable = function()
