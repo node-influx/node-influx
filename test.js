@@ -267,7 +267,7 @@ describe('InfluxDB', function () {
   });
 
   describe('#query  failover', function () {
-    this.timeout(20000);
+    this.timeout(25000);
     it('should read a point from the database after the failed servers have been removed', function (done) {
       failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
         console.log(err);
@@ -307,7 +307,7 @@ describe('InfluxDB', function () {
   });
 
   describe('#dropSeries', function () {
-    this.timeout(20000);
+    this.timeout(25000);
     it('should drop series', function (done) {
       client.dropSeries(info.series.name, function (err) {
         if (err) return done(err);
@@ -324,7 +324,7 @@ describe('InfluxDB', function () {
   });
 
   describe('#deleteDatabase', function () {
-    this.timeout(20000);
+    this.timeout(25000);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
     });
