@@ -3,30 +3,38 @@ var influxRequest = require('./lib/InfluxRequest.js');
 var url           = require('url');
 var _             = require('underscore');
 
-var InfluxDB = function(hosts, port, username, password, database, logFunction) {
+var defaultOptions = {
+  hosts               : [],
+  disabled_hosts      : [],
+  username            : 'root',
+  password            : 'root',
+  port                : 8086,
+  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
+  failoverTimeout     : 60000,
+  requestTimeout      : null,
+  maxRetries          : 2
+};
 
-  this.request = new influxRequest();
+var InfluxDB = function(options) {
 
-  this.options = {
-    hosts               : [],
-    disabled_hosts      : [],
-    port                : port     || 8086,
-    username            : username || 'root',
-    password            : password || 'root',
-    database            : database,
-    depreciatedLogging  : ((process.env.NODE_ENV === undefined || 'development') || logFunction)
-        ? logFunction || console.log : false
-  };
 
-  if ( !_.isArray(hosts) && 'string' == typeof hosts)
+  this.options = _.extend(defaultOptions,options);
+
+  this.request = new influxRequest({
+    failoverTimeout   : this.options.failoverTimeout,
+    maxRetries        : this.options.maxRetries,
+    requestTimeout    : this.options.requestTimeout
+  });
+
+  if ( !_.isArray(options.hosts) && 'string' === typeof options.host)
   {
-    this.request.addHost(hosts,this.options.port);
+    this.request.addHost(options.host,this.options.port);
   }
-  if (_.isArray(hosts))
+  if (_.isArray(this.options.hosts) && 0 < this.options.hosts.length)
   {
     var self = this;
-    _.each(hosts,function(host){
-      self.request.addHost(host,self.options.port);
+    _.each(this.options.hosts,function(host){
+      self.request.addHost(host.host, host.port || self.options.port);
     });
   }
 
@@ -102,7 +110,7 @@ InfluxDB.prototype.getDatabaseNames = function(callback) {
 
 InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
   // if database defined on connection level use it unless overwritten
-  if ( this.options.database && typeof databaseName == "function" ) {
+  if ( this.options.database && typeof databaseName === 'function' ) {
     callback = databaseName;
     databaseName = this.options.database;
   }
@@ -184,7 +192,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
     headers: {
       'content-type': 'application/json'
     },
-    pool : 'undefined' != typeof options.pool ? options.pool : {},
+    pool : 'undefined' !== typeof options.pool ? options.pool : {},
     body: JSON.stringify(data)
   }, this._parseCallback(callback));
 };
@@ -226,7 +234,7 @@ InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
 {
   if ('function' === typeof databaseName)
   {
-    callback=databaseName;
+    callback = databaseName;
     databaseName = this.options.database;
   }
   this.request.get({
@@ -250,11 +258,6 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
   }, this._parseCallback(callback));
 };
 
-// legacy function
-InfluxDB.prototype.readPoints = function(query, callback) {
-  if (this.options.depreciatedLogging) this.options.depreciatedLogging('influx.readPoints() has been depreciated, please use influx.query()');
-  this.query(query,callback);
-};
 
 InfluxDB.prototype.seriesUrl  = function(databaseName) {
   if ( !databaseName ) databaseName = this.options.database;
@@ -273,9 +276,9 @@ InfluxDB.prototype.getHostsDisabled = function()
 
 var createClient = function() {
   var args = arguments;
-  var client = function () { return InfluxDB.apply(this, args); };
-  client.prototype = InfluxDB.prototype;
-  return new client();
+  var Client = function () { return InfluxDB.apply(this, args); };
+  Client.prototype = InfluxDB.prototype;
+  return new Client();
 };
 
 

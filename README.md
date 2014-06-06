@@ -2,9 +2,12 @@
 
 An [InfluxDB](http://influxdb.org/) Node.js Client
 
-[![Build Status](https://travis-ci.org/bencevans/node-influx.png?branch=master)](https://travis-ci.org/bencevans/node-influx)
-[![Coverage Status](https://coveralls.io/repos/bencevans/node-influx/badge.png?branch=master)](https://coveralls.io/r/bencevans/node-influx?branch=master)
+[![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
+[![build](http://img.shields.io/travis/bencevans/node-influx/master.svg)](https://travis-ci.org/bencevans/node-influx)
+[![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/bencevans/node-influx?branch=master)
+[![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/bencevans/node-influx)
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
+[![gittip](https://img.shields.io/gittip/bencevans.svg)](https://www.gittip.com/bencevans/)
 
 ## Installation
 
@@ -14,17 +17,86 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Create a client instance (`database` not required for all methods):
 
-```js
-var influx = require('influx');
-var client = influx(host, port, username, password, database);
-var client = influx([host1,host2], port, username, password, database);
-```
+   ```
+   var client = influx(
 
-You can either pass a single hostname, or an array of hostnames. Node-influx uses round-robin balancing to distribute
-the requests to all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
-host and disables the failed host for 30seconds. If all servers fail to respond, node-influx raises an error.
+       //cluster configuration
+       hosts : [
+           {
+               host : 'localhost',
+               port : 8060 //optional. default 8086
+           }
+       ],
+       // or single-host configuration
+       host : 'localhost',
+       port : 8086, // optional, default 8086
+       username : 'dbuser',
+       password : 'f4ncyp4ass',
+       database : 'my_database'
+       }
+   );
+
+   ```
+
+A list of all configuration values can be found below.
+
+
+You can either pass a single hostname or an array of hostnames. Node-influx uses round-robin balancing to distribute
+the requests across all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
+host and disables the failed host for 60 seconds (timeout value is configurable). If all servers fail to respond, node-influx raises an error.
+
+
+### Configuration options
+
+| Option        | Description   |
+|:------------- |:-------------|
+| username      | username |
+| password      | password      |
+| database | database name |
+| host | hostname, e.g. 'localhost' |
+| port [optional] |  influxdb port, default: 8086 |
+| hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
+| depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
+| failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
+| requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
+| maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default : 2 |
+
+
 
 ## Functions
+
+
+###setRequestTimeout
+Sets the default timeout for a request. When a request times out the host is removed from the list of available hosts
+and the request is resubmitted to the next configured host. The default value is ```null``` (will wait forever for a respose).
+
+Be careful with this setting. If the value is too low, slow queries might disable all configured hosts.
+
+```js
+setRequestTimeout( value ) { }
+```
+
+###setFailoverTimeout
+Sets the failover timeout for a host. After a host has been removed from balancing, it will be re-enabled after 60
+seconds (default). You can configure the timeout value using this function.
+
+```js
+setFailoverTimeout( value ) { }
+```
+
+###getHostsAvailable
+Returns an array of available hosts.
+
+```js
+getHostsAvailable( ) { }
+```
+
+###getHostsDisabled
+Returns an array of disabled hosts. This can be useful to check whether a host is unresponsive or not.
+```js
+getHostsDisabled( ) { }
+```
+
 
 ###createDatabase
 Creates a new database - requires cluster admin privileges
@@ -117,16 +189,6 @@ query(query, callback) { }
 
 ```
 
-
-###readPoints
-Reads points from a database - requires database user privileges
-
-```js
-readPoints(query, callback) { }
-```
-*readPoints() has been replaced with query(), please upgrade *
-
-
 ###getContinuousQueries
 Fetches all continuous queries from a database - requires database admin privileges
 
@@ -148,7 +210,6 @@ Drops a series from a database - requires database admin privileges
 ```js
 query ( [databaseName ,] seriesName, callback) { }
 ```
-
 
 
 

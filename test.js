@@ -2,7 +2,7 @@ var influx = require('./');
 var assert = require('assert');
 
 
-describe("InfluxDB", function () {
+describe('InfluxDB', function () {
 
   var client;
   var dbClient;
@@ -34,38 +34,45 @@ describe("InfluxDB", function () {
 
   describe('create client', function () {
     it('should create an instance without error', function () {
-      client = influx(info.server.host, info.server.port, info.server.username, info.server.password, info.db.name);
-      dbClient = influx(info.server.host, info.server.port, info.db.username, info.db.password, info.db.name);
-      failClient = influx(info.server.host, 6465, info.db.username, info.db.password, info.db.name);
-      failoverClient = influx(['192.168.1.1', '192.168.1.2', '192.168.1.3', '192.168.2.4', info.server.host], info.server.port, info.db.username, info.db.password, info.db.name);
+      client = influx({host : info.server.host, port: info.server.port, username: info.server.username, passwort : info.server.password, database : info.db.name});
+      dbClient = influx({host : info.server.host, port: info.server.port, username: info.server.username, passwort : info.server.password, database : info.db.name});
+      failClient = influx({host : info.server.host, port: 6543, username: info.server.username, passwort : info.server.password, database : info.db.name});
+      failoverClient = influx({hosts : [
+        {host : '192.168.1.1'},
+        {host : '192.168.1.2'},
+        {host : '192.168.1.3'},
+        {host : '192.168.1.4'},
+        {host : info.server.host, port: info.server.port}
+      ], username: info.server.username, passwort : info.server.password, database : info.db.name});
+
       assert(client instanceof influx.InfluxDB);
     });
   });
 
 
-  describe("#setRequestTimeout", function () {
-    it("should set the default request timeout value", function () {
+  describe('#setRequestTimeout', function () {
+    it('should set the default request timeout value', function () {
       var timeout= failoverClient.setRequestTimeout(2000);
       assert.equal(timeout,2000);
     });
   });
 
-  describe("#setFailoverTimeout", function () {
-    it("should set the default request timeout value", function () {
+  describe('#setFailoverTimeout', function () {
+    it('should set the default request timeout value', function () {
       var timeout= failoverClient.setFailoverTimeout(2000);
       assert.equal(timeout,2000);
     });
   });
 
-  describe("#url", function () {
-    it("should build a properly formatted url", function () {
+  describe('#url', function () {
+    it('should build a properly formatted url', function () {
       var url = client.url(info.db.name);
       assert.equal(url, /*'http://'+info.server.host+':8086/' + */ info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
     });
   });
 
   describe('#availableHosts', function () {
-    it("should return one host", function (done) {
+    it('should return one host', function (done) {
       var hosts = client.getHostsAvailable();
       assert(hosts instanceof Array);
       assert.equal(hosts.length, 1);
@@ -74,7 +81,7 @@ describe("InfluxDB", function () {
   });
 
   describe('#disabledHosts', function () {
-    it("should return empty array", function (done) {
+    it('should return empty array', function (done) {
       var hosts = client.getHostsDisabled();
       assert(hosts instanceof Array);
       assert.equal(hosts.length, 0);
@@ -82,11 +89,11 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#createDatabase", function () {
-    it("should create a new database without error", function (done) {
+  describe('#createDatabase', function () {
+    it('should create a new database without error', function (done) {
       client.createDatabase(info.db.name, done);
     });
-    it("should throw an error if db already exists", function (done) {
+    it('should throw an error if db already exists', function (done) {
       client.createDatabase(info.db.name, function (err) {
         assert(err instanceof Error);
         done();
@@ -94,7 +101,7 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#getDatabaseNames", function () {
+  describe('#getDatabaseNames', function () {
     it('should return array of database names', function (done) {
       client.getDatabaseNames(function (err, dbs) {
         if (err) return done(err);
@@ -112,7 +119,7 @@ describe("InfluxDB", function () {
   });
 
   describe('#disabledHosts', function () {
-    it("should return failed host", function (done) {
+    it('should return failed host', function (done) {
       var hosts = failClient.getHostsDisabled();
       assert.equal(hosts.length, 1);
       assert.equal(hosts[0].name, info.server.host);
@@ -120,7 +127,7 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe('#createUser', function (done) {
+  describe('#createUser', function () {
     it('should create a user without error', function (done) {
       client.createUser(info.db.name, info.db.username, info.db.password, done);
     });
@@ -133,7 +140,7 @@ describe("InfluxDB", function () {
   });
 
 
-  describe('#updateUser', function (done) {
+  describe('#updateUser', function () {
     it('should update user without error', function (done) {
       client.updateUser(info.db.name, info.db.username, {admin: true}, done);
     });
@@ -146,18 +153,18 @@ describe("InfluxDB", function () {
   });
 
 
-  describe("#writePoint", function () {
-    it("should write a generic point into the database", function (done) {
+  describe('#writePoint', function () {
+    it('should write a generic point into the database', function (done) {
       dbClient.writePoint(info.series.name, {username: 'reallytrial', value: 232}, done);
     });
-    it("should write a point with time into the database", function (done) {
+    it('should write a point with time into the database', function (done) {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, done);
     });
   });
 
-  describe("#writePoints", function () {
+  describe('#writePoints', function () {
     this.timeout(10000);
-    it("should write multiple points to the same time series, same column names", function (done) {
+    it('should write multiple points to the same time series, same column names', function (done) {
       var points = [
         {username: 'reallytrial', value: 232},
         {username: 'welovefashion', value: 232},
@@ -165,7 +172,7 @@ describe("InfluxDB", function () {
       ];
       dbClient.writePoints(info.series.name, points, done);
     });
-    it("should write multiple points to the same time series, differing column names", function (done) {
+    it('should write multiple points to the same time series, differing column names', function (done) {
       var points = [
         {username: 'reallytrial', value: 232},
         {username: 'welovefashion', othervalue: 232},
@@ -175,8 +182,8 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#writeSeries", function () {
-    it("should write multiple points to multiple time series, same column names", function (done) {
+  describe('#writeSeries', function () {
+    it('should write multiple points to multiple time series, same column names', function (done) {
       var points = [
         {username: 'reallytrial', value: 232},
         {username: 'welovefashion', value: 232},
@@ -188,7 +195,7 @@ describe("InfluxDB", function () {
       };
       dbClient.writeSeries(data, done);
     });
-    it("should write multiple points to multiple time series, differing column names", function (done) {
+    it('should write multiple points to multiple time series, differing column names', function (done) {
       var points = [
         {username: 'reallytrial', value: 232},
         {username: 'welovefashion', othervalue: 232},
@@ -202,8 +209,8 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#query", function () {
-    it("should read a point from the database", function (done) {
+  describe('#query', function () {
+    it('should read a point from the database', function (done) {
       dbClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
@@ -215,8 +222,8 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#query", function () {
-    it("should create a continuous query", function (done) {
+  describe('#query', function () {
+    it('should create a continuous query', function (done) {
       dbClient.query('SELECT MEDIAN(value) FROM ' + info.series.name + ' INTO ' + info.series.name + '.downsampled;', function (err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
@@ -226,9 +233,9 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#getContinuousQueries", function () {
-    it("should fetch all continuous queries from the database", function (done) {
-      dbClient.getContinuousQueries(info.db.name, function (err, res) {
+  describe('#getContinuousQueries', function () {
+    it('should fetch all continuous queries from the database', function (done) {
+      dbClient.getContinuousQueries( function (err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
@@ -237,10 +244,10 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#dropContinuousQuery", function () {
-    it("should drop the continuous query from the database", function (done) {
+  describe('#dropContinuousQuery', function () {
+    it('should drop the continuous query from the database', function (done) {
       dbClient.getContinuousQueries(info.db.name, function (err, res) {
-        dbClient.dropContinuousQuery(res[0].id, function (err, res) {
+        dbClient.dropContinuousQuery(res[0].id, function (err) {
           assert.equal(err, null);
           done();
         });
@@ -249,34 +256,21 @@ describe("InfluxDB", function () {
   });
 
 
-  describe("#readPoints", function () {
-    it("should read a point from the database", function (done) {
-      dbClient.readPoints('SELECT value FROM ' + info.series.name + ';', function (err, res) {
-        assert.equal(err, null);
-        assert(res instanceof Array);
-        assert.equal(res.length, 1);
-        assert.equal(res[0].name, info.series.name);
-        assert(res[0].points.length >= 2);
-        done();
-      });
-    });
-  });
-
-
-  describe("#query failover", function () {
+  describe('#query failover', function () {
     this.timeout(30000);
-    it("should exceed retry limit", function (done) {
-      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
+    it('should exceed retry limit', function (done) {
+      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err) {
         assert(err instanceof Error);
         done();
       });
     });
   });
 
-  describe("#query  failover", function () {
+  describe('#query  failover', function () {
     this.timeout(20000);
-    it("should read a point from the database after the failed servers have been removed", function (done) {
+    it('should read a point from the database after the failed servers have been removed', function (done) {
       failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
+        console.log(err);
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
@@ -287,7 +281,7 @@ describe("InfluxDB", function () {
     });
   });
 
-  describe("#getSeriesNames", function () {
+  describe('#getSeriesNames', function () {
     it('should return array of series names', function (done) {
       client.getSeriesNames(info.db.name, function (err, series) {
         if (err) return done(err);
@@ -302,7 +296,7 @@ describe("InfluxDB", function () {
         assert(series instanceof Array);
         assert.notEqual(series.indexOf(info.series.name), -1);
         done();
-      })
+      });
     });
     it('should bubble errors through', function (done) {
       failClient.getSeriesNames(info.db.name, function (err) {
@@ -320,16 +314,16 @@ describe("InfluxDB", function () {
         assert.equal(err, null);
         done();
       });
-      it('should bubble errors through', function (done) {
-        failClient.dropSeries(info.series.name, function (err) {
-          assert(err instanceof Error);
-          done();
-        });
+    });
+    it('should bubble errors through', function (done) {
+      failClient.dropSeries(info.series.name, function (err) {
+        assert(err instanceof Error);
+        done();
       });
     });
   });
 
-  describe("#deleteDatabase", function () {
+  describe('#deleteDatabase', function () {
     this.timeout(20000);
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done);
@@ -348,9 +342,9 @@ describe('Helpers', function () {
 
   describe('parseResult()', function () {
     assert.deepEqual(influx.parseResult({
-      "name": "response_time",
-      "columns": ["time", "sequence_number", "value"],
-      "points": [
+      'name': 'response_time',
+      'columns': ['time', 'sequence_number', 'value'],
+      'points': [
         [1383934015207, 23169, 232],
         [1383934015205, 23168, 232]
       ]
