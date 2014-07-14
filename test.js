@@ -270,7 +270,6 @@ describe('InfluxDB', function () {
     this.timeout(20000);
     it('should read a point from the database after the failed servers have been removed', function (done) {
       failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
-        console.log(err);
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
