@@ -26,9 +26,9 @@ var InfluxDB = function(options) {
     requestTimeout    : this.options.requestTimeout
   });
 
-  if ( !_.isArray(options.hosts) && 'string' === typeof options.host)
+  if ( (!_.isArray(this.options.hosts) || 0 == this.options.hosts.length ) && 'string' === typeof this.options.host)
   {
-    this.request.addHost(options.host,this.options.port);
+    this.request.addHost(this.options.host,this.options.port);
   }
   if (_.isArray(this.options.hosts) && 0 < this.options.hosts.length)
   {
@@ -37,7 +37,6 @@ var InfluxDB = function(options) {
       self.request.addHost(host.host, host.port || self.options.port);
     });
   }
-
 
   return this;
 };
