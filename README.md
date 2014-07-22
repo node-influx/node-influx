@@ -17,26 +17,25 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Create a client instance (`database` not required for all methods):
 
-   ```
-   var client = influx(
+```js
+var client = influx(
 
-       //cluster configuration
-       hosts : [
-           {
-               host : 'localhost',
-               port : 8060 //optional. default 8086
-           }
-       ],
-       // or single-host configuration
-       host : 'localhost',
-       port : 8086, // optional, default 8086
-       username : 'dbuser',
-       password : 'f4ncyp4ass',
-       database : 'my_database'
-       }
-   );
+  //cluster configuration
+  hosts : [
+    {
+      host : 'localhost',
+      port : 8060 //optional. default 8086
+    }
+  ],
+  // or single-host configuration
+  host : 'localhost',
+  port : 8086, // optional, default 8086
+  username : 'dbuser',
+  password : 'f4ncyp4ass',
+  database : 'my_database'
+});
 
-   ```
+```
 
 A list of all configuration values can be found below.
 
