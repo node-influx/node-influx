@@ -157,7 +157,7 @@ Writes multiple point to a series - requires database user privileges
 
 ```js
 var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
-writePoint(seriesName, points, options, callback) { }
+writePoints(seriesName, points, options, callback) { }
 ```
 
 ###writeSeries
