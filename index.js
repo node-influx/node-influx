@@ -3,20 +3,19 @@ var influxRequest = require('./lib/InfluxRequest.js');
 var url           = require('url');
 var _             = require('underscore');
 
-var defaultOptions = {
-  hosts               : [],
-  disabled_hosts      : [],
-  username            : 'root',
-  password            : 'root',
-  port                : 8086,
-  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
-  failoverTimeout     : 60000,
-  requestTimeout      : null,
-  maxRetries          : 2
-};
-
 var InfluxDB = function(options) {
 
+  var defaultOptions = {
+    hosts               : [],
+    disabled_hosts      : [],
+    username            : 'root',
+    password            : 'root',
+    port                : 8086,
+    depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
+    failoverTimeout     : 60000,
+    requestTimeout      : null,
+    maxRetries          : 2
+  };
 
   this.options = _.extend(defaultOptions,options);
 
