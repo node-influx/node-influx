@@ -18,7 +18,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 Create a client instance (`database` not required for all methods):
 
 ```js
-var client = influx(
+var client = influx({
 
   //cluster configuration
   hosts : [
