@@ -177,7 +177,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
         var v = typeof values[k] === 'undefined' ? null : values[k];
         if(k === 'time' && v instanceof Date) {
           v = v.valueOf();
-          query.time_precision = 'm';
+          query.time_precision = 'ms';
         }
         point.push(v);
       });
