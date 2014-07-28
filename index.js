@@ -3,9 +3,7 @@ var influxRequest = require('./lib/InfluxRequest.js');
 var url           = require('url');
 var _             = require('underscore');
 
-var InfluxDB = function(options) {
-
-  var defaultOptions = {
+var defaultOptions = {
     hosts               : [],
     disabled_hosts      : [],
     username            : 'root',
@@ -15,9 +13,11 @@ var InfluxDB = function(options) {
     failoverTimeout     : 60000,
     requestTimeout      : null,
     maxRetries          : 2
-  };
+};
 
-  this.options = _.extend(defaultOptions,options);
+var InfluxDB = function(options) {
+
+  this.options = _.extend(_.clone(defaultOptions), options);
 
   this.request = new influxRequest({
     failoverTimeout   : this.options.failoverTimeout,
@@ -293,3 +293,4 @@ var parseResult = function(res) {
 module.exports = createClient;
 module.exports.parseResult = parseResult;
 module.exports.InfluxDB = InfluxDB;
+module.exports.defaultOptions = defaultOptions;
