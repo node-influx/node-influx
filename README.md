@@ -9,6 +9,9 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
 [![gittip](https://img.shields.io/gittip/bencevans.svg)](https://www.gittip.com/bencevans/)
 
+
+Try [![Bountysource](https://www.bountysource.com/badge/issue?issue_id=3370228)](https://www.bountysource.com/issues/3370228-handle-chunked-query-responses?utm_source=3370228&utm_medium=shield&utm_campaign=ISSUE_BADGE) to help drive this project forward by rewarding the maintainers and others involved.
+
 ## Installation
 
 `npm install influx`
