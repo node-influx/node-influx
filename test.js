@@ -52,8 +52,8 @@ describe('InfluxDB', function () {
 
   describe('#setRequestTimeout', function () {
     it('should set the default request timeout value', function () {
-      var timeout= failoverClient.setRequestTimeout(2000);
-      assert.equal(timeout,2000);
+      var timeout= failoverClient.setRequestTimeout(5000);
+      assert.equal(timeout,5000);
     });
   });
 
