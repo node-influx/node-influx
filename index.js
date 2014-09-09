@@ -116,11 +116,11 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
   this.request.get({
     url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
     json: true
-  }, this._parseCallback(function(err, series) {
+  }, this._parseCallback(function(err, results) {
     if(err) {
-      return callback(err, series);
+      return callback(err, results);
     }
-    return callback(err, _.map(series, function(series) { return series.name; }));
+    return callback(err, _.map(results[0].points, function(series) { return series[1]; }));
   }));
 };
 
