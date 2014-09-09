@@ -4,15 +4,15 @@ var url           = require('url');
 var _             = require('underscore');
 
 var defaultOptions = {
-    hosts               : [],
-    disabled_hosts      : [],
-    username            : 'root',
-    password            : 'root',
-    port                : 8086,
-    depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
-    failoverTimeout     : 60000,
-    requestTimeout      : null,
-    maxRetries          : 2
+  hosts               : [],
+  disabled_hosts      : [],
+  username            : 'root',
+  password            : 'root',
+  port                : 8086,
+  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
+  failoverTimeout     : 60000,
+  requestTimeout      : null,
+  maxRetries          : 2
 };
 
 var InfluxDB = function(options) {
@@ -264,7 +264,7 @@ InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
 
 InfluxDB.prototype.getHostsAvailable = function()
 {
- return this.request.getHostsAvailable();
+  return this.request.getHostsAvailable();
 };
 
 InfluxDB.prototype.getHostsDisabled = function()
