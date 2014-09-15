@@ -42,6 +42,7 @@ var InfluxDB = function(options) {
 
 InfluxDB.prototype._parseCallback = function(callback) {
   return function(err, res, body) {
+    if ('undefined' === typeof callback) return;
     if(err) {
       return callback(err);
     }
@@ -155,6 +156,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
     callback = options;
     options  = {};
   }
+  if ('undefined' === typeof options) options = {};
 
   var query = options.query || {};
   var data = [];
