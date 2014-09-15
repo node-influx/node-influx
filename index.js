@@ -4,15 +4,15 @@ var url           = require('url');
 var _             = require('underscore');
 
 var defaultOptions = {
-    hosts               : [],
-    disabled_hosts      : [],
-    username            : 'root',
-    password            : 'root',
-    port                : 8086,
-    depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
-    failoverTimeout     : 60000,
-    requestTimeout      : null,
-    maxRetries          : 2
+  hosts               : [],
+  disabled_hosts      : [],
+  username            : 'root',
+  password            : 'root',
+  port                : 8086,
+  depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
+  failoverTimeout     : 60000,
+  requestTimeout      : null,
+  maxRetries          : 2
 };
 
 var InfluxDB = function(options) {
@@ -25,7 +25,7 @@ var InfluxDB = function(options) {
     requestTimeout    : this.options.requestTimeout
   });
 
-  if ( (!_.isArray(this.options.hosts) || 0 == this.options.hosts.length ) && 'string' === typeof this.options.host)
+  if ( (!_.isArray(this.options.hosts) || 0 === this.options.hosts.length ) && 'string' === typeof this.options.host)
   {
     this.request.addHost(this.options.host,this.options.port);
   }
@@ -116,11 +116,11 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
   this.request.get({
     url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
     json: true
-  }, this._parseCallback(function(err, series) {
+  }, this._parseCallback(function(err, results) {
     if(err) {
-      return callback(err, series);
+      return callback(err, results);
     }
-    return callback(err, _.map(series, function(series) { return series.name; }));
+    return callback(err, _.map(results[0].points, function(series) { return series[1]; }));
   }));
 };
 
@@ -176,7 +176,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
         var v = typeof values[k] === 'undefined' ? null : values[k];
         if(k === 'time' && v instanceof Date) {
           v = v.valueOf();
-          query.time_precision = 'm';
+          query.time_precision = 'ms';
         }
         point.push(v);
       });
@@ -264,7 +264,7 @@ InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
 
 InfluxDB.prototype.getHostsAvailable = function()
 {
- return this.request.getHostsAvailable();
+  return this.request.getHostsAvailable();
 };
 
 InfluxDB.prototype.getHostsDisabled = function()

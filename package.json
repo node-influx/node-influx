@@ -1,6 +1,6 @@
 {
   "name": "influx",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "InfluxDB Client",
   "main": "index.js",
   "scripts": {
@@ -23,11 +23,11 @@
   "license": "MIT",
   "dependencies": {
     "request": "2.x",
-    "underscore": "~1.6.0"
+    "underscore": "^1.7.0"
   },
   "devDependencies": {
-    "mocha": "~1.17.1",
-    "istanbul": "~0.2.4",
-    "coveralls": "~2.8.0"
+    "coveralls": "^2.11.1",
+    "istanbul": "^0.3.2",
+    "mocha": "^1.21.4"
   }
 }
