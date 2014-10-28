@@ -247,7 +247,7 @@ describe('InfluxDB', function () {
   describe('#dropContinuousQuery', function () {
     it('should drop the continuous query from the database', function (done) {
       dbClient.getContinuousQueries(info.db.name, function (err, res) {
-        dbClient.dropContinuousQuery(res[0].id, function (err) {
+        dbClient.dropContinuousQuery(res[0].points[0][1], function (err) {
           assert.equal(err, null);
           done();
         });

@@ -238,7 +238,7 @@ InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
     databaseName = this.options.database;
   }
   this.request.get({
-    url: this.url('db/' + databaseName + '/continuous_queries'),
+    url: this.url('db/' + databaseName + '/series', { q: 'list continuous queries' }),
     json: true
   }, this._parseCallback(callback));
 };
@@ -252,8 +252,7 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
     databaseName = this.options.database;
   }
   this.request.get({
-    url: this.url('db/' + databaseName + '/continuous_queries/' + queryID ),
-    method : 'DELETE',
+    url: this.url('db/' + databaseName + '/series', { q: 'drop continuous query '+queryID }),
     json: true
   }, this._parseCallback(callback));
 };
