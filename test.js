@@ -255,6 +255,61 @@ describe('InfluxDB', function () {
     });
   });
 
+  describe('#getShardSpaces', function () {
+    it('should fetch all shard spaces from the database', function (done) {
+      dbClient.getShardSpaces(function (err, res) {
+        assert.equal(err, null);
+        assert(res instanceof Array);
+        assert.equal(res.length, 1);
+        done();
+      });
+    });
+  });
+
+  describe('#createShardSpace', function () {
+    it('should create a shard space', function (done) {
+      dbClient.createShardSpace({
+        name: 'test_shard',
+        retentionPolicy: '30d',
+        shardDuration: '7d',
+        regex: '/test123/',
+        replicationFactor: 1,
+        split: 1
+      }, function (err) {
+        assert.equal(err, null);
+        done();
+      });
+    });
+  });
+
+  describe('#updateShardSpace', function () {
+    it('should update the database shard space', function (done) {
+      dbClient.getShardSpaces(function (err, res) {
+        dbClient.updateShardSpace(res[0].name, {
+          retentionPolicy: '60d',
+          shardDuration: '14d',
+          regex: '/test123/',
+          replicationFactor: 1,
+          split: 1
+        }, function (err) {
+          assert.equal(err, null);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('#deleteShardSpace', function () {
+    it('should delete the database shard space', function (done) {
+      dbClient.getShardSpaces(function (err, res) {
+        dbClient.deleteShardSpace(res[0].name, function (err) {
+          assert.equal(err, null);
+          done();
+        });
+      });
+    });
+  });
+
 
   describe('#query failover', function () {
     this.timeout(30000);

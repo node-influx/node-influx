@@ -104,8 +104,9 @@ getHostsDisabled( ) { }
 Creates a new database - requires cluster admin privileges
 
 ```js
-createDatabase(databaseName, callback) { }
+createDatabase(databaseName, [options,] callback) { }
 ```
+[Options can be an array of shard spaces and/or continuous queries](http://influxdb.com/docs/v0.8/advanced_topics/sharding_and_storage.html#configuration).
 
 ###deleteDatabase
 Deletes a database - requires cluster admin privileges
@@ -203,6 +204,50 @@ Drops a continuous query from a database - requires database admin privileges
 
 ```js
 dropContinuousQuery( [databaseName,] queryID, callback) { }
+```
+
+
+###getShardSpaces
+Returns array of all shard spaces for a database - requires cluster admin privileges
+
+```js
+getShardSpaces( [databaseName,] function(err, arrayShardSpaces){} ) { }
+```
+
+###createShardSpace
+Creates a new shard space for a database - requires cluster admin privileges
+
+```js
+var shardSpace = {
+    name: '30d_shard',
+    retentionPolicy: '30d',
+    shardDuration: '7d',
+    regex: '/.*/',
+    replicationFactor: 1,
+    split: 1
+};
+createShardSpace( [databaseName,] shardSpace, callback) {}
+```
+
+###updateShardSpace
+Updates a shard space - requires cluster admin privileges
+
+```js
+var updatedShardSpace = {
+    retentionPolicy: '60d',
+    shardDuration: '14d',
+    regex: '/.*/',
+    replicationFactory: 1,
+    split: 1
+};
+updateShardSpace( [databaseName,] shardSpaceName, updatedShardSpace, callback) { }
+```
+
+###deleteShardSpace
+Deletes a shard space - requires cluster admin privileges
+
+```js
+deleteShardSpace( [databaseName,] shardSpaceName, callback) { }
 ```
 
 

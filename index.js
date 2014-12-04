@@ -75,15 +75,18 @@ InfluxDB.prototype.url = function(database, query) {
   });
 };
 
-InfluxDB.prototype.createDatabase = function(databaseName, callback) {
+InfluxDB.prototype.createDatabase = function(databaseName, options, callback) {
+  if (typeof callback === 'undefined') {
+      callback = options;
+      options = {};
+  }
+
   this.request.post({
-    url: this.url('db'),
+    url: this.url('cluster/database_configs/' + databaseName),
     headers: {
       'content-type': 'application/json'
     },
-    body: JSON.stringify({
-      name: databaseName
-    }, null)
+    body: JSON.stringify(options, null)
   }, this._parseCallback(callback));
 };
 
@@ -254,6 +257,67 @@ InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callba
   this.request.get({
     url: this.url('db/' + databaseName + '/series', { q: 'drop continuous query '+queryID }),
     json: true
+  }, this._parseCallback(callback));
+};
+
+
+InfluxDB.prototype.getShardSpaces = function(databaseName, callback) {
+  if ('function' === typeof databaseName) {
+    callback = databaseName;
+    databaseName = this.options.database;
+  }
+  this.request.get({
+    url: this.url('cluster/shard_spaces'),
+    json: true
+  }, this._parseCallback(function(err, shards) {
+    if (err) return callback(err, shards);
+    callback(null, _.where(shards, {database: databaseName}));
+  }));
+};
+
+
+InfluxDB.prototype.createShardSpace = function(databaseName, shardSpace, callback) {
+  if ('function' === typeof shard) {
+    callback = shardSpace;
+    shardSpace = databaseName;
+    databaseName = this.options.database;
+  }
+  this.request.post({
+    url: this.url('cluster/shard_spaces/' + databaseName),
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(shardSpace, null)
+  }, this._parseCallback(callback));
+};
+
+
+InfluxDB.prototype.updateShardSpace = function(databaseName, shardSpaceName, options, callback) {
+  if ('function' === typeof options) {
+    callback = options;
+    options = shardSpaceName;
+    shardSpaceName = databaseName;
+    databaseName = this.options.database;
+  }
+  this.request.post({
+    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName),
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(options, null)
+  }, this._parseCallback(callback));
+};
+
+
+InfluxDB.prototype.deleteShardSpace = function(databaseName, shardSpaceName, callback) {
+  if ('function' === typeof shardSpaceName) {
+    callback = shardSpaceName;
+    shardSpaceName = databaseName;
+    databaseName = this.options.database;
+  }
+  this.request.get({
+    method: 'DELETE',
+    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName)
   }, this._parseCallback(callback));
 };
 
