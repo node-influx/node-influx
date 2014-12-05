@@ -277,7 +277,7 @@ InfluxDB.prototype.getShardSpaces = function(databaseName, callback) {
 
 
 InfluxDB.prototype.createShardSpace = function(databaseName, shardSpace, callback) {
-  if ('function' === typeof shard) {
+  if ('function' === typeof shardSpace) {
     callback = shardSpace;
     shardSpace = databaseName;
     databaseName = this.options.database;
