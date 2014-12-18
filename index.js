@@ -129,6 +129,12 @@ InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
 };
 
 
+InfluxDB.prototype.getUsers = function(databaseName, callback) {
+  this.request.get({
+    url: this.url('db/' + databaseName + '/users'),
+    json: true
+  }, this._parseCallback(callback));
+};
 
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
   this.request.post({

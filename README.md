@@ -129,6 +129,13 @@ Returns array of series names from given database - requires database admin priv
 getSeriesNames(databaseName, function(err,arraySeriesNames){} ) { }
 ```
 
+###getUsers
+Returns an array of database users - requires cluster admin privileges
+
+```js
+getUsers(databaseName, callback) { }
+```
+
 ###createUser
 Creates a new database user - requires cluster admin privileges
 
