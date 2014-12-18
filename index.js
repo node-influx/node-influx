@@ -136,6 +136,13 @@ InfluxDB.prototype.getUsers = function(databaseName, callback) {
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.getUser = function(databaseName, username, callback) {
+  this.request.get({
+    url: this.url('db/' + databaseName + '/users/' + username),
+    json: true
+  }, this._parseCallback(callback));
+};
+
 InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
   this.request.post({
     url: this.url('db/' + databaseName + '/users'),

@@ -150,6 +150,17 @@ describe('InfluxDB', function () {
     });
   });
 
+  describe('#getUser', function() {
+    it('should get a database user without error', function (done) {
+      client.getUser(info.db.name, info.db.username, done);
+    });
+    it('should error when getting non existing user', function (done) {
+      client.getUser(info.db.name, 'johndoe', function (err) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+  });
 
   describe('#updateUser', function () {
     it('should update user without error', function (done) {
