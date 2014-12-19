@@ -127,6 +127,17 @@ describe('InfluxDB', function () {
     });
   });
 
+  describe('#getUsers', function() {
+    it('should get an array of database users', function (done) {
+      client.getUsers(info.db.name, function(err, users) {
+        assert.equal(err, null);
+        assert(users instanceof Array);
+        assert.equal(users.length, 0);
+        done();
+      });
+    });
+  });
+
   describe('#createUser', function () {
     it('should create a user without error', function (done) {
       client.createUser(info.db.name, info.db.username, info.db.password, done);
@@ -139,6 +150,17 @@ describe('InfluxDB', function () {
     });
   });
 
+  describe('#getUser', function() {
+    it('should get a database user without error', function (done) {
+      client.getUser(info.db.name, info.db.username, done);
+    });
+    it('should error when getting non existing user', function (done) {
+      client.getUser(info.db.name, 'johndoe', function (err) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+  });
 
   describe('#updateUser', function () {
     it('should update user without error', function (done) {
