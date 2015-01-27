@@ -232,6 +232,16 @@ InfluxDB.prototype.query = function(query, callback) {
   }, this._parseCallback(callback));
 };
 
+InfluxDB.prototype.queryStream = function(query) {
+  // A streamed request forgoes any response processing by this library and
+  // leaves that up to the user.
+  return this.request.stream(
+    url: this.url('db/' + this.options.database + '/series', { q: query }),
+    method: "GET",
+    json: true
+  );
+};
+
 InfluxDB.prototype.dropSeries  = function(databaseName, seriesName, callback) {
   if ('function' === typeof seriesName)
   {
