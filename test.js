@@ -14,7 +14,8 @@ describe('InfluxDB', function () {
       host: 'localhost',
       port: 8086,
       username: 'root',
-      password: 'root'
+      password: 'root',
+      timePrecision: 'ms'
     },
     db: {
       name: 'test_db',
