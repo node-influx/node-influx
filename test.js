@@ -67,7 +67,7 @@ describe('InfluxDB', function () {
   describe('#url', function () {
     it('should build a properly formatted url', function () {
       var url = client.url(info.db.name);
-      assert.equal(url, /*'http://'+info.server.host+':8086/' + */ info.db.name + '?u=' + info.server.username + '&p=' + info.server.password);
+      assert.equal(url, /*'http://'+info.server.host+':8086/' + */ info.db.name + '?u=' + info.server.username + '&p=' + info.server.password + '&time_precision=' + info.server.timePrecision);
     });
   });
 
