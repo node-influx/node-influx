@@ -276,6 +276,14 @@ query ( [databaseName ,] seriesName, callback) { }
 
 As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/blog/2012/04/learn-to-read-the-source-luke.html). If you're still stuck, read the `./examples/*` files and the `./test.js` file.
 
+## Testing
+
+Either install InfluxDB or use a docker container to run the service:
+
+    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
+
+Then to run the test harness use `npm test`.
+
 
 ## Licence
 
