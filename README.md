@@ -62,7 +62,7 @@ host and disables the failed host for 60 seconds (timeout value is configurable)
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
 | requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
 | maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default : 2 |
-
+| timePrecision [optional] |Time precision, default : ms |
 
 
 ## Functions

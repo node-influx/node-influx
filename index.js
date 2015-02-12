@@ -12,7 +12,8 @@ var defaultOptions = {
   depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
   failoverTimeout     : 60000,
   requestTimeout      : null,
-  maxRetries          : 2
+  maxRetries          : 2,
+  timePrecision       : 'ms'
 };
 
 var InfluxDB = function(options) {
@@ -70,7 +71,8 @@ InfluxDB.prototype.url = function(database, query) {
     pathname: database,
     query: _.extend({
       u: this.options.username,
-      p: this.options.password
+      p: this.options.password,
+      time_precision: this.options.timePrecision
     }, query || {})
   });
 };
