@@ -20,6 +20,8 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 Create a client instance (`database` not required for all methods):
 
 ```js
+var influx = require('influx')
+
 var client = influx({
 
   //cluster configuration
@@ -35,7 +37,7 @@ var client = influx({
   username : 'dbuser',
   password : 'f4ncyp4ass',
   database : 'my_database'
-});
+})
 
 ```
 
