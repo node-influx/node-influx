@@ -4,7 +4,12 @@ var influx = require('../../')
 
 var app = express()
 var serverInflux = influx()
-var dbInflux = influx({host : 'localhost',username : 'example_response_dbuser', password : 'P85sw0rD', database : 'example_response'})
+var dbInflux = influx({
+  host: 'localhost',
+  username: 'example_response_dbuser',
+  password: 'P85sw0rD',
+  database: 'example_response'
+})
 
 app.use(express.logger('dev'))
 
@@ -24,7 +29,7 @@ app.use(function (req, res, next) {
     res.removeListener('finish', logRequest)
     res.removeListener('close', logRequest)
     dbInflux.writePoint('response_times', { time: startTime, value: (new Date()) - startTime }, function (err) {
-      if(err) throw err
+      if (err) throw err
     })
   }
   res.on('finish', logRequest)
@@ -50,14 +55,14 @@ function startApp () {
 
 console.log('Checking DB Exists')
 serverInflux.getDatabaseNames(function (err, dbs) {
-  if(err) throw err
-  if(dbs.indexOf('example_response') === -1) {
+  if (err) throw err
+  if (dbs.indexOf('example_response') === -1) {
     console.log('Creating Database')
     serverInflux.createDatabase('example_response', function (err) {
-      if(err) throw err
+      if (err) throw err
       console.log('Creating User')
       serverInflux.createUser('example_response', 'example_response_dbuser', 'P85sw0rD', function (err) {
-        if(err) throw err
+        if (err) throw err
         startApp()
       })
     })

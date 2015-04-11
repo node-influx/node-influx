@@ -1,3 +1,4 @@
+/* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
 
@@ -33,16 +34,16 @@ describe('InfluxDB', function () {
 
   describe('create client', function () {
     it('should create an instance without error', function () {
-      client = influx({host : info.server.host, port: info.server.port, username: info.server.username, password : info.server.password, database : info.db.name})
-      dbClient = influx({host : info.server.host, port: info.server.port, username: info.server.username, password : info.server.password, database : info.db.name})
-      failClient = influx({host : info.server.host, port: 6543, username: info.server.username, password : info.server.password, database : info.db.name})
-      failoverClient = influx({hosts : [
-          {host : '192.168.1.1'},
-          {host : '192.168.1.2'},
-          {host : '192.168.1.3'},
-          {host : '192.168.1.4'},
-          {host : info.server.host, port: info.server.port}
-      ], username: info.server.username, passwort : info.server.password, database : info.db.name})
+      client = influx({ host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+      dbClient = influx({ host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+      failClient = influx({ host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
+      failoverClient = influx({ hosts: [
+          { host: '192.168.1.1'},
+          { host: '192.168.1.2'},
+          { host: '192.168.1.3'},
+          { host: '192.168.1.4'},
+          { host: info.server.host, port: info.server.port}
+      ], username: info.server.username, password: info.server.password, database: info.db.name})
 
       assert(client instanceof influx.InfluxDB)
     })
@@ -266,6 +267,7 @@ describe('InfluxDB', function () {
   describe('#dropContinuousQuery', function () {
     it('should drop the continuous query from the database', function (done) {
       dbClient.getContinuousQueries(info.db.name, function (err, res) {
+        if (err) return done(err)
         dbClient.dropContinuousQuery(res[0].points[0][1], function (err) {
           assert.equal(err, null)
           done()
@@ -304,6 +306,7 @@ describe('InfluxDB', function () {
   describe('#updateShardSpace', function () {
     it('should update the database shard space', function (done) {
       dbClient.getShardSpaces(function (err, res) {
+        if (err) return done(err)
         dbClient.updateShardSpace(res[0].name, {
           retentionPolicy: '60d',
           shardDuration: '14d',
@@ -321,6 +324,7 @@ describe('InfluxDB', function () {
   describe('#deleteShardSpace', function () {
     it('should delete the database shard space', function (done) {
       dbClient.getShardSpaces(function (err, res) {
+        if (err) return done(err)
         dbClient.deleteShardSpace(res[0].name, function (err) {
           assert.equal(err, null)
           done()
