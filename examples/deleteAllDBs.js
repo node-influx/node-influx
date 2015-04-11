@@ -1,28 +1,27 @@
+var influx = require('../')
 
-var influx = require('../');
+var username = 'root'
+var password = 'root'
+var database = 'example_app_db'
 
-var username = 'root';
-var password = 'root';
-var database = 'example_app_db';
+var client = influx({host : 'localhost', username : username, password : password, database : database})
 
-var client = influx({host : 'localhost', username : username, password : password, database : database});
-
-client.getDatabaseNames(function(err, dbs) {
+client.getDatabaseNames(function (err, dbs) {
   if(err) {
-    throw err;
+    throw err
   }
-  console.log('Deleting Databases: ' + dbs.join(', '));
+  console.log('Deleting Databases: ' + dbs.join(', '))
 
-  var callbackGenerator = function(dbName) {
-    return function(err) {
-        if(err) {
-          throw err;
-        }
-        console.log('Deleted Database: ' + dbName);
-      };
-  };
+  var callbackGenerator = function (dbName) {
+    return function (err) {
+      if(err) {
+        throw err
+      }
+      console.log('Deleted Database: ' + dbName)
+    }
+  }
 
   for (var i = dbs.length - 1; i >= 0; i--) {
-    client.deleteDatabase(dbs[i], callbackGenerator(dbs[i]));
+    client.deleteDatabase(dbs[i], callbackGenerator(dbs[i]))
   }
-});
+})
