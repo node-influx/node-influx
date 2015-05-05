@@ -431,3 +431,37 @@ describe('Helpers', function () {
     ]);
   });
 });
+
+describe('HTTPS connection', function() {
+  var client;
+
+  var dbName = 'https_db';
+
+  describe('connect and create test DB', function () {
+
+    before(function() {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // allow self-signed cert
+
+      client = influx({
+        host: 'localhost',
+        port: 8084,
+        protocol: 'https',
+        username: 'root',
+        password: 'root',
+        timePrecision: 'ms'
+      });
+    });
+
+    it('should create a new database without error', function (done) {
+      client.createDatabase(dbName, done);
+    });
+
+    it('should throw an error if db already exists', function (done) {
+      client.createDatabase(dbName, function (err) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+
+  });
+});
