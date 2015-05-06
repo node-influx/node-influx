@@ -6,9 +6,9 @@ env:
 before_script:
   - wget "http://s3.amazonaws.com/influxdb/influxdb_$(echo $INFLUX)_amd64.deb"
   - sudo dpkg -i "influxdb_$(echo $INFLUX)_amd64.deb"
-  - openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj '/C=US/ST=NewYork/L=NYC/O=Influx/CN=*' -keyout /server.pem -out /server.pem >/dev/null 2>&1
-  - sed -i -r -e 's/^# ssl-cert/ssl-cert = "\/server.pem" #/g' /opt/influxdb/shared/config.toml
-  - sed -i -r -e 's/^# ssl-port/ssl-port = 8084 #/g' /opt/influxdb/shared/config.toml
+  - sudo openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj '/C=US/ST=NewYork/L=NYC/O=Influx/CN=*' -keyout /server.pem -out /server.pem >/dev/null 2>&1
+  - sudo sed -i -r -e 's/^# ssl-cert/ssl-cert = "\/server.pem" #/g' /opt/influxdb/shared/config.toml
+  - sudo sed -i -r -e 's/^# ssl-port/ssl-port = 8084 #/g' /opt/influxdb/shared/config.toml
   - sudo service influxdb start
   - sleep 5
 script: npm run travis-test
