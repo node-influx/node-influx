@@ -7,7 +7,6 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 [![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/bencevans/node-influx?branch=master)
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
-[![gittip](https://img.shields.io/gittip/bencevans.svg)](https://www.gittip.com/bencevans/)
 
 
 [![Bountysource](https://www.bountysource.com/badge/issue?issue_id=3370228)](https://www.bountysource.com/issues/3370228-handle-chunked-query-responses?utm_source=3370228&utm_medium=shield&utm_campaign=ISSUE_BADGE) - Reward the contributors for their efforts on upcoming tasks.
@@ -21,22 +20,26 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 Create a client instance (`database` not required for all methods):
 
 ```js
+var influx = require('influx')
+
 var client = influx({
 
   //cluster configuration
   hosts : [
     {
       host : 'localhost',
-      port : 8060 //optional. default 8086
+      port : 8060, //optional. default 8086
+      protocol : 'http' //optional. default 'http'
     }
   ],
   // or single-host configuration
   host : 'localhost',
   port : 8086, // optional, default 8086
+  protocol : 'http', // optional, default 'http'
   username : 'dbuser',
   password : 'f4ncyp4ass',
   database : 'my_database'
-});
+})
 
 ```
 
@@ -57,6 +60,7 @@ host and disables the failed host for 60 seconds (timeout value is configurable)
 | database | database name |
 | host | hostname, e.g. 'localhost' |
 | port [optional] |  influxdb port, default: 8086 |
+| protocol [optional] |  protocol, default: http |
 | hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
 | depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
