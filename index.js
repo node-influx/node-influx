@@ -9,6 +9,7 @@ var defaultOptions = {
   username            : 'root',
   password            : 'root',
   port                : 8086,
+  protocol            : 'http',
   depreciatedLogging  : (process.env.NODE_ENV === undefined || 'development') ? console.log : false,
   failoverTimeout     : 60000,
   requestTimeout      : null,
@@ -28,13 +29,15 @@ var InfluxDB = function(options) {
 
   if ( (!_.isArray(this.options.hosts) || 0 === this.options.hosts.length ) && 'string' === typeof this.options.host)
   {
-    this.request.addHost(this.options.host,this.options.port);
+    this.request.addHost(this.options.host, this.options.port, this.options.protocol);
   }
   if (_.isArray(this.options.hosts) && 0 < this.options.hosts.length)
   {
     var self = this;
     _.each(this.options.hosts,function(host){
-      self.request.addHost(host.host, host.port || self.options.port);
+      var port = host.port || self.options.port;
+      var protocol = host.protocol || self.options.protocol;
+      self.request.addHost(host.host, port, protocol);
     });
   }
 

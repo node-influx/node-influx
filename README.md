@@ -28,12 +28,14 @@ var client = influx({
   hosts : [
     {
       host : 'localhost',
-      port : 8060 //optional. default 8086
+      port : 8060, //optional. default 8086
+      protocol : 'http' //optional. default 'http'
     }
   ],
   // or single-host configuration
   host : 'localhost',
   port : 8086, // optional, default 8086
+  protocol : 'http', // optional, default 'http'
   username : 'dbuser',
   password : 'f4ncyp4ass',
   database : 'my_database'
@@ -58,6 +60,7 @@ host and disables the failed host for 60 seconds (timeout value is configurable)
 | database | database name |
 | host | hostname, e.g. 'localhost' |
 | port [optional] |  influxdb port, default: 8086 |
+| protocol [optional] |  protocol, default: http |
 | hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
 | depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
