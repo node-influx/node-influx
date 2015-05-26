@@ -175,7 +175,7 @@ writePoint(seriesName, point, options, callback) { }
 ```
 
 ###writePoints
-Writes multiple point to a series - requires database user privileges
+Writes multiple points to a series - requires database user privileges
 
 ```js
 var points = [ {attr : value, time : new Date()}, {attr : value2, time : new Date()}];
@@ -273,7 +273,7 @@ deleteShardSpace( [databaseName,] shardSpaceName, callback) { }
 Drops a series from a database - requires database admin privileges
 
 ```js
-query ( [databaseName ,] seriesName, callback) { }
+dropSeries ( [databaseName ,] seriesName, callback) { }
 ```
 
 
