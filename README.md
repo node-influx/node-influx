@@ -13,7 +13,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 ## Installation
 
-`npm install influx`
+    $ npm install influx
 
 ## Usage
 
