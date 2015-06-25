@@ -15,6 +15,11 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
     $ npm install influx
 
+## Compatibility
+
+The latest version of node-influx is compatible with InfluxDB 0.8.x.
+The development for a 0.9.x compatible version is in progress.
+
 ## Usage
 
 Create a client instance (`database` not required for all methods):
