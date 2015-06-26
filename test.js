@@ -483,13 +483,13 @@ describe('InfluxDB', function () {
   //      done();
   //    });
   //  });
-    it('should bubble errors through', function (done) {
-      failClient.dropMeasurement(info.series.name, function (err) {
-        assert(err instanceof Error);
-        done();
-      });
-    });
-  });
+  //  it('should bubble errors through', function (done) {
+  //    failClient.dropMeasurement(info.series.name, function (err) {
+  //      assert(err instanceof Error);
+  //      done();
+  //    });
+  //  });
+  //});
 
 
   describe('#deleteDatabase', function () {
