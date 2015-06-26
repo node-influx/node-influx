@@ -457,39 +457,39 @@ describe('InfluxDB', function () {
     });
   });
 
-  //describe('#dropSeries', function () {
-  //  this.timeout(25000);
-  //  it('should drop series', function (done) {
-  //    client.dropSeries('WHERE foobar="baz"', function (err) {
-  //      if (err) return done(err);
-  //      assert.equal(err, null);
-  //      done();
-  //    });
-  //  });
-  //  it('should bubble errors through', function (done) {
-  //    failClient.dropSeries(info.series.name, function (err) {
-  //      assert(err instanceof Error);
-  //      done();
-  //    });
-  //  });
-  //});
+  describe('#dropSeries', function () {
+    this.timeout(25000);
+    it('should drop series', function (done) {
+      client.dropSeries('WHERE foobar="baz"', function (err) {
+        if (err) return done(err);
+        assert.equal(err, null);
+        done();
+      });
+    });
+    it('should bubble errors through', function (done) {
+      failClient.dropSeries(info.series.name, function (err) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+  });
 
-  //describe('#dropMeasurement', function () {
-  //  this.timeout(25000);
-  //  it('should drop measurement', function (done) {
-  //    client.dropMeasurement(info.series.name, function (err) {
-  //      if (err) return done(err);
-  //      assert.equal(err, null);
-  //      done();
-  //    });
-  //  });
-  //  it('should bubble errors through', function (done) {
-  //    failClient.dropMeasurement(info.series.name, function (err) {
-  //      assert(err instanceof Error);
-  //      done();
-  //    });
-  //  });
-  //});
+  describe('#dropMeasurement', function () {
+    this.timeout(25000);
+    it('should drop measurement', function (done) {
+      client.dropMeasurement(info.series.name, function (err) {
+        if (err) return done(err);
+        assert.equal(err, null);
+        done();
+      });
+    });
+    it('should bubble errors through', function (done) {
+      failClient.dropMeasurement(info.series.name, function (err) {
+        assert(err instanceof Error);
+        done();
+      });
+    });
+  });
 
 
   describe('#deleteDatabase', function () {
