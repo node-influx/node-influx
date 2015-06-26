@@ -15,7 +15,6 @@ var defaultOptions = {
   maxRetries          : 2,
   timePrecision       : 'ms'
 };
-var qs = require('querystring');
 
 var InfluxDB = function(options) {
 
@@ -137,43 +136,6 @@ InfluxDB.prototype.queryDB = function(query, options, callback) {
     json: true
   }, this._parseCallback(callback));
 };
-
-
-
-InfluxDB.prototype.queryUrl = function(database,querystring,options) {
-
-  if (_.isObject(querystring) || 1 == arguments.length)
-  {
-    querystring = database;
-    options = querystring;
-  }
-
-
-  return url.format({
-    pathname: 'query',
-    query: _.extend({
-      u: this.options.username,
-      p: this.options.password,
-      db : database,
-      q : querystring
-    }, options || {})
-  });
-};
-
-InfluxDB.prototype.writeUrl = function(database,retentionPolicy,options) {
-
-  return url.format({
-    pathname: 'write',
-    query: _.extend({
-      u: this.options.username,
-      p: this.options.password,
-      db : database,
-      rp : retentionPolicy
-    }, options || {})
-  });
-};
-
-
 
 InfluxDB.prototype.createDatabase = function(databaseName, callback) {
   this.queryDB('create database "' + databaseName + '"', callback);
@@ -382,7 +344,7 @@ InfluxDB.prototype.writeSeries = function(series, options, callback) {
   }
 
   this.request.post({
-    url: this.writeUrl(options.database,options.rp),
+    url: this.url('write',options),
     pool : 'undefined' !== typeof options.pool ? options.pool : {},
     body: this._prepareValues(series)
   }, this._parseCallback(callback));
@@ -418,10 +380,9 @@ InfluxDB.prototype.query = function(databaseName, query, callback) {
     databaseName = this.options.database;
   }
   var self = this;
-  this.request.get({
-    url: this.queryUrl(databaseName,query),
-    json: true
-  }, this._parseCallback(function(err, results) {
+
+  this.queryDB(query,{db : databaseName}, function(err, results)
+  {
     if(err) {
       return callback(err, results);
     }
@@ -429,9 +390,8 @@ InfluxDB.prototype.query = function(databaseName, query, callback) {
     {
       return callback(err,results);
     });
-  }));
+  });
 };
-
 
 
 InfluxDB.prototype.createContinuousQuery = function(queryName, query, databaseName,callback)
@@ -468,74 +428,6 @@ InfluxDB.prototype.dropContinuousQuery  = function(queryName, databaseName,  cal
   this.queryDB('DROP CONTINUOUS QUERY "'+queryName+'" ON "'+databaseName + '"', callback);
 };
 
-// shardSpace functions are obsolet and handled by retentionPolicies
-//InfluxDB.prototype.getShardSpaces = function(databaseName, callback) {
-//  if ('function' === typeof databaseName) {
-//    callback = databaseName;
-//    databaseName = this.options.database;
-//  }
-//  this.request.get({
-//    url: this.url('cluster/shard_spaces'),
-//    json: true
-//  }, this._parseCallback(function(err, shards) {
-//    if (err) return callback(err, shards);
-//    callback(null, _.where(shards, {database: databaseName}));
-//  }));
-//};
-//
-//
-//InfluxDB.prototype.createShardSpace = function(databaseName, shardSpace, callback) {
-//  if ('function' === typeof shardSpace) {
-//    callback = shardSpace;
-//    shardSpace = databaseName;
-//    databaseName = this.options.database;
-//  }
-//  this.request.post({
-//    url: this.url('cluster/shard_spaces/' + databaseName),
-//    headers: {
-//      'content-type': 'application/json'
-//    },
-//    body: JSON.stringify(shardSpace, null)
-//  }, this._parseCallback(callback));
-//};
-//
-//
-//InfluxDB.prototype.updateShardSpace = function(databaseName, shardSpaceName, options, callback) {
-//  if ('function' === typeof options) {
-//    callback = options;
-//    options = shardSpaceName;
-//    shardSpaceName = databaseName;
-//    databaseName = this.options.database;
-//  }
-//  this.request.post({
-//    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName),
-//    headers: {
-//      'content-type': 'application/json'
-//    },
-//    body: JSON.stringify(options, null)
-//  }, this._parseCallback(callback));
-//};
-//
-//
-//InfluxDB.prototype.deleteShardSpace = function(databaseName, shardSpaceName, callback) {
-//  if ('function' === typeof shardSpaceName) {
-//    callback = shardSpaceName;
-//    shardSpaceName = databaseName;
-//    databaseName = this.options.database;
-//  }
-//  this.request.get({
-//    method: 'DELETE',
-//    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName)
-//  }, this._parseCallback(callback));
-//};
-
-
-
-// due to the unified query syntax, seriesUrl is obsolete
-//InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
-//  if ( !databaseName ) databaseName = this.options.database;
-//  return this.url('db/' + databaseName + '/series',query);
-//};
 
 InfluxDB.prototype.getHostsAvailable = function()
 {
@@ -554,18 +446,6 @@ var createClient = function() {
   return new Client();
 };
 
-// is obsolete
-var parseResult = function(res) {
-  return _.map(res.points, function(point) {
-    var objectPoint = {};
-    _.each(res.columns, function(name, n) {
-      objectPoint[name] = point[n];
-    });
-    return objectPoint;
-  });
-};
-
 module.exports = createClient;
-module.exports.parseResult = parseResult;
 module.exports.InfluxDB = InfluxDB;
 module.exports.defaultOptions = defaultOptions;
