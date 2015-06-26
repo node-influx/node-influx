@@ -321,7 +321,7 @@ describe('InfluxDB', function () {
   describe('#createContinuousQuery', function () {
     //
     it('should create a continuous query', function (done) {
-      dbClient.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM '+ info.series.name +' GROUP BY time(1h) ', function (err, res) {
+      dbClient.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM '+ info.series.name +' GROUP BY time(1h) ', info.db.name, function (err, res) {
         assert.equal(err, null);
         assert(res instanceof Array);
         assert.equal(res.length, 1);
@@ -507,22 +507,6 @@ describe('InfluxDB', function () {
 
 });
 
-describe('Helpers', function () {
-
-  describe('parseResult()', function () {
-    assert.deepEqual(influx.parseResult({
-      'name': 'response_time',
-      'columns': ['time', 'sequence_number', 'value'],
-      'points': [
-        [1383934015207, 23169, 232],
-        [1383934015205, 23168, 232]
-      ]
-    }), [
-      {time: 1383934015207, sequence_number: 23169, value: 232},
-      {time: 1383934015205, sequence_number: 23168, value: 232}
-    ]);
-  });
-});
 /*
 
 describe('HTTPS connection', function() {
