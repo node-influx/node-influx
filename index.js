@@ -1,7 +1,6 @@
-
 var influxRequest = require('./lib/InfluxRequest.js');
 var url           = require('url');
-var _             = require('underscore');
+var _             = require('lodash');
 
 var defaultOptions = {
   hosts               : [],
@@ -16,6 +15,7 @@ var defaultOptions = {
   maxRetries          : 2,
   timePrecision       : 'ms'
 };
+var qs = require('querystring');
 
 var InfluxDB = function(options) {
 
@@ -44,6 +44,29 @@ var InfluxDB = function(options) {
   return this;
 };
 
+
+InfluxDB.prototype._parseResults = function(response,callback)
+{
+  var results = [];
+  _.forEach(response,function(result,iterator)
+  {
+    var tmp = [];
+    if (result.series)
+    {
+      _.forEach(result.series, function(series,seriesIterator)
+      {
+
+        var rows = _.map(series.values,function(values){
+          return _.extend(_.zipObject(series.columns,values),series.tags);
+        });
+        tmp = _.chain(tmp).concat(rows).sort('time').value();
+      });
+    }
+    results.push(tmp);
+  });
+  return callback(null,results);
+};
+
 InfluxDB.prototype._parseCallback = function(callback) {
   return function(err, res, body) {
     if ('undefined' === typeof callback) return;
@@ -53,7 +76,16 @@ InfluxDB.prototype._parseCallback = function(callback) {
     if(res.statusCode < 200 || res.statusCode >= 300) {
       return callback(new Error(body));
     }
-    return callback(null, body);
+
+    if (_.isObject(body) && body.results && _.isArray(body.results))
+    {
+      for (var i=0;i<=body.results.length;++i) {
+        if (body.results[i] && body.results[i].error && '' != body.results[i].error) {
+          return callback(new Error(body.results[i].error));
+        }
+      }
+    }
+    return callback(null, body.results);
   };
 };
 
@@ -68,100 +100,220 @@ InfluxDB.prototype.setFailoverTimeout = function (value)
 };
 
 
-InfluxDB.prototype.url = function(database, query) {
+// possible options:
+// {db: databaseName,  rp: retentionPolicy, precision: timePrecision}
+InfluxDB.prototype.url = function(endpoint, options, query) {
+  // prepare the query object
+  var queryObj = _.extend({
+    u: this.options.username,
+    p: this.options.password
+  }, options || {}, query || {});
+
+  // add the global configuration if they are set and not provided by the options
+  if(this.options.precision && !queryObj.precision) {
+    queryObj.precision = this.options.precision;
+  }
+  if(this.options.database && !queryObj.db) {
+    queryObj.db = this.options.database;
+  }
+  if(this.options.retentionPolicy && !queryObj.rp) {
+    queryObj.rp = this.options.retentionPolicy;
+  }
 
   return url.format({
-    pathname: database,
-    query: _.extend({
-      u: this.options.username,
-      p: this.options.password,
-      time_precision: this.options.timePrecision
-    }, query || {})
+    pathname: endpoint,
+    query: queryObj
   });
 };
 
-InfluxDB.prototype.createDatabase = function(databaseName, options, callback) {
-  if (typeof callback === 'undefined') {
-      callback = options;
-      options = {};
+InfluxDB.prototype.queryDB = function(query, options, callback) {
+  if(typeof options === 'function') {
+    callback = options;
+    options = undefined;
   }
 
-  this.request.post({
-    url: this.url('cluster/database_configs/' + databaseName),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(options, null)
+  this.request.get({
+    url: this.url('query', options, {q: query}),
+    json: true
   }, this._parseCallback(callback));
+};
+
+
+
+InfluxDB.prototype.queryUrl = function(database,querystring,options) {
+
+  if (_.isObject(querystring) || 1 == arguments.length)
+  {
+    querystring = database;
+    options = querystring;
+  }
+
+
+  return url.format({
+    pathname: 'query',
+    query: _.extend({
+      u: this.options.username,
+      p: this.options.password,
+      db : database,
+      q : querystring
+    }, options || {})
+  });
+};
+
+InfluxDB.prototype.writeUrl = function(database,retentionPolicy,options) {
+
+  return url.format({
+    pathname: 'write',
+    query: _.extend({
+      u: this.options.username,
+      p: this.options.password,
+      db : database,
+      rp : retentionPolicy
+    }, options || {})
+  });
+};
+
+
+
+InfluxDB.prototype.createDatabase = function(databaseName, callback) {
+  this.queryDB('create database "' + databaseName + '"', callback);
 };
 
 InfluxDB.prototype.deleteDatabase = function(databaseName, callback) {
-  this.request.get({
-    method: 'DELETE',
-    url:this.url('db/' + databaseName)
-  }, this._parseCallback(callback));
+  this.queryDB('drop database "' + databaseName + '"', callback);
 };
 
 InfluxDB.prototype.getDatabaseNames = function(callback) {
-  this.request.get({
-    url: this.url('db'),
-    json: true
-  }, this._parseCallback(function(err, dbs) {
-    if(err) {
-      return callback(err, dbs);
-    }
-    return callback(err, _.map(dbs, function(db) { return db.name; }));
-  }));
-};
 
-
-InfluxDB.prototype.getSeriesNames = function(databaseName,callback) {
-  // if database defined on connection level use it unless overwritten
-  if ( this.options.database && typeof databaseName === 'function' ) {
-    callback = databaseName;
-    databaseName = this.options.database;
-  }
-
-  this.request.get({
-    url: this.url('db/' + databaseName + '/series', {q: 'list series'}),
-    json: true
-  }, this._parseCallback(function(err, results) {
+  this.queryDB('show databases', function(err, results) {
     if(err) {
       return callback(err, results);
     }
-    return callback(err, _.map(results[0].points, function(series) { return series[1]; }));
-  }));
+    return callback(err, _.map(results[0].series[0].values,function(dbarray){return dbarray[0]}));
+  });
+};
+
+InfluxDB.prototype.getMeasurements = function(callback) {
+  this.queryDB('show measurements', callback);
+}
+
+InfluxDB.prototype.getSeriesNames = function(measurementName,callback) {
+
+
+  var query = 'show series';
+
+  // if no measurement name is given
+  if (typeof measurementName === 'function' ) {
+    callback = measurementName;
+  } else {
+    query = query + ' from "' + measurementName + '"';
+  }
+
+  this.queryDB(query, function(err, results) {
+    if(err) {
+      return callback(err, results);
+    }
+    return callback(err, _.map(results[0].series,function(series){return series.name}));
+  });
+
 };
 
 
-InfluxDB.prototype.getUsers = function(databaseName, callback) {
-  this.request.get({
-    url: this.url('db/' + databaseName + '/users'),
-    json: true
-  }, this._parseCallback(callback));
+InfluxDB.prototype.getSeries = function(databaseName,callback) {
+
+
+  var query = 'show series';
+
+  // if no measurement name is given
+  if (typeof databaseName === 'function' ) {
+    callback = databaseName;
+  } else {
+    query = query + ' from "' + databaseName + '"';
+  }
+
+  this.queryDB(query, function(err, results) {
+    if(err) {
+      return callback(err, results);
+    }
+    return callback(err, results[0].series);
+  });
+
 };
 
+InfluxDB.prototype.dropMeasurement = function(measurementName, callback) {
+  this.queryDB('drop measurement "' + measurementName+'"' , callback);
+};
+
+InfluxDB.prototype.dropSeries  = function(seriesId, callback) {
+  this.queryDB('drop series ' + seriesId , callback);
+};
+
+
+InfluxDB.prototype.getUsers = function(callback) {
+  var self  = this;
+
+  this.queryDB('show users', function(err, results) {
+    if(err) {
+      return callback(err, results);
+    }
+    return self._parseResults(results,function(err,results)
+    {
+      return callback(err,results[0]);
+    });
+    //return callback(err, results[0].series[0].values);
+  });
+};
+
+/*
+This function is obsolete in 0.9
 InfluxDB.prototype.getUser = function(databaseName, username, callback) {
   this.request.get({
     url: this.url('db/' + databaseName + '/users/' + username),
     json: true
   }, this._parseCallback(callback));
+};*/
+
+InfluxDB.prototype.createUser = function(username, password, isAdmin, callback) {
+  if ('function' == typeof  isAdmin)
+  {
+    callback = isAdmin;
+    isAdmin = false;
+  }
+  var query = 'create user "' + username + '" with password \'' + password + '\'';
+  if(isAdmin) {
+    query += ' with all privileges';
+  }
+  this.queryDB(query, callback);
 };
 
-InfluxDB.prototype.createUser = function(databaseName, username, password, callback) {
-  this.request.post({
-    url: this.url('db/' + databaseName + '/users'),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: username,
-      password: password
-    }, null)
-  }, this._parseCallback(callback));
+  InfluxDB.prototype.setPassword = function (username, password, callback) {
+  this.queryDB('set password for "' + username + '" = \'' + password + '\'', callback);
 };
 
-InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
+
+InfluxDB.prototype.grantPrivilege = function(privilege, databaseName, userName, callback) {
+  this.queryDB('grant ' + privilege + ' on "' + databaseName + '" to "' + userName + '"', callback);
+}
+
+InfluxDB.prototype.revokePrivilege = function(privilege, databaseName, userName, callback) {
+  this.queryDB('revoke ' + privilege + ' on "' + databaseName + '" from "' + userName + '"', callback);
+}
+
+InfluxDB.prototype.grantAdminPrivileges = function(userName, callback) {
+  this.queryDB('grant all privileges to "' + userName + '"', callback);
+}
+
+InfluxDB.prototype.revokeAdminPrivileges = function(userName, callback) {
+  this.queryDB('revoke all privileges from "' + userName + '"', callback);
+}
+
+
+InfluxDB.prototype.dropUser = function (username, callback) {
+  this.queryDB('drop user "' + username + '"', callback);
+};
+
+//obsolete
+/*InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
 {
   this.request.post({
     url: this.url('db/' + databaseName + '/users/' + userName),
@@ -170,180 +322,220 @@ InfluxDB.prototype.updateUser = function (databaseName, userName, options, callb
     },
     body: JSON.stringify(options, null)
   }, this._parseCallback(callback));
-};
+};*/
+
+InfluxDB.prototype._createKeyValueString = function(object)
+{
+  return _.map(object,function(value,key){
+    return key+"="+value;
+  }).join(',');
+}
+
+InfluxDB.prototype._prepareValues = function(series)
+{
+  var output = [];
+  _.forEach(series,function(values,seriesName)
+  {
+    _.each(values,function(points)
+    {
+      var line = seriesName;
+      if (points[1] && _.isObject(points[1]) && 0 < _.keys(points[1]).length)
+      {
+        line += ","+this._createKeyValueString(points[1]);
+      }
+
+      if (_.isObject(points[0]))
+      {
+        var timestamp = null;
+        if (points[0].time)
+        {
+          timestamp = points[0].time;
+          delete (points[0].time);
+        }
+        line += " "+this._createKeyValueString(points[0]);
+        if (timestamp) {
+          if (timestamp instanceof Date)
+          {
+            line += " "+timestamp.getTime();
+          } else {
+            line += " "+timestamp;
+          }
+        }
+      } else {
+        line += " value="+points[0];
+      }
+      output.push(line);
+    },this);
+  },this);
+  return output.join("\n");
+}
 
 InfluxDB.prototype.writeSeries = function(series, options, callback) {
   if(typeof options === 'function') {
     callback = options;
     options  = {};
   }
-  if ('undefined' === typeof options) options = {};
 
-  var query = options.query || {};
-  var data = [];
-
-  _.each(series, function(dataPoints, seriesName) {
-    var datum = { points: [], name: seriesName, columns: [] };
-    // Collect column names first
-    var columns = {};
-    _.each(dataPoints, function(values) {
-      _.each(values, function(_, k) {
-        columns[k] = true;
-      });
-    });
-    datum.columns = _.keys(columns);
-    // Add point values with null where needed
-    _.each(dataPoints, function(values) {
-      var point = [];
-      _.each(datum.columns, function(k) {
-        var v = typeof values[k] === 'undefined' ? null : values[k];
-        if(k === 'time' && v instanceof Date) {
-          v = v.valueOf();
-          query.time_precision = 'ms';
-        }
-        point.push(v);
-      });
-      datum.points.push(point);
-    });
-    data.push(datum);
-  });
+  if (!options.database)
+  {
+    options.database = this.options.database;
+  }
 
   this.request.post({
-    url: this.seriesUrl(options.database,query),
-    headers: {
-      'content-type': 'application/json'
-    },
+    url: this.writeUrl(options.database,options.rp),
     pool : 'undefined' !== typeof options.pool ? options.pool : {},
-    body: JSON.stringify(data)
+    body: this._prepareValues(series)
   }, this._parseCallback(callback));
 };
 
-InfluxDB.prototype.writePoint = function(seriesName, values, options, callback) {
+InfluxDB.prototype.writePoint = function(seriesName, values, tags, options, callback) {
+  if ('function' == typeof options)
+  {
+    callback = options;
+    options = {};
+  }
   var data = {};
-  data[seriesName] = [values];
+  data[seriesName] = [[values,tags]];
   this.writeSeries(data, options, callback);
 };
 
 InfluxDB.prototype.writePoints = function(seriesName, points, options, callback) {
+  if ('function' == typeof options)
+  {
+    callback = options;
+    options = {};
+  }
   var data = {};
   data[seriesName] = points;
   this.writeSeries(data, options, callback);
 };
 
-InfluxDB.prototype.query = function(query, callback) {
-  this.request.get({
-    url: this.url('db/' + this.options.database + '/series', { q: query }),
-    json: true
-  }, this._parseCallback(callback));
-};
-
-InfluxDB.prototype.dropSeries  = function(databaseName, seriesName, callback) {
-  if ('function' === typeof seriesName)
+InfluxDB.prototype.query = function(databaseName, query, callback) {
+  if ('function' == typeof query)
   {
-    callback=seriesName;
-    seriesName = databaseName;
+    callback = query;
+    query = databaseName;
     databaseName = this.options.database;
   }
+  var self = this;
   this.request.get({
-    url: this.url('db/' + databaseName + '/series/' + seriesName),
-    method : 'DELETE',
+    url: this.queryUrl(databaseName,query),
     json: true
-  }, this._parseCallback(callback));
-};
-
-InfluxDB.prototype.getContinuousQueries = function(databaseName,callback)
-{
-  if ('function' === typeof databaseName)
-  {
-    callback = databaseName;
-    databaseName = this.options.database;
-  }
-  this.request.get({
-    url: this.url('db/' + databaseName + '/series', { q: 'list continuous queries' }),
-    json: true
-  }, this._parseCallback(callback));
-};
-
-
-InfluxDB.prototype.dropContinuousQuery  = function(databaseName, queryID, callback) {
-  if ('function' === typeof queryID)
-  {
-    callback=queryID;
-    queryID = databaseName;
-    databaseName = this.options.database;
-  }
-  this.request.get({
-    url: this.url('db/' + databaseName + '/series', { q: 'drop continuous query '+queryID }),
-    json: true
-  }, this._parseCallback(callback));
-};
-
-
-InfluxDB.prototype.getShardSpaces = function(databaseName, callback) {
-  if ('function' === typeof databaseName) {
-    callback = databaseName;
-    databaseName = this.options.database;
-  }
-  this.request.get({
-    url: this.url('cluster/shard_spaces'),
-    json: true
-  }, this._parseCallback(function(err, shards) {
-    if (err) return callback(err, shards);
-    callback(null, _.where(shards, {database: databaseName}));
+  }, this._parseCallback(function(err, results) {
+    if(err) {
+      return callback(err, results);
+    }
+    return self._parseResults(results,function(err,results)
+    {
+      return callback(err,results);
+    });
   }));
 };
 
 
-InfluxDB.prototype.createShardSpace = function(databaseName, shardSpace, callback) {
-  if ('function' === typeof shardSpace) {
-    callback = shardSpace;
-    shardSpace = databaseName;
+
+InfluxDB.prototype.createContinuousQuery = function(queryName, query, databaseName,callback)
+{
+  if ('function' == typeof databaseName)
+  {
+    callback = databaseName;
     databaseName = this.options.database;
   }
-  this.request.post({
-    url: this.url('cluster/shard_spaces/' + databaseName),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(shardSpace, null)
-  }, this._parseCallback(callback));
+
+  var query = "CREATE CONTINUOUS QUERY " +queryName+ " ON "+databaseName+" BEGIN "+
+               query  +
+              " END";
+  this.queryDB(query, callback);
+}
+
+InfluxDB.prototype.getContinuousQueries = function(callback)
+{
+  var self = this;
+  this.queryDB("SHOW CONTINUOUS QUERIES", function(err,result)
+  {
+    if (err) return callback(err);
+    self._parseResults(result,callback);
+  });
 };
 
 
-InfluxDB.prototype.updateShardSpace = function(databaseName, shardSpaceName, options, callback) {
-  if ('function' === typeof options) {
-    callback = options;
-    options = shardSpaceName;
-    shardSpaceName = databaseName;
+InfluxDB.prototype.dropContinuousQuery  = function(queryName, databaseName,  callback) {
+  if ('function' == typeof databaseName)
+  {
+    callback = databaseName;
     databaseName = this.options.database;
   }
-  this.request.post({
-    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(options, null)
-  }, this._parseCallback(callback));
+  this.queryDB('DROP CONTINUOUS QUERY "'+queryName+'" ON "'+databaseName + '"', callback);
 };
 
+// shardSpace functions are obsolet and handled by retentionPolicies
+//InfluxDB.prototype.getShardSpaces = function(databaseName, callback) {
+//  if ('function' === typeof databaseName) {
+//    callback = databaseName;
+//    databaseName = this.options.database;
+//  }
+//  this.request.get({
+//    url: this.url('cluster/shard_spaces'),
+//    json: true
+//  }, this._parseCallback(function(err, shards) {
+//    if (err) return callback(err, shards);
+//    callback(null, _.where(shards, {database: databaseName}));
+//  }));
+//};
+//
+//
+//InfluxDB.prototype.createShardSpace = function(databaseName, shardSpace, callback) {
+//  if ('function' === typeof shardSpace) {
+//    callback = shardSpace;
+//    shardSpace = databaseName;
+//    databaseName = this.options.database;
+//  }
+//  this.request.post({
+//    url: this.url('cluster/shard_spaces/' + databaseName),
+//    headers: {
+//      'content-type': 'application/json'
+//    },
+//    body: JSON.stringify(shardSpace, null)
+//  }, this._parseCallback(callback));
+//};
+//
+//
+//InfluxDB.prototype.updateShardSpace = function(databaseName, shardSpaceName, options, callback) {
+//  if ('function' === typeof options) {
+//    callback = options;
+//    options = shardSpaceName;
+//    shardSpaceName = databaseName;
+//    databaseName = this.options.database;
+//  }
+//  this.request.post({
+//    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName),
+//    headers: {
+//      'content-type': 'application/json'
+//    },
+//    body: JSON.stringify(options, null)
+//  }, this._parseCallback(callback));
+//};
+//
+//
+//InfluxDB.prototype.deleteShardSpace = function(databaseName, shardSpaceName, callback) {
+//  if ('function' === typeof shardSpaceName) {
+//    callback = shardSpaceName;
+//    shardSpaceName = databaseName;
+//    databaseName = this.options.database;
+//  }
+//  this.request.get({
+//    method: 'DELETE',
+//    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName)
+//  }, this._parseCallback(callback));
+//};
 
-InfluxDB.prototype.deleteShardSpace = function(databaseName, shardSpaceName, callback) {
-  if ('function' === typeof shardSpaceName) {
-    callback = shardSpaceName;
-    shardSpaceName = databaseName;
-    databaseName = this.options.database;
-  }
-  this.request.get({
-    method: 'DELETE',
-    url: this.url('cluster/shard_spaces/' + databaseName + '/' + shardSpaceName)
-  }, this._parseCallback(callback));
-};
 
 
-InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
-  if ( !databaseName ) databaseName = this.options.database;
-  return this.url('db/' + databaseName + '/series',query);
-};
+// due to the unified query syntax, seriesUrl is obsolete
+//InfluxDB.prototype.seriesUrl  = function(databaseName,query) {
+//  if ( !databaseName ) databaseName = this.options.database;
+//  return this.url('db/' + databaseName + '/series',query);
+//};
 
 InfluxDB.prototype.getHostsAvailable = function()
 {
@@ -362,7 +554,7 @@ var createClient = function() {
   return new Client();
 };
 
-
+// is obsolete
 var parseResult = function(res) {
   return _.map(res.points, function(point) {
     var objectPoint = {};
