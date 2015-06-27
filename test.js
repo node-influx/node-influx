@@ -73,6 +73,33 @@ describe('InfluxDB', function () {
     });
   });
 
+
+  describe('#_createKeyValueString', function () {
+    it('should build a properly formatted string', function () {
+      var str = client._createKeyValueString({a : 1 , b : 2});
+      assert.equal(str, 'a=1,b=2');
+    });
+  });
+
+  describe('parseResult()', function () {
+    it('should build a properly formatted response', function (done) {
+
+      client._parseResults([{"series":[{"name":"myseries2","tags":{"mytag":"foobarfoo"},"columns":["time","value"],"values":[["2015-06-27T06:25:54.411900884Z",55]]},{"name":"myseries2","tags":{"mytag":"foobarfoo2"},"columns":["time","value"],"values":[["2015-06-27T06:25:54.411900884Z",29]]}]}],
+          function(err,results)
+          {
+            assert.deepEqual(results,
+                [ [ { time: '2015-06-27T06:25:54.411900884Z',
+                  value: 55,
+                  mytag: 'foobarfoo' },
+                  { time: '2015-06-27T06:25:54.411900884Z',
+                    value: 29,
+                    mytag: 'foobarfoo2' } ] ]
+            );
+            done();
+          });
+    });
+  });
+
   describe('#availableHosts', function () {
     it('should return one host', function (done) {
       var hosts = client.getHostsAvailable();
