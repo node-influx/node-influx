@@ -459,6 +459,29 @@ describe('InfluxDB', function () {
     });
   });
 
+
+  describe('#getMeasurements', function () {
+    it('should return array of measurements', function (done) {
+      client.getMeasurements(function (err, measurements) {
+        if (err) return done(err);
+        assert(measurements instanceof Array);
+        assert.equal(measurements.length, 1);
+        done();
+      });
+    });
+  });
+
+  describe('#getSeries', function () {
+    it('should return array of series', function (done) {
+      client.getSeries(function (err, series) {
+        if (err) return done(err);
+        assert(series instanceof Array);
+        assert.equal(series.length, 3);
+        done();
+      });
+    });
+  });
+
   describe('#getSeriesNames', function () {
     it('should return array of series names', function (done) {
       client.getSeriesNames(function (err, series) {
