@@ -226,15 +226,6 @@ InfluxDB.prototype.getUsers = function(callback) {
   });
 };
 
-/*
-This function is obsolete in 0.9
-InfluxDB.prototype.getUser = function(databaseName, username, callback) {
-  this.request.get({
-    url: this.url('db/' + databaseName + '/users/' + username),
-    json: true
-  }, this._parseCallback(callback));
-};*/
-
 InfluxDB.prototype.createUser = function(username, password, isAdmin, callback) {
   if ('function' == typeof  isAdmin)
   {
@@ -273,18 +264,6 @@ InfluxDB.prototype.revokeAdminPrivileges = function(userName, callback) {
 InfluxDB.prototype.dropUser = function (username, callback) {
   this.queryDB('drop user "' + username + '"', callback);
 };
-
-//obsolete
-/*InfluxDB.prototype.updateUser = function (databaseName, userName, options, callback)
-{
-  this.request.post({
-    url: this.url('db/' + databaseName + '/users/' + userName),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(options, null)
-  }, this._parseCallback(callback));
-};*/
 
 InfluxDB.prototype._createKeyValueString = function(object)
 {
