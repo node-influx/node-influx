@@ -19,8 +19,9 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 ## Compatibility
 
-The latest version of node-influx is compatible with InfluxDB 0.8.x.
-The development for a 0.9.x compatible version is in progress.
+Version 0.3.x is compatible with InfluxDB 0.8.x
+Version 0.4.x is compatible with InfluxDB 0.9.x (currently under development)
+
 
 ## Usage
 
