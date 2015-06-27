@@ -239,34 +239,6 @@ describe('InfluxDB', function () {
     })
   })
 
-  // influx API doesn't provide a getUser method atm
-
-  // describe('#getUser', function() {
-  //  it('should get a database user without error', function (done) {
-  //    client.getUser(info.db.name, info.db.username, done)
-  //  })
-  //  it('should error when getting non existing user', function (done) {
-  //    client.getUser(info.db.name, 'johndoe', function (err) {
-  //      assert(err instanceof Error)
-  //      done()
-  //    })
-  //  })
-  // })
-
-  // influx API seems broken
-  // describe('#updateUser', function () {
-  //  it('should update user without error', function (done) {
-  //    client.updateUser(info.db.name, info.db.username, {admin: true}, done)
-  //  })
-  //  it('should error when updating non existing user', function (done) {
-  //    client.updateUser(info.db.name, 'johndoe', {admin: false}, function (err) {
-  //      assert(err instanceof Error)
-  //      done()
-  //    })
-  //  })
-  // })
-
-  //
   describe('#writePoint', function () {
     it('should write a generic point into the database', function (done) {
       dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
@@ -275,7 +247,7 @@ describe('InfluxDB', function () {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, done)
     })
   })
-  //
+
   describe('#writePoints', function () {
     this.timeout(10000)
     it('should write multiple points to the same time series, same column names', function (done) {
@@ -338,8 +310,21 @@ describe('InfluxDB', function () {
     })
   })
 
+  describe('#queryRaw', function () {
+    it('should read a point from the database and return raw values', function (done) {
+      dbClient.queryRaw('SELECT value FROM ' + info.series.name + ';', function (err, res) {
+        console.log(res);
+        assert.equal(err, null)
+        assert(res instanceof Array)
+        assert.equal(res.length, 1)
+        assert.equal(res[0].series.length,1)
+        done()
+      })
+    })
+  })
+
+
   describe('#createContinuousQuery', function () {
-    //
     it('should create a continuous query', function (done) {
       dbClient.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM ' + info.series.name + ' GROUP BY time(1h) ', info.db.name, function (err, res) {
         assert.equal(err, null)
@@ -372,62 +357,6 @@ describe('InfluxDB', function () {
     })
   })
 
-  // describe('#getShardSpaces', function () {
-  //  it('should fetch all shard spaces from the database', function (done) {
-  //    dbClient.getShardSpaces(function (err, res) {
-  //      assert.equal(err, null)
-  //      assert(res instanceof Array)
-  //      assert.equal(res.length, 1)
-  //      done()
-  //    })
-  //  })
-  // })
-  //
-  // describe('#createShardSpace', function () {
-  //  it('should create a shard space', function (done) {
-  //    dbClient.createShardSpace({
-  //      name: 'test_shard',
-  //      retentionPolicy: '30d',
-  //      shardDuration: '7d',
-  //      regex: '/test123/',
-  //      replicationFactor: 1,
-  //      split: 1
-  //    }, function (err) {
-  //      assert.equal(err, null)
-  //      done()
-  //    })
-  //  })
-  // })
-  //
-  // describe('#updateShardSpace', function () {
-  //  it('should update the database shard space', function (done) {
-  //    dbClient.getShardSpaces(function (err, res) {
-  //      dbClient.updateShardSpace(res[0].name, {
-  //        retentionPolicy: '60d',
-  //        shardDuration: '14d',
-  //        regex: '/test123/',
-  //        replicationFactor: 1,
-  //        split: 1
-  //      }, function (err) {
-  //        assert.equal(err, null)
-  //        done()
-  //      })
-  //    })
-  //  })
-  // })
-  //
-  // describe('#deleteShardSpace', function () {
-  //  it('should delete the database shard space', function (done) {
-  //    dbClient.getShardSpaces(function (err, res) {
-  //      dbClient.deleteShardSpace(res[0].name, function (err) {
-  //        assert.equal(err, null)
-  //        done()
-  //      })
-  //    })
-  //  })
-  // })
-  //
-  //
   describe('#query failover', function () {
     this.timeout(30000)
     it('should exceed retry limit', function (done) {
@@ -538,7 +467,7 @@ describe('InfluxDB', function () {
     it('should delete the database without error', function (done) {
       client.deleteDatabase(info.db.name, done)
     })
-    it("should error if database didn't exist", function (done) {
+    it('should error if database didn\'t exist', function (done) {
       client.deleteDatabase(info.db.name, function (err) {
         assert(err instanceof Error)
         done()
@@ -548,6 +477,9 @@ describe('InfluxDB', function () {
 
 })
 
+
+// todo:
+// HTTPS support didn't work, InfluxDB didn't start no matter what. needs to be solved asap
 /*
 
 describe('HTTPS connection', function() {

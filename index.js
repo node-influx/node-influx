@@ -334,6 +334,15 @@ InfluxDB.prototype.query = function (databaseName, query, callback) {
   })
 }
 
+InfluxDB.prototype.queryRaw = function (databaseName, query, callback) {
+  if (typeof query === 'function') {
+    callback = query
+    query = databaseName
+    databaseName = this.options.database
+  }
+  this.queryDB(query, {db: databaseName}, callback)
+}
+
 InfluxDB.prototype.createContinuousQuery = function (queryName, queryString, databaseName, callback) {
   if (databaseName === 'function') {
     callback = databaseName
