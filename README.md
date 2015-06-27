@@ -110,9 +110,8 @@ getHostsDisabled( ) { }
 Creates a new database - requires cluster admin privileges
 
 ```js
-createDatabase(databaseName, [options,] callback) { }
+createDatabase(databaseName, callback) { }
 ```
-[Options can be an array of shard spaces and/or continuous queries](http://influxdb.com/docs/v0.8/advanced_topics/sharding_and_storage.html#configuration).
 
 ###deleteDatabase
 Deletes a database - requires cluster admin privileges
@@ -128,11 +127,26 @@ Returns array of database names - requires cluster admin privileges
 getDatabaseNames(function(err,arrayDatabaseNames){}) { }
 ```
 
-###getSeriesNames
-Returns array of series names from given database - requires database admin privileges
+
+###getMeasurements
+Returns array of measurements - requires database admin privileges
 
 ```js
-getSeriesNames(databaseName, function(err,arraySeriesNames){} ) { }
+getMeasurements(function(err,arrayMeasurements){} ) { }
+```
+
+###getSeries
+Returns array of series names from given measurement, or database if `measurementName` is omitted - requires database admin privileges
+
+```js
+getSeries([measurementName,] function(err,arraySeriesNames){} ) { }
+```
+
+###getSeriesNames
+Returns array of series names from given measurement - requires database admin privileges
+
+```js
+getSeriesNames([measurementName,] function(err,arraySeriesNames){} ) { }
 ```
 
 ###getUsers
