@@ -96,8 +96,8 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
   }, options || {}, query || {})
 
   // add the global configuration if they are set and not provided by the options
-  if (this.options.precision && !queryObj.precision) {
-    queryObj.precision = this.options.precision
+  if (this.options.timePrecision && !queryObj.precision) {
+    queryObj.precision = this.options.timePrecision
   }
   if (this.options.database && !queryObj.db) {
     queryObj.db = this.options.database
@@ -344,7 +344,7 @@ InfluxDB.prototype.queryRaw = function (databaseName, query, callback) {
 }
 
 InfluxDB.prototype.createContinuousQuery = function (queryName, queryString, databaseName, callback) {
-  if (databaseName === 'function') {
+  if (typeof databaseName === 'function') {
     callback = databaseName
     databaseName = this.options.database
   }

@@ -34,7 +34,7 @@ describe('InfluxDB', function () {
 
   describe('create client', function () {
     it('should create an instance without error', function () {
-      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy : info.db.retentionPolicy})
       dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
       failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
       failoverClient = influx({hosts: [
@@ -68,6 +68,13 @@ describe('InfluxDB', function () {
       var url = client.url('query', { db: info.db.name, rp: info.db.retentionPolicy, precision: info.server.timePrecision })
       assert.equal(url, /*'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy + '&precision=' + info.server.timePrecision)
     })
+
+    it('should build a properly formatted url', function () {
+      var url = client.url('query')
+      assert.equal(url, /*'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
+    })
+
+
   })
 
   describe('#_createKeyValueString', function () {
@@ -152,7 +159,7 @@ describe('InfluxDB', function () {
 
   describe('#createUser', function () {
     it('should create a user without error', function (done) {
-      client.createUser(info.db.username, info.db.password, false, done)
+      client.createUser(info.db.username, info.db.password, true, done)
     })
     it('should error when creating an existing user', function (done) {
       client.createUser(info.db.username, info.db.password, function (err) {
@@ -171,6 +178,14 @@ describe('InfluxDB', function () {
         done()
       })
     })
+
+    it('should error when deleting an existing user', function (done) {
+      failClient.getUsers( function (err) {
+        assert(err instanceof Error)
+        done()
+      })
+    })
+
   })
 
   describe('#setPassword', function () {
@@ -267,6 +282,17 @@ describe('InfluxDB', function () {
     it('should write a generic point into the database', function (done) {
       dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
     })
+
+    it('should write a generic point into the database', function (done) {
+      dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, done)
+    })
+
+    it('should write a generic point into the database', function (done) {
+      dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, done)
+
+    })
+
+
     it('should write a point with time into the database', function (done) {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, done)
     })
@@ -349,7 +375,7 @@ describe('InfluxDB', function () {
 
   describe('#createContinuousQuery', function () {
     it('should create a continuous query', function (done) {
-      dbClient.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM ' + info.series.name + ' GROUP BY time(1h) ', info.db.name, function (err, res) {
+      dbClient.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM ' + info.series.name + ' GROUP BY time(1h) ', function (err, res) {
         assert.equal(err, null)
         assert(res instanceof Array)
         assert.equal(res.length, 1)
@@ -424,6 +450,21 @@ describe('InfluxDB', function () {
         done()
       })
     })
+
+    it('should return array of series', function (done) {
+      client.getSeries(info.series.name, function (err, series) {
+        if (err) return done(err)
+        assert(series instanceof Array)
+        assert.equal(series.length, 1)
+        done()
+      })
+    })
+    it('should bubble errors through', function (done) {
+      client.getSeries(info.db.name, function (err) {
+        assert(err instanceof Error)
+        done()
+      })
+    })
   })
 
   describe('#getSeriesNames', function () {
@@ -444,7 +485,7 @@ describe('InfluxDB', function () {
       })
     })
     it('should bubble errors through', function (done) {
-      failClient.getSeriesNames(info.db.name, function (err) {
+      client.getSeriesNames(info.db.name, function (err) {
         assert(err instanceof Error)
         done()
       })
