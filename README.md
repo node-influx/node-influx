@@ -7,9 +7,11 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/bencevans/node-influx?branch=master)
 [![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/bencevans/node-influx)
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
-
+[![Github Releases](https://img.shields.io/github/downloads/atom/atom/latest/total.svg)](https://github.com/bencevans/node-influx)
 
 [![Bountysource](https://www.bountysource.com/badge/issue?issue_id=3370228)](https://www.bountysource.com/issues/3370228-handle-chunked-query-responses?utm_source=3370228&utm_medium=shield&utm_campaign=ISSUE_BADGE) - Reward the contributors for their efforts on upcoming tasks.
+
+[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 ## Installation
 
@@ -159,18 +161,6 @@ Creates a new database user - requires cluster admin privileges
 createUser(databaseName, username, password, callback) { }
 ```
 
-###updateUser
-Updates database user - requires cluster admin privileges
-
-```js
-updateUser(databaseName, username, options, callback) { }
-
-e.g.:
-// adds database admin privilege
-influxDB.updateUser('myDatabase','johndoe',{admin:true},callback);
-```
-
-
 ###writePoint
 Writes a point to a series - requires database user privileges
 
@@ -201,6 +191,7 @@ var series = {
 
 writeSeries(series, options, callback) { }
 ```
+
 *Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
 
 ###query
@@ -208,12 +199,14 @@ Queries the database - requires database user privileges
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-query(query, callback) { }
+query([database,] query, callback) { }
 
 
-query(query, callback) { }
+query([database,]query, callback) { }
 
 ```
+
+If `database` is omitted, node-influx uses the database defined in the default options.
 
 ###getContinuousQueries
 Fetches all continuous queries from a database - requires database admin privileges
@@ -227,50 +220,6 @@ Drops a continuous query from a database - requires database admin privileges
 
 ```js
 dropContinuousQuery( [databaseName,] queryID, callback) { }
-```
-
-
-###getShardSpaces
-Returns array of all shard spaces for a database - requires cluster admin privileges
-
-```js
-getShardSpaces( [databaseName,] function(err, arrayShardSpaces){} ) { }
-```
-
-###createShardSpace
-Creates a new shard space for a database - requires cluster admin privileges
-
-```js
-var shardSpace = {
-    name: '30d_shard',
-    retentionPolicy: '30d',
-    shardDuration: '7d',
-    regex: '/.*/',
-    replicationFactor: 1,
-    split: 1
-};
-createShardSpace( [databaseName,] shardSpace, callback) {}
-```
-
-###updateShardSpace
-Updates a shard space - requires cluster admin privileges
-
-```js
-var updatedShardSpace = {
-    retentionPolicy: '60d',
-    shardDuration: '14d',
-    regex: '/.*/',
-    replicationFactory: 1,
-    split: 1
-};
-updateShardSpace( [databaseName,] shardSpaceName, updatedShardSpace, callback) { }
-```
-
-###deleteShardSpace
-Deletes a shard space - requires cluster admin privileges
-
-```js
-deleteShardSpace( [databaseName,] shardSpaceName, callback) { }
 ```
 
 
@@ -292,6 +241,16 @@ Either install InfluxDB or use a docker container to run the service:
     docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
 
 Then to run the test harness use `npm test`.
+
+## Contributing
+
+If you want to add features, fix bugs or improve node-influx please open a pull-request. 
+Please note, we are following [Javascript Standard Style](https://github.com/feross/standard). Before opening a PR
+your code should pass Standard.
+
+ `npm install standard`
+ `standard`
+
 
 
 ## Licence
