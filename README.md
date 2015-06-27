@@ -7,8 +7,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/bencevans/node-influx?branch=master)
 [![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/bencevans/node-influx)
 [![Dependency Status](https://david-dm.org/bencevans/node-influx.png)](https://david-dm.org/bencevans/node-influx)
-[downloads-image]: https://img.shields.io/npm/dm/influx.svg?style=flat
-
+[![Github Releases](https://img.shields.io/github/downloads/atom/atom/latest/total.svg)](https://github.com/bencevans/node-influx)
 
 [![Bountysource](https://www.bountysource.com/badge/issue?issue_id=3370228)](https://www.bountysource.com/issues/3370228-handle-chunked-query-responses?utm_source=3370228&utm_medium=shield&utm_campaign=ISSUE_BADGE) - Reward the contributors for their efforts on upcoming tasks.
 
