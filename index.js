@@ -371,6 +371,40 @@ InfluxDB.prototype.dropContinuousQuery = function (queryName, databaseName, call
   this.queryDB('DROP CONTINUOUS QUERY "' + queryName + '" ON "' + databaseName + '"', callback)
 }
 
+
+InfluxDB.prototype.createRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+  var query = 'create retention policy "' + rpName +
+      '" on "' + databaseName +
+      '" duration ' + duration +
+      ' replication ' + replication;
+  if(isDefault) {
+    query += ' default';
+  }
+
+  this.queryDB(query, callback);
+}
+
+InfluxDB.prototype.getRetentionPolicies = function(databaseName, callback) {
+  this.queryDB('show retention policies "' + databaseName + '"', callback);
+}
+
+InfluxDB.prototype.alterRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+  var query = 'alter retention policy "' + rpName +
+      '" on "' + databaseName + '"';
+  if(duration) {
+    query += ' duration ' + duration;
+  }
+  if(replication) {
+    query += ' replication ' + replication;
+  }
+  if(isDefault) {
+    query += ' default';
+  }
+
+  this.queryDB(query, callback);
+}
+
+
 InfluxDB.prototype.getHostsAvailable = function () {
   return this.request.getHostsAvailable()
 }

@@ -150,17 +150,6 @@ describe('InfluxDB', function () {
     })
   })
 
-  describe('#getUsers', function () {
-    it('should get an array of database users', function (done) {
-      client.getUsers(function (err, users) {
-        assert.equal(err, null)
-        assert(users instanceof Array)
-        assert.equal(users.length, 0)
-        done()
-      })
-    })
-  })
-
   describe('#createUser', function () {
     it('should create a user without error', function (done) {
       client.createUser(info.db.username, info.db.password, false, done)
@@ -168,6 +157,17 @@ describe('InfluxDB', function () {
     it('should error when creating an existing user', function (done) {
       client.createUser(info.db.username, info.db.password, function (err) {
         assert(err instanceof Error)
+        done()
+      })
+    })
+  })
+
+  describe('#getUsers', function () {
+    it('should get an array of database users', function (done) {
+      client.getUsers(function (err, users) {
+        assert.equal(err, null)
+        assert(users instanceof Array)
+        assert.equal(users.length, 1)
         done()
       })
     })
@@ -236,6 +236,30 @@ describe('InfluxDB', function () {
         assert(err instanceof Error)
         done()
       })
+    })
+  })
+
+
+  describe('#createRetentionPolicy', function () {
+    it('should create a rentention policy', function (done) {
+      dbClient.createRetentionPolicy(info.db.retentionPolicy, info.db.name, '1d', 1, true, done)
+    })
+  })
+
+  describe('#getRetentionPolicies', function () {
+    it('should get an array of retention policies', function (done) {
+      client.getRetentionPolicies(info.db.name,function (err, rps) {
+        assert.equal(err, null)
+        assert(rps instanceof Array)
+        assert.equal(rps.length, 1)
+        done()
+      })
+    })
+  })
+
+  describe('#alterRetentionPolicy', function () {
+    it('should alter a rentention policy', function (done) {
+      dbClient.alterRetentionPolicy(info.db.retentionPolicy, info.db.name, '1h', 1, true, done)
     })
   })
 
@@ -313,7 +337,6 @@ describe('InfluxDB', function () {
   describe('#queryRaw', function () {
     it('should read a point from the database and return raw values', function (done) {
       dbClient.queryRaw('SELECT value FROM ' + info.series.name + ';', function (err, res) {
-        console.log(res);
         assert.equal(err, null)
         assert(res instanceof Array)
         assert.equal(res.length, 1)
