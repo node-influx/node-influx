@@ -164,14 +164,14 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
 
 }
 
-InfluxDB.prototype.getSeries = function (databaseName, callback) {
+InfluxDB.prototype.getSeries = function (measurementName, callback) {
   var query = 'show series'
 
   // if no measurement name is given
-  if (typeof databaseName === 'function') {
-    callback = databaseName
+  if (typeof measurementName === 'function') {
+    callback = measurementName
   } else {
-    query = query + ' from "' + databaseName + '"'
+    query = query + ' from "' + measurementName + '"'
   }
 
   this.queryDB(query, function (err, results) {
