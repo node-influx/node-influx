@@ -96,8 +96,8 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
   }, options || {}, query || {})
 
   // add the global configuration if they are set and not provided by the options
-  if (this.options.precision && !queryObj.precision) {
-    queryObj.precision = this.options.precision
+  if (this.options.timePrecision && !queryObj.precision) {
+    queryObj.precision = this.options.timePrecision
   }
   if (this.options.database && !queryObj.db) {
     queryObj.db = this.options.database
@@ -164,14 +164,14 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
 
 }
 
-InfluxDB.prototype.getSeries = function (databaseName, callback) {
+InfluxDB.prototype.getSeries = function (measurementName, callback) {
   var query = 'show series'
 
   // if no measurement name is given
-  if (typeof databaseName === 'function') {
-    callback = databaseName
+  if (typeof measurementName === 'function') {
+    callback = measurementName
   } else {
-    query = query + ' from "' + databaseName + '"'
+    query = query + ' from "' + measurementName + '"'
   }
 
   this.queryDB(query, function (err, results) {
@@ -344,7 +344,7 @@ InfluxDB.prototype.queryRaw = function (databaseName, query, callback) {
 }
 
 InfluxDB.prototype.createContinuousQuery = function (queryName, queryString, databaseName, callback) {
-  if (databaseName === 'function') {
+  if (typeof databaseName === 'function') {
     callback = databaseName
     databaseName = this.options.database
   }
@@ -370,6 +370,40 @@ InfluxDB.prototype.dropContinuousQuery = function (queryName, databaseName, call
   }
   this.queryDB('DROP CONTINUOUS QUERY "' + queryName + '" ON "' + databaseName + '"', callback)
 }
+
+
+InfluxDB.prototype.createRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+  var query = 'create retention policy "' + rpName +
+      '" on "' + databaseName +
+      '" duration ' + duration +
+      ' replication ' + replication;
+  if(isDefault) {
+    query += ' default';
+  }
+
+  this.queryDB(query, callback);
+}
+
+InfluxDB.prototype.getRetentionPolicies = function(databaseName, callback) {
+  this.queryDB('show retention policies "' + databaseName + '"', callback);
+}
+
+InfluxDB.prototype.alterRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+  var query = 'alter retention policy "' + rpName +
+      '" on "' + databaseName + '"';
+  if(duration) {
+    query += ' duration ' + duration;
+  }
+  if(replication) {
+    query += ' replication ' + replication;
+  }
+  if(isDefault) {
+    query += ' default';
+  }
+
+  this.queryDB(query, callback);
+}
+
 
 InfluxDB.prototype.getHostsAvailable = function () {
   return this.request.getHostsAvailable()
