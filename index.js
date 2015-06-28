@@ -112,6 +112,8 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
   })
 }
 
+
+// Prepares and sends the actual request
 InfluxDB.prototype.queryDB = function (query, options, callback) {
   if (typeof options === 'function') {
     callback = options
@@ -124,11 +126,12 @@ InfluxDB.prototype.queryDB = function (query, options, callback) {
   }, this._parseCallback(callback))
 }
 
+//creates a new database
 InfluxDB.prototype.createDatabase = function (databaseName, callback) {
   this.queryDB('create database "' + databaseName + '"', callback)
 }
 
-InfluxDB.prototype.deleteDatabase = function (databaseName, callback) {
+InfluxDB.prototype.dropDatabase = function (databaseName, callback) {
   this.queryDB('drop database "' + databaseName + '"', callback)
 }
 
@@ -287,6 +290,11 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
 
   if (!options.database) {
     options.database = this.options.database
+  }
+
+  if (!options.precision)
+  {
+    options.precision = this.options.timePrecision;
   }
 
   this.request.post({
