@@ -119,18 +119,19 @@ Creates a new database - requires cluster admin privileges
 client.createDatabase(databaseName, function(err, result) {} )
 ```
 
-##### deleteDatabase
-Deletes a database - requires cluster admin privileges
-
-```js
-client.deleteDatabase(databaseName, function(err,result) { }
-```
 
 ##### getDatabaseNames
 Returns array of database names - requires cluster admin privileges
 
 ```js
 client.getDatabaseNames( function(err,arrayDatabaseNames){ } ) 
+```
+
+##### dropDatabase
+Drops a database inluding all measurements/series - requires cluster admin privileges
+
+```js
+dropDatabase ( databaseName, function(err,response) { })
 ```
 
 
@@ -140,6 +141,15 @@ Returns array of measurements - requires database admin privileges
 ```js
 client.getMeasurements(function(err,arrayMeasurements){ } )
 ```
+
+
+##### dropMeasurement
+Drops a measurement from a database - requires database admin privileges
+
+```js
+dropSeries ( measurementName, function(err,response) { })
+```
+
 
 ##### getSeries
 Returns array of series names from given measurement, or database if `measurementName` is omitted - requires database admin privileges
@@ -154,6 +164,16 @@ Returns array of series names from given measurement - requires database admin p
 ```js
 client.getSeriesNames([measurementName,] function(err,arraySeriesNames){} ) { }
 ```
+
+
+##### dropSeries
+Drops a series from a database - requires database admin privileges
+
+```js
+dropSeries ( seriesId, function(err,response) { })
+```
+
+
 
 ##### getUsers
 Returns an array of users - requires cluster admin privileges
@@ -382,28 +402,6 @@ client.alterRetentionPolicy(rpName, databaseName, duration, replication, isDefau
 ```
 
 
-##### dropMeasurement
-Drops a measurement from a database - requires database admin privileges
-
-```js
-dropSeries ( measurementName, function(err,response) { })
-```
-
-
-##### dropSeries
-Drops a series from a database - requires database admin privileges
-
-```js
-dropSeries ( seriesId, function(err,response) { })
-```
-
-
-##### dropDatabase
-Drops a database inluding all measurements/series - requires cluster admin privileges
-
-```js
-dropDatabase ( databaseName, function(err,response) { })
-```
 
 
 
