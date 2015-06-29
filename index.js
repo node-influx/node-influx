@@ -112,7 +112,6 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
   })
 }
 
-
 // Prepares and sends the actual request
 InfluxDB.prototype.queryDB = function (query, options, callback) {
   if (typeof options === 'function') {
@@ -126,7 +125,7 @@ InfluxDB.prototype.queryDB = function (query, options, callback) {
   }, this._parseCallback(callback))
 }
 
-//creates a new database
+// creates a new database
 InfluxDB.prototype.createDatabase = function (databaseName, callback) {
   this.queryDB('create database "' + databaseName + '"', callback)
 }
@@ -292,9 +291,8 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
     options.database = this.options.database
   }
 
-  if (!options.precision)
-  {
-    options.precision = this.options.timePrecision;
+  if (!options.precision) {
+    options.precision = this.options.timePrecision
   }
 
   this.request.post({
@@ -379,39 +377,37 @@ InfluxDB.prototype.dropContinuousQuery = function (queryName, databaseName, call
   this.queryDB('DROP CONTINUOUS QUERY "' + queryName + '" ON "' + databaseName + '"', callback)
 }
 
-
-InfluxDB.prototype.createRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+InfluxDB.prototype.createRetentionPolicy = function (rpName, databaseName, duration, replication, isDefault, callback) {
   var query = 'create retention policy "' + rpName +
-      '" on "' + databaseName +
-      '" duration ' + duration +
-      ' replication ' + replication;
-  if(isDefault) {
-    query += ' default';
+    '" on "' + databaseName +
+    '" duration ' + duration +
+    ' replication ' + replication
+  if (isDefault) {
+    query += ' default'
   }
 
-  this.queryDB(query, callback);
+  this.queryDB(query, callback)
 }
 
-InfluxDB.prototype.getRetentionPolicies = function(databaseName, callback) {
-  this.queryDB('show retention policies "' + databaseName + '"', callback);
+InfluxDB.prototype.getRetentionPolicies = function (databaseName, callback) {
+  this.queryDB('show retention policies "' + databaseName + '"', callback)
 }
 
-InfluxDB.prototype.alterRetentionPolicy = function(rpName, databaseName, duration, replication, isDefault, callback) {
+InfluxDB.prototype.alterRetentionPolicy = function (rpName, databaseName, duration, replication, isDefault, callback) {
   var query = 'alter retention policy "' + rpName +
-      '" on "' + databaseName + '"';
-  if(duration) {
-    query += ' duration ' + duration;
+    '" on "' + databaseName + '"'
+  if (duration) {
+    query += ' duration ' + duration
   }
-  if(replication) {
-    query += ' replication ' + replication;
+  if (replication) {
+    query += ' replication ' + replication
   }
-  if(isDefault) {
-    query += ' default';
+  if (isDefault) {
+    query += ' default'
   }
 
-  this.queryDB(query, callback);
+  this.queryDB(query, callback)
 }
-
 
 InfluxDB.prototype.getHostsAvailable = function () {
   return this.request.getHostsAvailable()

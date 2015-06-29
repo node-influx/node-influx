@@ -4,7 +4,7 @@ var influx = require('../../')
 
 var app = express()
 var serverInflux = influx()
-var dbInflux = influx({host: 'localhost',username: 'example_response_dbuser', password: 'P85sw0rD', database: 'example_response'})
+var dbInflux = influx({host: 'localhost', username: 'example_response_dbuser', password: 'P85sw0rD', database: 'example_response'})
 
 app.use(express.logger('dev'))
 
