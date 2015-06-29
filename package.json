@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/bencevans/node-influx.git"
+    "url": "git://github.com/node-influx/node-influx.git"
   },
   "keywords": [
     "influx",
@@ -20,6 +20,9 @@
     "db"
   ],
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
+  "contributors" : [
+      "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
+  ],
   "license": "MIT",
   "dependencies": {
     "request": "2.x",
