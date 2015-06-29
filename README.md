@@ -9,7 +9,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![Dependency Status](https://david-dm.org/node-influx/node-influx.png)](https://david-dm.org/node-influx/node-influx)
 [![Github Releases](https://img.shields.io/github/downloads/atom/atom/latest/total.svg)](https://github.com/node-influx/node-influx)
 
-[![Bountysource](https://www.bountysource.com/badge/issue?issue_id=3370228)](https://www.bountysource.com/issues/3370228-handle-chunked-query-responses?utm_source=3370228&utm_medium=shield&utm_campaign=ISSUE_BADGE) - Reward the contributors for their efforts on upcoming tasks.
+[![Bountysource](https://img.shields.io/bountysource/team/node-influx/activity.svg)](https://www.bountysource.com/teams/node-influx) - Reward the contributors for their efforts on upcoming tasks.
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
