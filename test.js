@@ -1,3 +1,4 @@
+/* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
 
@@ -34,7 +35,7 @@ describe('InfluxDB', function () {
 
   describe('create client', function () {
     it('should create an instance without error', function () {
-      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy : info.db.retentionPolicy})
+      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
       dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
       failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
       failoverClient = influx({hosts: [
@@ -66,28 +67,28 @@ describe('InfluxDB', function () {
   describe('#url', function () {
     it('should build a properly formatted url', function () {
       var url = client.url('query', { db: info.db.name, rp: info.db.retentionPolicy, precision: info.server.timePrecision })
-      assert.equal(url, /*'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy + '&precision=' + info.server.timePrecision)
+      assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy + '&precision=' + info.server.timePrecision)
     })
 
     it('should build a properly formatted url', function () {
       var url = client.url('query')
-      assert.equal(url, /*'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
+      assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
     })
-
 
   })
 
   describe('#_createKeyValueString', function () {
     it('should build a properly formatted string', function () {
-      var str = client._createKeyValueString({a: 1,  b: 2})
+      var str = client._createKeyValueString({a: 1, b: 2})
       assert.equal(str, 'a=1,b=2')
     })
   })
 
   describe('parseResult()', function () {
     it('should build a properly formatted response', function (done) {
-      client._parseResults([{'series': [{'name': 'myseries2','tags': {'mytag': 'foobarfoo'},'columns': ['time', 'value'],'values': [['2015-06-27T06:25:54.411900884Z', 55]]}, {'name': 'myseries2','tags': {'mytag': 'foobarfoo2'},'columns': ['time', 'value'],'values': [['2015-06-27T06:25:54.411900884Z', 29]]}]}],
+      client._parseResults([{'series': [{'name': 'myseries2', 'tags': {'mytag': 'foobarfoo'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 55]]}, {'name': 'myseries2', 'tags': {'mytag': 'foobarfoo2'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 29]]}]}],
         function (err, results) {
+          if (err) return done(err)
           assert.deepEqual(results,
             [ [ { time: '2015-06-27T06:25:54.411900884Z',
               value: 55,
@@ -180,7 +181,7 @@ describe('InfluxDB', function () {
     })
 
     it('should error when deleting an existing user', function (done) {
-      failClient.getUsers( function (err) {
+      failClient.getUsers(function (err) {
         assert(err instanceof Error)
         done()
       })
@@ -254,7 +255,6 @@ describe('InfluxDB', function () {
     })
   })
 
-
   describe('#createRetentionPolicy', function () {
     it('should create a rentention policy', function (done) {
       dbClient.createRetentionPolicy(info.db.retentionPolicy, info.db.name, '1d', 1, true, done)
@@ -263,7 +263,7 @@ describe('InfluxDB', function () {
 
   describe('#getRetentionPolicies', function () {
     it('should get an array of retention policies', function (done) {
-      client.getRetentionPolicies(info.db.name,function (err, rps) {
+      client.getRetentionPolicies(info.db.name, function (err, rps) {
         assert.equal(err, null)
         assert(rps instanceof Array)
         assert.equal(rps.length, 1)
@@ -291,7 +291,6 @@ describe('InfluxDB', function () {
       dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, done)
 
     })
-
 
     it('should write a point with time into the database', function (done) {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, done)
@@ -366,12 +365,11 @@ describe('InfluxDB', function () {
         assert.equal(err, null)
         assert(res instanceof Array)
         assert.equal(res.length, 1)
-        assert.equal(res[0].series.length,1)
+        assert.equal(res[0].series.length, 1)
         done()
       })
     })
   })
-
 
   describe('#createContinuousQuery', function () {
     it('should create a continuous query', function (done) {
@@ -398,6 +396,7 @@ describe('InfluxDB', function () {
   describe('#dropContinuousQuery', function () {
     it('should drop the continuous query from the database', function (done) {
       dbClient.getContinuousQueries(function (err, res) {
+        if (err) return done(err)
         dbClient.dropContinuousQuery(res[0][0].name, function (err) {
           assert.equal(err, null)
           done()
@@ -541,12 +540,9 @@ describe('InfluxDB', function () {
 
 })
 
-
 // todo:
 // HTTPS support didn't work, InfluxDB didn't start no matter what. needs to be solved asap
-/*
-
-describe('HTTPS connection', function() {
+/* describe('HTTPS connection', function() {
   var client
 
   var dbName = 'https_db'
