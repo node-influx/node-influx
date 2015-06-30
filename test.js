@@ -445,7 +445,7 @@ describe('InfluxDB', function () {
       client.getSeries(function (err, series) {
         if (err) return done(err)
         assert(series instanceof Array)
-        assert.equal(series.length, 3)
+        assert(series.length >= 3)
         done()
       })
     })
