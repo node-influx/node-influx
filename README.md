@@ -7,7 +7,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
 [![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/node-influx/node-influx)
 [![Dependency Status](https://david-dm.org/node-influx/node-influx.png)](https://david-dm.org/node-influx/node-influx)
-[![Github Releases](https://img.shields.io/github/downloads/atom/atom/latest/total.svg)](https://github.com/node-influx/node-influx)
+[![Github Releases](https://img.shields.io/npm/dm/influx.svg)](https://github.com/node-influx/node-influx)
 
 [![Bountysource](https://img.shields.io/bountysource/team/node-influx/activity.svg)](https://www.bountysource.com/teams/node-influx) - Reward the contributors for their efforts on upcoming tasks.
 
