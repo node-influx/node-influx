@@ -21,7 +21,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 Version 0.3.x is compatible with InfluxDB 0.8.x
 
-Version 0.4.x is compatible with InfluxDB 0.9.x (currently under development)
+Version 0.4.x is compatible with InfluxDB 0.9.x 
 
 
 ## Usage
