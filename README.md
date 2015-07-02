@@ -20,6 +20,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 ## Compatibility
 
 Version 0.3.x is compatible with InfluxDB 0.8.x
+
 Version 0.4.x is compatible with InfluxDB 0.9.x (currently under development)
 
 
@@ -253,10 +254,10 @@ client.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foo
 client.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, done)
 
 //write a single point, providing an integer timestamp and time precision 's' for seconds
-client.writePoint(info.series.name, {time: 1234567890, value: 232}, {precision : 's'}, done)
+client.writePoint(info.series.name, {time: 1234567890, value: 232}, null, {precision : 's'}, done)
 
 //write a single point, providing a Date object. Precision is set to default 'ms' for milliseconds.
-client.writePoint(info.series.name, {time: new Date(), value: 232}, done)
+client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
 
 
 ```
