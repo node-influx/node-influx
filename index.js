@@ -245,6 +245,16 @@ InfluxDB.prototype.dropUser = function (username, callback) {
 
 InfluxDB.prototype._createKeyValueString = function (object) {
   return _.map(object, function (value, key) {
+    if(typeof value === 'string') {
+      return key + '="' + value + '"'
+    } else {
+      return key + '=' + value
+    }
+  }).join(',')
+}
+
+InfluxDB.prototype._createKeyTagString = function (object) {
+  return _.map(object, function (value, key) {
     return key + '=' + value
   }).join(',')
 }
@@ -255,7 +265,7 @@ InfluxDB.prototype._prepareValues = function (series) {
     _.each(values, function (points) {
       var line = seriesName
       if (points[1] && _.isObject(points[1]) && _.keys(points[1]).length > 0) {
-        line += ',' + this._createKeyValueString(points[1])
+        line += ',' + this._createKeyTagString(points[1])
       }
 
       if (_.isObject(points[0])) {
@@ -273,7 +283,11 @@ InfluxDB.prototype._prepareValues = function (series) {
           }
         }
       } else {
-        line += ' value=' + points[0]
+        if(typeof points[0] === 'string') {
+          line += ' value="' + points[0] + '"'
+        } else {
+          line += ' value=' + points[0]
+        }
       }
       output.push(line)
     }, this)
