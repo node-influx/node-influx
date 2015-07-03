@@ -20,18 +20,18 @@
     "db"
   ],
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
-  "contributors" : [
-      "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
+  "contributors": [
+    "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
   ],
   "license": "MIT",
   "dependencies": {
-    "request": "2.x",
-    "lodash": "~3.9.3"
+    "lodash": "^3.10.0",
+    "request": "2.x"
   },
   "devDependencies": {
     "coveralls": "^2.11.1",
     "istanbul": "^0.3.2",
-    "mocha": "^1.21.4",
-    "standard": "^3.5.0"
+    "mocha": "2.2.x",
+    "standard": "4.5.x"
   }
 }
