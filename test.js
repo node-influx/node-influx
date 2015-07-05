@@ -23,7 +23,7 @@ describe('InfluxDB', function () {
       retentionPolicy: 'testrp'
     },
     series: {
-      name: 'response_time'
+      name: 'response_time',
       strName: 'string_test'
     }
   }
