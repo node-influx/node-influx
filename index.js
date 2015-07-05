@@ -245,7 +245,7 @@ InfluxDB.prototype.dropUser = function (username, callback) {
 
 InfluxDB.prototype._createKeyValueString = function (object) {
   return _.map(object, function (value, key) {
-    if(typeof value === 'string') {
+    if (typeof value === 'string') {
       return key + '="' + value + '"'
     } else {
       return key + '=' + value
@@ -283,7 +283,7 @@ InfluxDB.prototype._prepareValues = function (series) {
           }
         }
       } else {
-        if(typeof points[0] === 'string') {
+        if (typeof points[0] === 'string') {
           line += ' value="' + points[0] + '"'
         } else {
           line += ' value=' + points[0]
