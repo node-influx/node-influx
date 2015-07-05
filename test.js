@@ -296,11 +296,11 @@ describe('InfluxDB', function () {
     it('should write a point with time into the database', function (done) {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, done)
     })
-    
+
     it('should write a point with a string as value into the database', function (done) {
       dbClient.writePoint(info.series.strName, {value: 'my test string'}, {}, done)
     })
-    
+
     it('should write a point with a string as value into the database (using different method)', function (done) {
       dbClient.writePoint(info.series.strName, 'my second test string', {}, done)
     })
