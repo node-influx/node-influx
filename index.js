@@ -253,7 +253,7 @@ InfluxDB.prototype._prepareValues = function (series) {
   var output = []
   _.forEach(series, function (values, seriesName) {
     _.each(values, function (points) {
-      var line = seriesName
+      var line = seriesName.replace(/ /g, '\\ ').replace(/,/g, '\\,')
       if (points[1] && _.isObject(points[1]) && _.keys(points[1]).length > 0) {
         line += ',' + this._createKeyValueString(points[1])
       }
