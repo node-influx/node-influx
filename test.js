@@ -280,6 +280,8 @@ describe('InfluxDB', function () {
   })
 
   describe('#writePoint', function () {
+    this.timeout(5000)
+
     it('should write a generic point into the database', function (done) {
       dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
     })
