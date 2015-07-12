@@ -22,6 +22,6 @@ client.getDatabaseNames(function (err, dbs) {
   }
 
   for (var i = dbs.length - 1; i >= 0; i--) {
-    client.deleteDatabase(dbs[i], callbackGenerator(dbs[i]))
+    client.dropDatabase(dbs[i], callbackGenerator(dbs[i]))
   }
 })
