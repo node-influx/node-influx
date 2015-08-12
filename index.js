@@ -245,12 +245,8 @@ InfluxDB.prototype.dropUser = function (username, callback) {
 
 InfluxDB.prototype._createKeyValueString = function (object) {
   return _.map(object, function (value, key) {
-    if (typeof value === 'string') {
-      return key + '="' + value + '"'
-    } else {
-      return key + '=' + value
-    }
-  }).join(',')
+    return this._formatKeyValueString(key, value)
+  }, this).join(',')
 }
 
 InfluxDB.prototype._createKeyTagString = function (object) {
@@ -259,22 +255,48 @@ InfluxDB.prototype._createKeyTagString = function (object) {
   }).join(',')
 }
 
-InfluxDB.prototype._prepareValues = function (series) {
+InfluxDB.prototype._formatKeyValueString = function (key, value) {
+  if (_.isObject(value)) {
+    if (value.type === 'int') {
+      return key + '=' + this._formatNumber(value.value, true)
+    }
+    return this._formatKeyValueString(key, value.value)
+  } else if (typeof value === 'string') {
+    return key + '="' + value + '"'
+  } else if (typeof value === 'number') {
+    return key + '=' + this._formatNumber(value)
+  } else {
+    return key + '=' + value
+  }
+}
+
+InfluxDB.prototype._formatNumber = function (number, asInt) {
+  if (asInt) {
+    return number.toFixed(0) + 'i'
+  }
+
+  return '' + number
+}
+
+InfluxDB.prototype._prepareValues = function (series, options) {
   var output = []
   _.forEach(series, function (values, seriesName) {
     _.each(values, function (points) {
       var line = seriesName.replace(/ /g, '\\ ').replace(/,/g, '\\,')
-      if (points[1] && _.isObject(points[1]) && _.keys(points[1]).length > 0) {
-        line += ',' + this._createKeyTagString(points[1])
+      var value = points[0]
+      var tag = points[1]
+
+      if (tag && _.isObject(tag) && _.keys(tag).length > 0) {
+        line += ',' + this._createKeyTagString(tag)
       }
 
-      if (_.isObject(points[0])) {
+      if (_.isObject(value)) {
         var timestamp = null
-        if (points[0].time) {
-          timestamp = points[0].time
-          delete (points[0].time)
+        if (value.time) {
+          timestamp = value.time
+          delete (value.time)
         }
-        line += ' ' + this._createKeyValueString(points[0])
+        line += ' ' + this._createKeyValueString(value)
         if (timestamp) {
           if (timestamp instanceof Date) {
             line += ' ' + timestamp.getTime()
@@ -283,11 +305,11 @@ InfluxDB.prototype._prepareValues = function (series) {
           }
         }
       } else {
-        if (typeof points[0] === 'string') {
-          line += ' value="' + points[0] + '"'
-        } else {
-          line += ' value=' + points[0]
+        value = { value: value }
+        if (options.type) {
+          value.type = options.type
         }
+        line += this._createKeyValueString('value', value)
       }
       output.push(line)
     }, this)
@@ -312,7 +334,7 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
   this.request.post({
     url: this.url('write', options),
     pool: typeof options.pool !== 'undefined' ? options.pool : {},
-    body: this._prepareValues(series)
+    body: this._prepareValues(series, options)
   }, this._parseCallback(callback))
 }
 

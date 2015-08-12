@@ -23,6 +23,8 @@ Version 3.x.x is compatible with InfluxDB 0.8.x
 
 Version 4.x.x is compatible with InfluxDB 0.9.x 
 
+Version 4.1.x is compatible with InfluxDB 0.9.3+
+
 
 ## Usage
 
@@ -194,7 +196,7 @@ client.createUser(username, password, isAdmin, function(err,response) { })
 Sets the users password - requires admin privileges
 
 ```js
-client.setPassword(username, password, function (err, reponse) {} )
+client.setPassword(username, password, function (err, response) {} )
 ```
 
 
@@ -202,34 +204,34 @@ client.setPassword(username, password, function (err, reponse) {} )
 Grants privilege for the given user - requires admin privileges
 
 ```js
-client.grantPrivilege(privilege, databaseName, userName, function (err, reponse) {} )
+client.grantPrivilege(privilege, databaseName, userName, function (err, response) {} )
 ```
 
 ##### revokePrivilege
 Revokes privilege for the given user - requires admin privileges
 
 ```js
-client.revokePrivilege(privilege, databaseName, userName, function (err, reponse) {} )
+client.revokePrivilege(privilege, databaseName, userName, function (err, response) {} )
 ```
 
 ##### grantAdminPrivileges
 Grants admin privileges for the given user - requires admin privileges
 
 ```js
-client.grantAdminPrivileges(userName, function (err, reponse) {} )
+client.grantAdminPrivileges(userName, function (err, response) {} )
 ```
 
 ##### revokeAdminPrivileges
 Revokes all admin privileges for the given user - requires admin privileges
 
 ```js
-client.revokeAdminPrivileges(userName, function (err, reponse) {} )
+client.revokeAdminPrivileges(userName, function (err, response) {} )
 ```
 
 ##### dropUser
 Drops the given user - requires admin privileges
 ```js
-client.dropUser(userName, function(err,response) {] )
+client.dropUser(userName, function(err,response) {} )
 ```
 
 
@@ -241,25 +243,34 @@ var point = { attr : value, time : new Date()};
 client.writePoint(seriesName, values, tags, [options,] function(err, response) { })
 ```
 
-`values` can be either an objekt or a single value. For the latter the columname is set to `value`.
-You can set the time by passing an object propety called `time`. The time an be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
-The parameter `options` is optional and can be used to set the time precision.
+`values` can be either an object or a single value. For the latter the column name is set to `value`.
+You can set the time by passing an object property called `time`. The time an be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
+The parameter `options` is optional and can be used to set the time precision or value type. Unless manually specified, all numbers will be written as InfluxDB floats.
 
 ###### example
 ```js
-//write a single point with two values and two tags. time is omitted
-client.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
+//write a single point with two values and two tags. time is omitted.
+// The number values will be written as an InfluxDB floats.
+client.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz' }, done)
 
 //write a single point with the value "1". The value "1" corresponds to { value : 1 }
-client.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, done)
+client.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz' }, done)
 
 //write a single point, providing an integer timestamp and time precision 's' for seconds
 client.writePoint(info.series.name, {time: 1234567890, value: 232}, null, {precision : 's'}, done)
 
 //write a single point, providing a Date object. Precision is set to default 'ms' for milliseconds.
-client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
+client.writePoint(info.series.name, {time: new Date(), value: 232}, null, done)
 
+//write a single point using a single value (number will be written as InfluxDB float)
+client.writePoint(info.series.name, 232, null, done)
 
+//write a single point using a single value, forcing as InfluxDB integer
+client.writePoint(info.series.name, 232, null, {type: 'int'}, done)
+
+//write a single point with two values.
+// The first number value will be written as an InfluxDB float, the second as an integer.
+client.writePoint(info.series.name, {value: 232, value2: { type: 'int', value: 123 }}, done)
 ```
 
 ###### writePoints
@@ -292,7 +303,9 @@ var points = [
   //third value, passed as integer. Different tag
   [123, { foobar: 'baz'}],
   //value providing timestamp, without tags
-  [{value: 122, time : new Date()}]
+  [{value: 122, time : new Date()}],
+  //value as integer instead of float
+  [{value: { value: 23122, type: 'int' }}]
 ]
 
 var points2 = [
@@ -303,7 +316,9 @@ var points2 = [
   //third value, passed as integer. Different tag
   [12345, { foobar: 'baz'}],
   //value providing timestamp, without tags
-  [{value: 23122, time : new Date()}]
+  [{value: 23122, time : new Date()}],
+  //value as integer instead of float
+  [{value: { value: 23122, type: 'int' }}]
 ]
 var series = {
     series_name_one : points,
