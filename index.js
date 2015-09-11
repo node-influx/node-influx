@@ -369,7 +369,7 @@ InfluxDB.prototype.createContinuousQuery = function (queryName, queryString, dat
     databaseName = this.options.database
   }
 
-  var query = 'CREATE CONTINUOUS QUERY ' + queryName + ' ON ' + databaseName + ' BEGIN ' +
+  var query = 'CREATE CONTINUOUS QUERY ' + queryName + ' ON "' + databaseName + '" BEGIN ' +
     queryString +
     ' END'
   this.queryDB(query, callback)
