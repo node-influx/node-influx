@@ -77,7 +77,7 @@ describe('InfluxDB', function () {
     })
 
   })
-  
+
   describe('#_createKeyTagString', function () {
     it('should build a properly formatted string', function () {
       var str = client._createKeyTagString({tag_1: 'value', tag2: 'value value', tag3: 'value,value'})
