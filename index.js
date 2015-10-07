@@ -49,7 +49,7 @@ InfluxDB.prototype._parseResults = function (response, callback) {
         var rows = _.map(series.values, function (values) {
           return _.extend(_.zipObject(series.columns, values), series.tags)
         })
-        tmp = _.chain(tmp).concat(rows).sort('time').value()
+        tmp = _.chain(tmp).concat(rows).value()
       })
     }
     results.push(tmp)
