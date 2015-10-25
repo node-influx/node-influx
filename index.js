@@ -411,7 +411,7 @@ InfluxDB.prototype.createRetentionPolicy = function (rpName, databaseName, durat
 }
 
 InfluxDB.prototype.getRetentionPolicies = function (databaseName, callback) {
-  this.queryDB('show retention policies "' + databaseName + '"', callback)
+  this.queryDB('show retention policies on "' + databaseName + '"', callback)
 }
 
 InfluxDB.prototype.alterRetentionPolicy = function (rpName, databaseName, duration, replication, isDefault, callback) {
