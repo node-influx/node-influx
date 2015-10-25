@@ -74,6 +74,9 @@ InfluxDB.prototype._parseCallback = function (callback) {
         }
       }
     }
+    if (body === undefined) {
+      return callback(new Error('body is undefined'))
+    }
     return callback(null, body.results)
   }
 }
