@@ -4,8 +4,8 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 [![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
 [![build](http://img.shields.io/travis/node-influx/node-influx/master.svg)](https://travis-ci.org/node-influx/node-influx)
-[![coverage](http://img.shields.io/coveralls/bencevans/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
-[![code climate](http://img.shields.io/codeclimate/github/bencevans/node-influx.svg)](https://codeclimate.com/github/node-influx/node-influx)
+[![coverage](http://img.shields.io/coveralls/node-influx/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
+[![code climate](http://img.shields.io/codeclimate/github/node-influx/node-influx.svg)](https://codeclimate.com/github/node-influx/node-influx)
 [![Dependency Status](https://david-dm.org/node-influx/node-influx.png)](https://david-dm.org/node-influx/node-influx)
 [![Github Releases](https://img.shields.io/npm/dm/influx.svg)](https://github.com/node-influx/node-influx)
 
