@@ -4,8 +4,9 @@
   "description": "InfluxDB Client",
   "main": "index.js",
   "scripts": {
+    "lint": "standard",
     "test": "./node_modules/.bin/mocha -R dot",
-    "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec && standard"
+    "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec && npm run lint"
   },
   "repository": {
     "type": "git",
