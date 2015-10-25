@@ -66,13 +66,16 @@ InfluxDB.prototype._parseCallback = function (callback) {
     if (res.statusCode < 200 || res.statusCode >= 300) {
       return callback(new Error(body.error || body))
     }
-
+    
     if (_.isObject(body) && body.results && _.isArray(body.results)) {
       for (var i = 0;i <= body.results.length;++i) {
         if (body.results[i] && body.results[i].error && body.results[i].error !== '') {
           return callback(new Error(body.results[i].error))
         }
       }
+    }
+    if (body === undefined) {
+      return callback(new Error('body is undefined'))
     }
     return callback(null, body.results)
   }
