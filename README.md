@@ -103,6 +103,14 @@ Returns an array of disabled hosts. This can be useful to check whether a host i
 getHostsDisabled( ) { }
 ```
 
+###hostIsAvailable
+Returns true if a host is available, else false.
+
+```js
+hostIsAvailable()
+```
+
+
 
 ###createDatabase
 Creates a new database - requires cluster admin privileges
@@ -275,8 +283,6 @@ Drops a series from a database - requires database admin privileges
 ```js
 query ( [databaseName ,] seriesName, callback) { }
 ```
-
-
 
 As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/blog/2012/04/learn-to-read-the-source-luke.html). If you're still stuck, read the `./examples/*` files and the `./test.js` file.
 
