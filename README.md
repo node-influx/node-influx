@@ -391,7 +391,7 @@ client.createRetentionPolicy(rpName, databaseName, duration, replication, isDefa
 
 ##### example
 ```js
-client.createRetentionPolicy('my_ret_pol_name', 'my_database, '1d', 1, true, function (err,resonse) {})
+client.createRetentionPolicy('my_ret_pol_name', 'my_database', '1d', 1, true, function (err,resonse) {})
 ```
 
 ##### alterRetentionPolicy
