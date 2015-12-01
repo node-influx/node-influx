@@ -13,6 +13,8 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
+Interested in becoming a maintainer? Please help out with issues and pull-requests and open an [issue introducing yourself](https://github.com/node-influx/node-influx/issues/new)! After we've seen you're involved with the project, we'll add you up :+1:
+
 ## Installation
 
     $ npm install influx
