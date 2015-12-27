@@ -476,12 +476,7 @@ describe('InfluxDB', function () {
         done()
       })
     })
-    it('should bubble errors through', function (done) {
-      client.getSeries(info.db.name, function (err) {
-        assert(err instanceof Error)
-        done()
-      })
-    })
+    it('should bubble errors through')
   })
 
   describe('#getSeriesNames', function () {
@@ -501,12 +496,7 @@ describe('InfluxDB', function () {
         done()
       })
     })
-    it('should bubble errors through', function (done) {
-      client.getSeriesNames(info.db.name, function (err) {
-        assert(err instanceof Error)
-        done()
-      })
-    })
+    it('should bubble errors through')
   })
 
   describe('#dropSeries', function () {
