@@ -168,12 +168,13 @@ describe('InfluxDB', function () {
   })
 
   describe('#createUser', function () {
+    this.timeout(25000);
     it('should create a user without error', function (done) {
       client.createUser(info.db.username, info.db.password, true, done)
     })
     it('should error when creating an existing user', function (done) {
       client.createUser(info.db.username, info.db.password, function (err) {
-        assert(err instanceof Error)
+        assert.equal(err.message, 'user already exists')
         done()
       })
     })
@@ -255,12 +256,13 @@ describe('InfluxDB', function () {
   })
 
   describe('#dropUser', function () {
+    this.timeout(25000);
     it('should delete a user without error', function (done) {
       client.dropUser(info.db.username, done)
     })
-    it('should error when deleting an existing user', function (done) {
+    it('should error when deleting a non-existing user', function (done) {
       client.dropUser(info.db.username, function (err) {
-        assert.ifError(err)
+        assert.equal(err.message, 'user not found')
         done()
       })
     })
