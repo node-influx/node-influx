@@ -183,7 +183,9 @@ describe('InfluxDB', function () {
       client.getUsers(function (err, users) {
         assert.equal(err, null)
         assert(users instanceof Array)
-        assert.equal(users.length, 1)
+        assert.equal(users.filter(function(u) {
+          return u.user === 'johnsmith'
+        }).length, 1)
         done()
       })
     })
