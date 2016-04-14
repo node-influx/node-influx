@@ -1,56 +1,57 @@
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
+var ts = new Date().getTime();
 
-describe('InfluxDB', function () {
-  var client
-  var dbClient
-  var failClient
-  var failoverClient
+var client
+var dbClient
+var failClient
+var failoverClient
+before((done) => {
+  client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
+  dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+  failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
+  failoverClient = influx({hosts: [
+      {host: '192.168.1.1'},
+      {host: '192.168.1.2'},
+      {host: '192.168.1.3'},
+      {host: '192.168.1.4'},
+      {host: info.server.host, port: info.server.port}
+  ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
-  var info = {
-    server: {
-      host: 'localhost',
-      port: 8086,
-      username: 'root',
-      password: 'root',
-      timePrecision: 'ms'
-    },
-    db: {
-      name: 'test_db',
-      username: 'johnsmith',
-      password: 'johnjohn',
-      retentionPolicy: 'testrp'
-    },
-    series: {
-      name: 'response_time',
-      strName: 'string_test'
-    }
+  assert(client instanceof influx.InfluxDB)
+  return done();
+})
+after(function(done) {
+  client.dropDatabase(info.db.name, function(err) {
+    return done();
+  });
+});
+var info = {
+  server: {
+    host: 'localhost',
+    port: 8086,
+    username: 'root',
+    password: 'root',
+    timePrecision: 'ms'
+  },
+  db: {
+    name: 'test_db_' + ts,
+    username: 'johnsmith',
+    password: 'johnjohn',
+    retentionPolicy: 'testrp'
+  },
+  series: {
+    name: 'response_time',
+    strName: 'string_test'
   }
-
+}
+describe('InfluxDB', function () {
   describe('#InfluxDB', function () {
     it('should exist as a function (class)', function () {
       assert(typeof influx.InfluxDB === 'function')
     })
   })
-
-  describe('create client', function () {
-    it('should create an instance without error', function () {
-      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
-      dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
-      failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
-      failoverClient = influx({hosts: [
-          {host: '192.168.1.1'},
-          {host: '192.168.1.2'},
-          {host: '192.168.1.3'},
-          {host: '192.168.1.4'},
-          {host: info.server.host, port: info.server.port}
-      ], username: info.server.username, passwort: info.server.password, database: info.db.name})
-
-      assert(client instanceof influx.InfluxDB)
-    })
-  })
-
   describe('#setRequestTimeout', function () {
     it('should set the default request timeout value', function () {
       var timeout = failoverClient.setRequestTimeout(5000)
