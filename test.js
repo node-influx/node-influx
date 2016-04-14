@@ -259,7 +259,7 @@ describe('InfluxDB', function () {
     })
     it('should error when deleting an existing user', function (done) {
       client.dropUser(info.db.username, function (err) {
-        assert(err instanceof Error)
+        assert.ifError(err)
         done()
       })
     })
