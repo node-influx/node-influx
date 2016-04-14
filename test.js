@@ -192,7 +192,7 @@ describe('InfluxDB', function () {
       })
     })
 
-    it('should error when deleting an existing user', function (done) {
+    it('should bubble errors through', function (done) {
       failClient.getUsers(function (err) {
         assert(err instanceof Error)
         done()
