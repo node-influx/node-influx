@@ -232,7 +232,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#grantAdminPrivileges', function () {
-    this.timeout(10000);
+    this.timeout(25000);
     it('should grant admin privileges without error', function (done) {
       client.grantAdminPrivileges(info.db.username, done)
     })
