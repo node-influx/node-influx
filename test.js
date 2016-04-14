@@ -232,6 +232,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#grantAdminPrivileges', function () {
+    this.timeout(10000);
     it('should grant admin privileges without error', function (done) {
       client.grantAdminPrivileges(info.db.username, done)
     })
@@ -244,8 +245,19 @@ describe('InfluxDB', function () {
   })
 
   describe('#revokeAdminPrivileges', function () {
+    this.timeout(25000);
+    var testUser = {
+      username: 'revokeAdminPrivileges',
+      passowrd: 'password'
+    }
+    beforeEach((done) => {
+      client.createUser(testUser.username, testUser.password, true, done);
+    })
+    afterEach((done) => {
+      client.dropUser(testUser.username, done);
+    })
     it('should revoke admin privileges without error', function (done) {
-      client.revokeAdminPrivileges(info.db.username, done)
+      client.revokeAdminPrivileges(testUser.username, done)
     })
     it('should error when revoking admin privileges', function (done) {
       client.revokeAdminPrivileges('yourmum', function (err) {
