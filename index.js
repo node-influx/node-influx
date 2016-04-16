@@ -259,7 +259,7 @@ InfluxDB.prototype._createKeyValueString = function (object) {
 InfluxDB.prototype._createKeyTagString = function (object) {
   return _.map(object, function (value, key) {
     if (typeof value === 'string') {
-      return key + '=' + value.replace(/ /g, '\\ ').replace(/,/g, '\\,')
+      return key + '=' + value.replace(/ /g, '\\ ').replace(/,/g, '\\,').replace(/=/g, '\\=')
     } else {
       return key + '=' + value
     }
