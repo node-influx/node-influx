@@ -313,6 +313,10 @@ describe('InfluxDB', function () {
     it('should write a point with a string as value into the database (using different method)', function (done) {
       dbClient.writePoint(info.series.strName, 'my second test string', {}, done)
     })
+
+    it('should write a point that has "length" in its keys', function (done) {
+      dbClient.writePoint(info.series.strName, {length: 3}, {length: '5'}, done)
+    })
   })
 
   describe('#writePoints', function () {
