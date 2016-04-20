@@ -49,6 +49,37 @@ describe('InfluxDB', function () {
 
       assert(client instanceof influx.InfluxDB)
     })
+
+    describe('configured using URLs', function () {
+      it('should parse it when passed as `options`', function () {
+        var urlClient = influx(
+          'http://admin:fancierpassword@influx.foobar.com:1337/mydatabase'
+        )
+
+        assert.equal(urlClient.options.host, 'influx.foobar.com')
+        assert.equal(urlClient.options.port, 1337)
+        assert.equal(urlClient.options.username, 'admin')
+        assert.equal(urlClient.options.password, 'fancierpassword')
+        assert.equal(urlClient.options.database, 'mydatabase')
+      })
+
+      it('should parse them when passed in `hosts`', function () {
+        var urlClient = influx({
+          hosts: [
+            'http://127.0.0.1:1337',
+            'https://127.0.0.2:1338'
+          ]
+        })
+
+        var hostsParsed = urlClient.getHostsAvailable()
+        assert.equal(hostsParsed[0].name, '127.0.0.1')
+        assert.equal(hostsParsed[0].port, 1337)
+        assert.equal(hostsParsed[0].protocol, 'http:')
+        assert.equal(hostsParsed[1].name, '127.0.0.2')
+        assert.equal(hostsParsed[1].port, 1338)
+        assert.equal(hostsParsed[1].protocol, 'https:')
+      })
+    })
   })
 
   describe('#setRequestTimeout', function () {
