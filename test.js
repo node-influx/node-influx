@@ -1,32 +1,15 @@
+'use strict';
+
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
 var ts = new Date().getTime();
-
+var async = require('async');
 var client
 var dbClient
 var failClient
 var failoverClient
-before((done) => {
-  client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
-  dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
-  failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
-  failoverClient = influx({hosts: [
-      {host: '192.168.1.1'},
-      {host: '192.168.1.2'},
-      {host: '192.168.1.3'},
-      {host: '192.168.1.4'},
-      {host: info.server.host, port: info.server.port}
-  ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
-  assert(client instanceof influx.InfluxDB)
-  return done();
-})
-after(function(done) {
-  client.dropDatabase(info.db.name, function(err) {
-    return done();
-  });
-});
 var info = {
   server: {
     host: 'localhost',
@@ -46,6 +29,52 @@ var info = {
     strName: 'string_test'
   }
 }
+
+function writeFixtures(done) {
+  async.series([
+    (cb) => {
+      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, cb)      
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.strName, {value: 'my test string'}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.strName, 'my second test string', {}, cb)
+    },
+  ], function() {
+    return done();
+  })
+}
+before((done) => {
+  client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
+  dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+  failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
+  failoverClient = influx({hosts: [
+      {host: '192.168.1.1'},
+      {host: '192.168.1.2'},
+      {host: '192.168.1.3'},
+      {host: '192.168.1.4'},
+      {host: info.server.host, port: info.server.port}
+  ], username: info.server.username, passwort: info.server.password, database: info.db.name})
+
+  assert(client instanceof influx.InfluxDB)
+  return client.createDatabase(info.db.name, done);
+})
+after(function(done) {
+  client.dropDatabase(info.db.name, function(err) {
+    return done();
+  });
+});
+
 describe('InfluxDB', function () {
   describe('#InfluxDB', function () {
     it('should exist as a function (class)', function () {
