@@ -523,7 +523,7 @@ describe('InfluxDB', function () {
       client.getSeries(info.series.name, function (err, series) {
         if (err) return done(err)
         assert(series instanceof Array)
-        assert.equal(series.length, 1)
+        assert.equal(series.length, 3)
         done()
       })
     })
@@ -592,9 +592,9 @@ describe('InfluxDB', function () {
     it('should delete the database without error', function (done) {
       client.dropDatabase(info.db.name, done)
     })
-    it('should error if database didn\'t exist', function (done) {
+    it('should not error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
-        assert(err instanceof Error)
+        assert.ifError(err)
         done()
       })
     })
