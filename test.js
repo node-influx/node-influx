@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
-var ts = new Date().getTime();
-var async = require('async');
+var ts = new Date().getTime()
+var async = require('async')
 var client
 var dbClient
 var failClient
@@ -51,7 +51,7 @@ function writeFixtures(done) {
       dbClient.writePoint(info.series.strName, 'my second test string', {}, cb)
     },
   ], function() {
-    return done();
+    return done()
   })
 }
 before((done) => {
@@ -67,13 +67,13 @@ before((done) => {
   ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
   assert(client instanceof influx.InfluxDB)
-  return client.createDatabase(info.db.name, done);
+  return client.createDatabase(info.db.name, done)
 })
 after(function(done) {
   client.dropDatabase(info.db.name, function(err) {
-    return done();
-  });
-});
+    return done()
+  })
+})
 
 describe('InfluxDB', function () {
   describe('#InfluxDB', function () {
@@ -197,7 +197,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#createUser', function () {
-    this.timeout(25000);
+    this.timeout(25000)
     it('should create a user without error', function (done) {
       client.createUser(info.db.username, info.db.password, true, done)
     })
@@ -261,7 +261,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#grantAdminPrivileges', function () {
-    this.timeout(25000);
+    this.timeout(25000)
     it('should grant admin privileges without error', function (done) {
       client.grantAdminPrivileges(info.db.username, done)
     })
@@ -274,16 +274,16 @@ describe('InfluxDB', function () {
   })
 
   describe('#revokeAdminPrivileges', function () {
-    this.timeout(25000);
+    this.timeout(25000)
     var testUser = {
       username: 'revokeAdminPrivileges',
       passowrd: 'password'
     }
     beforeEach((done) => {
-      client.createUser(testUser.username, testUser.password, true, done);
+      client.createUser(testUser.username, testUser.password, true, done)
     })
     afterEach((done) => {
-      client.dropUser(testUser.username, done);
+      client.dropUser(testUser.username, done)
     })
     it('should revoke admin privileges without error', function (done) {
       client.revokeAdminPrivileges(testUser.username, done)
@@ -297,7 +297,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#dropUser', function () {
-    this.timeout(25000);
+    this.timeout(25000)
     it('should delete a user without error', function (done) {
       client.dropUser(info.db.username, done)
     })
@@ -507,7 +507,7 @@ describe('InfluxDB', function () {
   describe('#getSeries', function () {
     before((done) => {
       client.createDatabase(info.db.name, () => {
-        return writeFixtures(done);
+        return writeFixtures(done)
       })
     })
     it('should return array of series', function (done) {
@@ -532,8 +532,8 @@ describe('InfluxDB', function () {
 
   describe('#getSeriesNames', function () {
     before((done) => {
-      writeFixtures(done);
-    });
+      writeFixtures(done)
+    })
     it('should return array of series names', function (done) {
       client.getSeriesNames(function (err, series) {
         if (err) return done(err)
