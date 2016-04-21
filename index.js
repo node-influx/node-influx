@@ -164,7 +164,10 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, _.map(results[0].series, function (series) {return series.name}))
+    return callback(err, results[0].series[0].values.reduce(function(cur, next) {
+      cur = cur.concat(next)
+      return cur
+    }, []))
   })
 
 }
@@ -183,7 +186,10 @@ InfluxDB.prototype.getSeries = function (measurementName, callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, results[0].series)
+    return callback(err, results[0].series[0].values.reduce(function(cur, next) {
+      cur = cur.concat(next)
+      return cur
+    }, []))
   })
 
 }
