@@ -30,10 +30,10 @@ var info = {
   }
 }
 
-function writeFixtures(done) {
+function writeFixtures (done) {
   async.series([
     (cb) => {
-      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, cb)      
+      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, cb)
     },
     (cb) => {
       dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, cb)
@@ -49,8 +49,8 @@ function writeFixtures(done) {
     },
     (cb) => {
       dbClient.writePoint(info.series.strName, 'my second test string', {}, cb)
-    },
-  ], function() {
+    }
+  ], function () {
     return done()
   })
 }
@@ -69,8 +69,11 @@ before((done) => {
   assert(client instanceof influx.InfluxDB)
   return client.createDatabase(info.db.name, done)
 })
-after(function(done) {
-  client.dropDatabase(info.db.name, function(err) {
+after(function (done) {
+  client.dropDatabase(info.db.name, function (err) {
+    if (err) { 
+      // do nothing
+    }
     return done()
   })
 })
@@ -214,7 +217,7 @@ describe('InfluxDB', function () {
       client.getUsers(function (err, users) {
         assert.equal(err, null)
         assert(users instanceof Array)
-        assert.equal(users.filter(function(u) {
+        assert.equal(users.filter(function (u) {
           return u.user === 'johnsmith'
         }).length, 1)
         done()
