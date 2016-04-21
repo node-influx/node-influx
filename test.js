@@ -505,6 +505,11 @@ describe('InfluxDB', function () {
   })
 
   describe('#getSeries', function () {
+    before((done) => {
+      client.createDatabase(info.db.name, () => {
+        return writeFixtures(done);
+      })
+    })
     it('should return array of series', function (done) {
       client.getSeries(function (err, series) {
         if (err) return done(err)
@@ -526,6 +531,9 @@ describe('InfluxDB', function () {
   })
 
   describe('#getSeriesNames', function () {
+    before((done) => {
+      writeFixtures(done);
+    });
     it('should return array of series names', function (done) {
       client.getSeriesNames(function (err, series) {
         if (err) return done(err)
