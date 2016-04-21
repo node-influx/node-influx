@@ -1,56 +1,89 @@
+'use strict'
+
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
+var ts = new Date().getTime()
+var async = require('async')
+var client
+var dbClient
+var failClient
+var failoverClient
+
+var info = {
+  server: {
+    host: 'localhost',
+    port: 8086,
+    username: 'root',
+    password: 'root',
+    timePrecision: 'ms'
+  },
+  db: {
+    name: 'test_db_' + ts,
+    username: 'johnsmith',
+    password: 'johnjohn',
+    retentionPolicy: 'testrp'
+  },
+  series: {
+    name: 'response_time',
+    strName: 'string_test'
+  }
+}
+
+function writeFixtures (done) {
+  async.series([
+    (cb) => {
+      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.strName, {value: 'my test string'}, {}, cb)
+    },
+    (cb) => {
+      dbClient.writePoint(info.series.strName, 'my second test string', {}, cb)
+    }
+  ], function () {
+    return done()
+  })
+}
+before((done) => {
+  client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
+  dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
+  failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
+  failoverClient = influx({hosts: [
+      {host: '192.168.1.1'},
+      {host: '192.168.1.2'},
+      {host: '192.168.1.3'},
+      {host: '192.168.1.4'},
+      {host: info.server.host, port: info.server.port}
+  ], username: info.server.username, passwort: info.server.password, database: info.db.name})
+
+  assert(client instanceof influx.InfluxDB)
+  return client.createDatabase(info.db.name, done)
+})
+after(function (done) {
+  client.dropDatabase(info.db.name, function (err) {
+    if (err) {
+      // do nothing
+    }
+    return done()
+  })
+})
 
 describe('InfluxDB', function () {
-  var client
-  var dbClient
-  var failClient
-  var failoverClient
-
-  var info = {
-    server: {
-      host: 'localhost',
-      port: 8086,
-      username: 'root',
-      password: 'root',
-      timePrecision: 'ms'
-    },
-    db: {
-      name: 'test_db',
-      username: 'johnsmith',
-      password: 'johnjohn',
-      retentionPolicy: 'testrp'
-    },
-    series: {
-      name: 'response_time',
-      strName: 'string_test'
-    }
-  }
-
   describe('#InfluxDB', function () {
     it('should exist as a function (class)', function () {
       assert(typeof influx.InfluxDB === 'function')
     })
   })
-
-  describe('create client', function () {
-    it('should create an instance without error', function () {
-      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
-      dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
-      failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
-      failoverClient = influx({hosts: [
-          {host: '192.168.1.1'},
-          {host: '192.168.1.2'},
-          {host: '192.168.1.3'},
-          {host: '192.168.1.4'},
-          {host: info.server.host, port: info.server.port}
-      ], username: info.server.username, passwort: info.server.password, database: info.db.name})
-
-      assert(client instanceof influx.InfluxDB)
-    })
-  })
-
   describe('#setRequestTimeout', function () {
     it('should set the default request timeout value', function () {
       var timeout = failoverClient.setRequestTimeout(5000)
@@ -132,9 +165,9 @@ describe('InfluxDB', function () {
     it('should create a new database without error', function (done) {
       client.createDatabase(info.db.name, done)
     })
-    it('should throw an error if db already exists', function (done) {
+    it('should not throw an error if db already exists', function (done) {
       client.createDatabase(info.db.name, function (err) {
-        assert(err instanceof Error)
+        assert.equal(err, null)
         done()
       })
     })
@@ -167,12 +200,13 @@ describe('InfluxDB', function () {
   })
 
   describe('#createUser', function () {
+    this.timeout(25000)
     it('should create a user without error', function (done) {
       client.createUser(info.db.username, info.db.password, true, done)
     })
     it('should error when creating an existing user', function (done) {
       client.createUser(info.db.username, info.db.password, function (err) {
-        assert(err instanceof Error)
+        assert.equal(err.message, 'user already exists')
         done()
       })
     })
@@ -183,12 +217,14 @@ describe('InfluxDB', function () {
       client.getUsers(function (err, users) {
         assert.equal(err, null)
         assert(users instanceof Array)
-        assert.equal(users.length, 1)
+        assert.equal(users.filter(function (u) {
+          return u.user === 'johnsmith'
+        }).length, 1)
         done()
       })
     })
 
-    it('should error when deleting an existing user', function (done) {
+    it('should bubble errors through', function (done) {
       failClient.getUsers(function (err) {
         assert(err instanceof Error)
         done()
@@ -228,6 +264,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#grantAdminPrivileges', function () {
+    this.timeout(25000)
     it('should grant admin privileges without error', function (done) {
       client.grantAdminPrivileges(info.db.username, done)
     })
@@ -240,8 +277,19 @@ describe('InfluxDB', function () {
   })
 
   describe('#revokeAdminPrivileges', function () {
+    this.timeout(25000)
+    var testUser = {
+      username: 'revokeAdminPrivileges',
+      passowrd: 'password'
+    }
+    beforeEach((done) => {
+      client.createUser(testUser.username, testUser.password, true, done)
+    })
+    afterEach((done) => {
+      client.dropUser(testUser.username, done)
+    })
     it('should revoke admin privileges without error', function (done) {
-      client.revokeAdminPrivileges(info.db.username, done)
+      client.revokeAdminPrivileges(testUser.username, done)
     })
     it('should error when revoking admin privileges', function (done) {
       client.revokeAdminPrivileges('yourmum', function (err) {
@@ -252,12 +300,13 @@ describe('InfluxDB', function () {
   })
 
   describe('#dropUser', function () {
+    this.timeout(25000)
     it('should delete a user without error', function (done) {
       client.dropUser(info.db.username, done)
     })
-    it('should error when deleting an existing user', function (done) {
+    it('should error when deleting a non-existing user', function (done) {
       client.dropUser(info.db.username, function (err) {
-        assert(err instanceof Error)
+        assert.equal(err.message, 'user not found')
         done()
       })
     })
@@ -463,6 +512,11 @@ describe('InfluxDB', function () {
   })
 
   describe('#getSeries', function () {
+    before((done) => {
+      client.createDatabase(info.db.name, () => {
+        return writeFixtures(done)
+      })
+    })
     it('should return array of series', function (done) {
       client.getSeries(function (err, series) {
         if (err) return done(err)
@@ -476,7 +530,7 @@ describe('InfluxDB', function () {
       client.getSeries(info.series.name, function (err, series) {
         if (err) return done(err)
         assert(series instanceof Array)
-        assert.equal(series.length, 1)
+        assert.equal(series.length, 3)
         done()
       })
     })
@@ -484,6 +538,9 @@ describe('InfluxDB', function () {
   })
 
   describe('#getSeriesNames', function () {
+    before((done) => {
+      writeFixtures(done)
+    })
     it('should return array of series names', function (done) {
       client.getSeriesNames(function (err, series) {
         if (err) return done(err)
@@ -542,9 +599,9 @@ describe('InfluxDB', function () {
     it('should delete the database without error', function (done) {
       client.dropDatabase(info.db.name, done)
     })
-    it('should error if database didn\'t exist', function (done) {
+    it('should not error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
-        assert(err instanceof Error)
+        assert.ifError(err)
         done()
       })
     })

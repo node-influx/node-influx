@@ -4,7 +4,7 @@ node_js:
   - "4"
   - "0.12"
 env:
-  - INFLUX=0.9.6.1
+  - INFLUX=0.12.1-1
 before_script:
   - wget "http://s3.amazonaws.com/influxdb/influxdb_$(echo $INFLUX)_amd64.deb"
   - sudo dpkg -i "influxdb_$(echo $INFLUX)_amd64.deb"
