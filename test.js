@@ -71,7 +71,7 @@ before((done) => {
 })
 after(function (done) {
   client.dropDatabase(info.db.name, function (err) {
-    if (err) { 
+    if (err) {
       // do nothing
     }
     return done()
