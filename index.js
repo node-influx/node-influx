@@ -16,7 +16,29 @@ var defaultOptions = {
   timePrecision: 'ms'
 }
 
+function parseOptionsUrl (url_) {
+  var parsed = url.parse(url_)
+
+  var options = {
+    host: parsed.hostname,
+    port: parsed.port,
+    protocol: parsed.protocol
+  }
+
+  if (parsed.auth) {
+    var authSplit = parsed.auth.split(':')
+    if (authSplit.length !== 2) throw new Error('Invalid authentication: ' + parsed.auth)
+    options.username = authSplit[0]
+    options.password = authSplit[1]
+  }
+
+  if (parsed.pathname.length > 1) options.database = parsed.pathname.slice(1)
+
+  return options
+}
+
 var InfluxDB = function (options) {
+  if (typeof options === 'string') options = parseOptionsUrl(options)
   this.options = _.extend(_.clone(defaultOptions), options)
 
   this.request = new InfluxRequest({
@@ -31,6 +53,7 @@ var InfluxDB = function (options) {
   if (_.isArray(this.options.hosts) && this.options.hosts.length > 0) {
     var self = this
     _.each(this.options.hosts, function (host) {
+      if (typeof host === 'string') host = parseOptionsUrl(host)
       var port = host.port || self.options.port
       var protocol = host.protocol || self.options.protocol
       self.request.addHost(host.host, port, protocol)

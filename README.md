@@ -61,6 +61,21 @@ You can either pass a single hostname or an array of hostnames. Node-influx uses
 the requests across all configured hosts. When a host is unreachable, node-influx tries to resubmit the request to another
 host and disables the failed host for 60 seconds (timeout value is configurable). If all servers fail to respond, node-influx raises an error.
 
+You can also pass an URL or an array of URLs:
+
+```js
+var influx = require('influx')
+
+var client = influx('http://dbuser:f4ncyp4ass@localhost:8060/my_database')
+// or
+client = influx({
+  hosts: ['http://127.0.0.1', 'https://127.0.0.2'],
+  username: 'dbuser',
+  password: 'f4ncyp4ass',
+  database: 'my_database'
+ })
+```
+
 
 ### Configuration options
 
