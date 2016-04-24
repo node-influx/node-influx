@@ -4,8 +4,22 @@ declare module "influx" {
 
     namespace influx {
         interface InfluxConstructor {
+            /**
+             * Connect to a single InfluxDB instance by specifying a set of connection options.
+             */
             (options: SingleHostOptions): Influx;
+            
+            /**
+             * Connect to an InfluxDB cluster by specifying a set of connection options.
+             */
             (options: ClusterOptions): Influx;
+            
+            /**
+             * Connect to an InfluxDB instance using a configuration URL.
+             * 
+             * Example: http://user:password@host:8086/database
+             */
+            (url: string): Influx;
         }
 
         type TimePrecision = "ns"|"us"|"ms"|"s"|"m"|"h"|"d"|"w"|"m"|"y";
