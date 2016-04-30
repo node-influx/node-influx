@@ -294,12 +294,13 @@ InfluxDB.prototype._createKeyTagString = function (object) {
 }
 
 InfluxDB.prototype._prepareValues = function (series) {
+  var self = this
   var output = []
   _.forEach(series, function (values, seriesName) {
     _.each(values, function (points) {
       var line = seriesName.replace(/ /g, '\\ ').replace(/,/g, '\\,')
       if (points[1] && _.isObject(points[1]) && _.keys(points[1]).length > 0) {
-        line += ',' + this._createKeyTagString(points[1])
+        line += ',' + self._createKeyTagString(points[1])
       }
 
       if (_.isObject(points[0])) {
@@ -308,7 +309,7 @@ InfluxDB.prototype._prepareValues = function (series) {
           timestamp = points[0].time
           delete (points[0].time)
         }
-        line += ' ' + this._createKeyValueString(points[0])
+        line += ' ' + self._createKeyValueString(points[0])
         if (timestamp) {
           if (timestamp instanceof Date) {
             line += ' ' + timestamp.getTime()
