@@ -332,7 +332,7 @@ InfluxDB.prototype._prepareValues = function (series) {
 }
 
 InfluxDB.prototype.writeSeries = function (series, options, callback) {
-  if (typeof options === 'function') {
+  if (typeof options !== 'object') {
     callback = options
     options = {}
   }
