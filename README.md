@@ -8,6 +8,9 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![code climate](http://img.shields.io/codeclimate/github/node-influx/node-influx.svg?style=flat-square)](https://codeclimate.com/github/node-influx/node-influx)
 [![Dependency Status](https://img.shields.io/david/node-influx/node-influx.svg?style=flat-square)](https://david-dm.org/node-influx/node-influx)
 [![Github Releases](https://img.shields.io/npm/dm/influx.svg?style=flat-square)](https://github.com/node-influx/node-influx)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000&style=flat-square)](https://gitter.im/node-influx/node-influx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+
 
 [![Bountysource](https://img.shields.io/bountysource/team/node-influx/activity.svg?style=flat-square)](https://www.bountysource.com/teams/node-influx) - Reward the contributors for their efforts on upcoming tasks.
 
