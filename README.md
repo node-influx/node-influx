@@ -1,5 +1,7 @@
 # node-influx
 
+[![Join the chat at https://gitter.im/node-influx/node-influx](https://badges.gitter.im/node-influx/node-influx.svg)](https://gitter.im/node-influx/node-influx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 An [InfluxDB](http://influxdb.org/) Node.js Client
 
 [![npm](http://img.shields.io/npm/v/influx.svg?style=flat-square)](https://www.npmjs.org/package/influx)
