@@ -37,6 +37,18 @@ function parseOptionsUrl (url_) {
   return options
 }
 
+function resolveOptCallback(options, callback) {
+  if (typeof options === 'function') {
+    callback = options
+    options = {}
+  }
+
+  return {
+    callback: callback || _.noop,
+    options: options || {},
+  }
+}
+
 var InfluxDB = function (options) {
   if (typeof options === 'string') options = parseOptionsUrl(options)
   this.options = _.extend(_.clone(defaultOptions), options)
@@ -140,15 +152,12 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
 
 // Prepares and sends the actual request
 InfluxDB.prototype.queryDB = function (query, options, callback) {
-  if (typeof options === 'function') {
-    callback = options
-    options = undefined
-  }
+  var args = resolveOptCallback(options, callback)
 
   this.request.get({
-    url: this.url('query', options, {q: query}),
+    url: this.url('query', args.options, {q: query}),
     json: true
-  }, this._parseCallback(callback))
+  }, this._parseCallback(args.callback))
 }
 
 // creates a new database
@@ -332,44 +341,31 @@ InfluxDB.prototype._prepareValues = function (series) {
 }
 
 InfluxDB.prototype.writeSeries = function (series, options, callback) {
-  if (typeof options !== 'object') {
-    callback = options
-    options = {}
+  var args = resolveOptCallback(options, callback)
+
+  if (!args.options.database) {
+    args.options.database = this.options.database
   }
 
-  if (!options.database) {
-    options.database = this.options.database
-  }
-
-  if (!options.precision) {
-    options.precision = this.options.timePrecision
+  if (!args.options.precision) {
+    args.options.precision = this.options.timePrecision
   }
 
   this.request.post({
-    url: this.url('write', options),
-    pool: typeof options.pool !== 'undefined' ? options.pool : {},
+    url: this.url('write', args.options),
+    pool: typeof args.options.pool !== 'undefined' ? args.options.pool : {},
     body: this._prepareValues(series)
-  }, this._parseCallback(callback))
+  }, this._parseCallback(args.callback))
 }
 
 InfluxDB.prototype.writePoint = function (seriesName, values, tags, options, callback) {
-  if (typeof options === 'function') {
-    callback = options
-    options = {}
-  }
-  var data = {}
-  data[seriesName] = [[values, tags]]
-  this.writeSeries(data, options, callback)
+  this.writePoints(seriesName, [[values, tags]], options, callback)
 }
 
 InfluxDB.prototype.writePoints = function (seriesName, points, options, callback) {
-  if (typeof options === 'function') {
-    callback = options
-    options = {}
-  }
   var data = {}
   data[seriesName] = points
-  this.writeSeries(data, options, callback)
+  this.writeSeries(data, options, options)
 }
 
 InfluxDB.prototype.query = function (databaseName, query, callback) {
