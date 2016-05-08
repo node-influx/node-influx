@@ -370,7 +370,7 @@ describe('InfluxDB', function () {
       var points = [
         [{value: 232, time: 1234567787}, { foobar: 'baz'}],
         [{othervalue: 212, time: 1234567777}, { foobar: 'baz'}],
-        [{andanothervalue: 452, time:1234567747}, { foobar: 'baz'}]
+        [{andanothervalue: 452, time: 1234567747}, { foobar: 'baz'}]
       ]
       var data = {
         series1: points,
