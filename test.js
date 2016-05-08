@@ -378,7 +378,8 @@ describe('InfluxDB', function () {
       }
       var response = dbClient._prepareValues(data)
       var expected = 'series1,foobar=baz value=232 1234567787\nseries1,foobar=baz othervalue=212 1234567777\nseries1,foobar=baz andanothervalue=452 1234567747\nseries2,foobar=baz value=232 1234567787\nseries2,foobar=baz othervalue=212 1234567777\nseries2,foobar=baz andanothervalue=452 1234567747'
-      assert.equal(response, expected);
+      assert.equal(response, expected)
+      done()
     })
   })
 
