@@ -248,10 +248,8 @@ InfluxDB.prototype.dropUser = function (username, callback) {
 
 InfluxDB.prototype._createKeyValueString = function (object) {
   var output = []
-  
-  clone = _.clone(object)
+  var clone = _.clone(object)
   delete clone.time
-  
   _.forOwn(clone, function (value, key) {
     if (typeof value === 'string') {
       output.push(key + '="' + value + '"')
