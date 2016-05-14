@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "standard",
-    "test": "./node_modules/.bin/mocha -R spec -r test/_setup.js",
+    "doc": "jsdoc -d ./doc -r ./lib ",
+    "test": "standard && ./node_modules/.bin/mocha -R spec -r test/_setup.js",
     "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec && npm run lint"
   },
   "repository": {
@@ -33,6 +34,7 @@
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
     "istanbul": "^0.4.3",
+    "jsdoc": "^3.4.0",
     "mocha": "^2.4.5",
     "standard": "^7.0.1"
   }
