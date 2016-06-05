@@ -6,8 +6,9 @@
   "scripts": {
     "lint": "standard",
     "doc": "jsdoc -d ./doc -r ./lib ",
-    "test": "standard && ./node_modules/.bin/mocha -R spec -r test/_setup.js",
-    "travis-test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- -R spec && npm run lint"
+    "test": "mocha -R spec -r test/_setup.js && standard",
+    "cover": "istanbul cover _mocha -- -R spec -r test/_setup.js",
+    "travis-test": "istanbul cover _mocha --report lcovonly -- -R spec -r test/_setup.js && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -23,8 +24,20 @@
   ],
   "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
   "contributors": [
+    "Connor Peet <connor@peet.io>",
     "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
   ],
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "beforeEach",
+      "afterEach",
+      "before",
+      "after",
+      "expect"
+    ]
+  },
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.11.1",
@@ -36,6 +49,8 @@
     "istanbul": "^0.4.3",
     "jsdoc": "^3.4.0",
     "mocha": "^2.4.5",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0",
     "standard": "^7.0.1"
   }
 }
