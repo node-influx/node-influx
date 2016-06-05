@@ -271,7 +271,9 @@ InfluxDB.prototype.dropUser = function (username, callback) {
 
 InfluxDB.prototype._createKeyValueString = function (object) {
   var output = []
-  _.forOwn(object, function (value, key) {
+  var clone = _.clone(object)
+  delete clone.time
+  _.forOwn(clone, function (value, key) {
     if (typeof value === 'string') {
       output.push(key + '="' + value + '"')
     } else {
@@ -307,7 +309,6 @@ InfluxDB.prototype._prepareValues = function (series) {
         var timestamp = null
         if (points[0].time) {
           timestamp = points[0].time
-          delete (points[0].time)
         }
         line += ' ' + self._createKeyValueString(points[0])
         if (timestamp) {
