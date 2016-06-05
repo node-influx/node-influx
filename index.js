@@ -87,7 +87,7 @@ InfluxDB.prototype._parseCallback = function (callback) {
       return callback(err)
     }
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      return callback(new Error(body.error || body))
+      return callback(new Error(body.error || (typeof body === 'object' ? JSON.stringify(body) : (body || res.statusCode))))
     }
 
     if (_.isObject(body) && body.results && _.isArray(body.results)) {
