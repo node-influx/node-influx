@@ -365,7 +365,7 @@ InfluxDB.prototype.writePoint = function (seriesName, values, tags, options, cal
 InfluxDB.prototype.writePoints = function (seriesName, points, options, callback) {
   var data = {}
   data[seriesName] = points
-  this.writeSeries(data, options, options)
+  this.writeSeries(data, options, options, callback)
 }
 
 InfluxDB.prototype.query = function (databaseName, query, callback) {
