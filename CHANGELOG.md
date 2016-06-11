@@ -6,6 +6,9 @@
  * connections: fix manging issue on multiple connection attempts
  * connections: treat `5xx` errors as temporary conditions and use a backoff when encountered
  * global: add automated jsdoc support
+ * **breaking:** (minor) only the InfluxDB class is exported; clients which previously relied on reading the exported defaultOptions or InfluxDB property will no longer be able to do so
+ * **breaking:** configuration object changes:
+   * configuration of the connection pool is now passed in a nested, sub-object
 
 ## 2016-05-05, Version 4.2.0
 

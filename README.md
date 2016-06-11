@@ -91,7 +91,6 @@ client = influx({
 | port [optional] |  influxdb port, default: 8086 |
 | protocol [optional] |  protocol, default: http |
 | hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
-| depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
 | requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
 | maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default : 2 |
@@ -123,7 +122,7 @@ client.setFailoverTimeout( value )
 Returns an array of available hosts.
 
 ```js
-getHostsAvailable( ) 
+getHostsAvailable( )
 ```
 
 ##### getHostsDisabled
@@ -145,7 +144,7 @@ client.createDatabase(databaseName, function(err, result) {} )
 Returns array of database names - requires cluster admin privileges
 
 ```js
-client.getDatabaseNames( function(err,arrayDatabaseNames){ } ) 
+client.getDatabaseNames( function(err,arrayDatabaseNames){ } )
 ```
 
 ##### dropDatabase
@@ -353,7 +352,7 @@ You can also pass multiple queries at once. The callback returns an array of ser
 ```js
 client.query('SELECT * FROM myseries; SELECT AVG(VALUE) as avgvalue from myseries', function (err, results) {});
 
-// -> results =[ 
+// -> results =[
 //   [ { value : 1, tagname : 'tagvalue'}, {value : 3, othertag : 'value}],
 //   [ {avgvalue : 2.345}]
 // ]
@@ -439,7 +438,7 @@ Then to run the test harness use `npm test`.
 
 ## Contributing
 
-If you want to add features, fix bugs or improve node-influx please open a pull-request. 
+If you want to add features, fix bugs or improve node-influx please open a pull-request.
 Please note, we are following [Javascript Standard Style](https://github.com/feross/standard). Before opening a PR
 your code should pass Standard.
 
