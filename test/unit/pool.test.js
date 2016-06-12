@@ -1,6 +1,6 @@
 'use strict'
 
-const Pool = require('../lib/pool')
+const Pool = require('../../lib/pool')
 const sinon = require('sinon')
 
 describe('pool', () => {

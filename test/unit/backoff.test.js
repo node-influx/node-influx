@@ -1,6 +1,6 @@
-const Base = require('../lib/backoff/base')
-const Exp = require('../lib/backoff/exponential')
-const pkg = require('../lib/backoff')
+const Base = require('../../lib/backoff/base')
+const Exp = require('../../lib/backoff/exponential')
+const pkg = require('../../lib/backoff')
 
 describe('backoff strategies', () => {
   it('exposes backoff strategies in the index package', () => {

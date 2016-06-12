@@ -2,13 +2,14 @@
   "name": "influx",
   "version": "4.2.0",
   "description": "InfluxDB Client",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "lint": "standard",
-    "doc": "jsdoc -d ./doc -r ./lib ",
-    "test": "mocha -R spec -r test/_setup.js && standard",
-    "cover": "istanbul cover _mocha -- -R spec -r test/_setup.js",
-    "travis-test": "istanbul cover _mocha --report lcovonly -- -R spec -r test/_setup.js && npm run lint"
+    "doc": "esdoc -c esdoc.json",
+    "test": "mocha -R spec -r test/unit/_setup.js test/unit/*.test.js && standard",
+    "integrate": "mocha -R spec test/integration/*.test.js && standard",
+    "cover": "istanbul cover _mocha -- -R spec -r test/unit/_setup.js",
+    "travis-test": "istanbul cover _mocha --report lcovonly -- -R spec -r test/unit/_setup.js test/unit/*.test.js && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -22,8 +23,8 @@
     "client",
     "db"
   ],
-  "author": "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
   "contributors": [
+    "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
     "Connor Peet <connor@peet.io>",
     "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
   ],
@@ -46,8 +47,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
+    "esdoc": "^0.4.7",
     "istanbul": "^0.4.3",
-    "jsdoc": "^3.4.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
