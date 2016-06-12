@@ -196,7 +196,20 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, _.map(results[0].series, function (series) {return series.name}))
+
+    // Influx version 0.11 changed the SHOW SERIES format. Support both versions.
+    if (_.get(results[0].series[0], 'columns')) {
+      results = _(results[0].series) // v0.11
+        .map('values')
+        .flattenDepth(2)
+        .map(function (value) {return value.split(',', 1)[0]})
+        .uniq()
+        .value()
+    } else {
+      results = _.map(results[0].series, 'name') // < v0.11
+    }
+
+    return callback(err, results)
   })
 
 }
