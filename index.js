@@ -144,9 +144,6 @@ InfluxDB.prototype.url = function (endpoint, options, query) {
     queryObj.rp = this.options.retentionPolicy
   }
 
-  console.log('queryObj', queryObj)
-  console.log(this.options)
-
   return url.format({
     pathname: endpoint,
     query: queryObj
@@ -354,8 +351,6 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
     args.options.precision = this.options.timePrecision
   }
 
-  console.log(this.url('write', args.options))
-
   this.request.post({
     url: this.url('write', args.options),
     pool: typeof args.options.pool !== 'undefined' ? args.options.pool : {},
@@ -370,7 +365,7 @@ InfluxDB.prototype.writePoint = function (seriesName, values, tags, options, cal
 InfluxDB.prototype.writePoints = function (seriesName, points, options, callback) {
   var data = {}
   data[seriesName] = points
-  this.writeSeries(data, options, callback)
+  this.writeSeries(data, options, options, callback)
 }
 
 InfluxDB.prototype.query = function (databaseName, query, callback) {
