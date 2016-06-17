@@ -263,7 +263,12 @@ client.writePoint(seriesName, values, tags, [options,] function(err, response) {
 
 `values` can be either an objekt or a single value. For the latter the columname is set to `value`.
 You can set the time by passing an object propety called `time`. The time an be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
-The parameter `options` is optional and can be used to set the time precision.
+
+The parameter `options` is an optional and can have following fields:
+- `db`: Database to work with
+- `precision`: Time precision
+- `rp`: Retention policy
+
 
 ###### example
 ```js
@@ -300,6 +305,11 @@ var points = [
 client.writePoints(seriesName, points, [options,] callback) { }
 ```
 
+The parameter `options` is an optional and can have following fields:
+- `db`: Database to work with
+- `precision`: Time precision
+- `rp`: Retention policy
+
 ##### writeSeries
 Writes multiple point to multiple series - requires database user privileges
 
@@ -332,6 +342,11 @@ var series = {
 
 client.writeSeries(series, [options,] function(err,response) { })
 ```
+
+The parameter `options` is an optional and can have following fields:
+- `db`: Database to work with
+- `precision`: Time precision
+- `rp`: Retention policy
 
 *Please note that there's a POST limit at about 2MB per request. Do not submit too many points at once.*
 
