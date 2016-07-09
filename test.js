@@ -40,10 +40,10 @@ describe('InfluxDB', function () {
       dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
       failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
       failoverClient = influx({hosts: [
-          {host: '192.168.1.1'},
-          {host: '192.168.1.2'},
-          {host: '192.168.1.3'},
-          {host: '192.168.1.4'},
+          {host: '192.168.255.1'},
+          {host: '192.168.255.2'},
+          {host: '192.168.255.3'},
+          {host: '192.168.255.4'},
           {host: info.server.host, port: info.server.port}
       ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
@@ -163,10 +163,9 @@ describe('InfluxDB', function () {
     it('should create a new database without error', function (done) {
       client.createDatabase(info.db.name, done)
     })
-    it('should throw an error if db already exists', function (done) {
+    it('should not throw an error if db already exists', function (done) {
       client.createDatabase(info.db.name, function (err) {
-        assert(err instanceof Error)
-        done()
+        done(err)
       })
     })
   })
@@ -474,8 +473,8 @@ describe('InfluxDB', function () {
   })
 
   describe('#query failover', function () {
-    this.timeout(30000)
     it('should exceed retry limit', function (done) {
+      this.timeout(30000)
       failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err) {
         assert(err instanceof Error)
         done()
@@ -483,9 +482,9 @@ describe('InfluxDB', function () {
     })
   })
 
-  describe('#query  failover', function () {
-    this.timeout(25000)
+  describe('#query failover', function () {
     it('should read a point from the database after the failed servers have been removed', function (done) {
+      this.timeout(25000)
       failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
         assert.equal(err, null)
         assert(res instanceof Array)
@@ -512,8 +511,8 @@ describe('InfluxDB', function () {
     it('should return array of series', function (done) {
       client.getSeries(function (err, series) {
         if (err) return done(err)
-        assert(series instanceof Array)
-        assert(series.length >= 3)
+        assert(series[0].values instanceof Array)
+        assert(series[0].values.length >= 3)
         done()
       })
     })
@@ -522,7 +521,7 @@ describe('InfluxDB', function () {
       client.getSeries(info.series.name, function (err, series) {
         if (err) return done(err)
         assert(series instanceof Array)
-        assert.equal(series.length, 1)
+        assert.equal(series[0].values.length, 3)
         done()
       })
     })
@@ -588,10 +587,9 @@ describe('InfluxDB', function () {
     it('should delete the database without error', function (done) {
       client.dropDatabase(info.db.name, done)
     })
-    it('should error if database didn\'t exist', function (done) {
+    it('should not error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
-        assert(err instanceof Error)
-        done()
+        done(err)
       })
     })
   })
