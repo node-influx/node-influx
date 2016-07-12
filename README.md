@@ -355,7 +355,7 @@ Queries the database and returns an array of parsed responses. - requires databa
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.query([database,] query, function(err, results) { })
+client.query([database], query, function(err, results) { })
 
 ```
 
