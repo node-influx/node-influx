@@ -176,14 +176,14 @@ dropSeries ( measurementName, function(err,response) { })
 Returns array of series names from given measurement, or database if `measurementName` is omitted - requires database admin privileges
 
 ```js
-client.getSeries([measurementName,] function(err,arraySeriesNames){} )
+client.getSeries([measurementName], function(err,arraySeriesNames){} )
 ```
 
 ##### getSeriesNames
 Returns array of series names from given measurement - requires database admin privileges
 
 ```js
-client.getSeriesNames([measurementName,] function(err,arraySeriesNames){} ) { }
+client.getSeriesNames([measurementName], function(err,arraySeriesNames){} ) { }
 ```
 
 
@@ -258,7 +258,7 @@ Writes a point to a series - requires database user privileges
 
 ```js
 var point = { attr : value, time : new Date()};
-client.writePoint(seriesName, values, tags, [options,] function(err, response) { })
+client.writePoint(seriesName, values, tags, [options], function(err, response) { })
 ```
 
 `values` can be either an objekt or a single value. For the latter the columname is set to `value`.
@@ -302,7 +302,7 @@ var points = [
   //value providing timestamp, without tags
   [{value: 122, time : new Date()}]
 ]
-client.writePoints(seriesName, points, [options,] callback) { }
+client.writePoints(seriesName, points, [options], callback) { }
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -340,7 +340,7 @@ var series = {
     series_name_two : points2
 };
 
-client.writeSeries(series, [options,] function(err,response) { })
+client.writeSeries(series, [options], function(err,response) { })
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -355,7 +355,7 @@ Queries the database and returns an array of parsed responses. - requires databa
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.query([database,] query, function(err, results) { })
+client.query([database], query, function(err, results) { })
 
 ```
 
@@ -381,7 +381,7 @@ Same as function `query` but returns the raw response from InfluxDB.
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.queryRaw([database,] query, function(err, results) { })
+client.queryRaw([database], query, function(err, results) { })
 
 ```
 
@@ -404,7 +404,7 @@ getContinuousQueries( function(err,arrayContinuousQueries) { })
 Drops a continuous query from a database - requires database admin privileges
 
 ```js
-dropContinuousQuery( queryName, [databaseName,] callback) { }
+dropContinuousQuery( queryName, [databaseName], callback) { }
 ```
 
 
