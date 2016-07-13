@@ -381,7 +381,7 @@ Same as function `query` but returns the raw response from InfluxDB.
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.queryRaw([database,] query, function(err, results) { })
+client.queryRaw([database], query, function(err, results) { })
 
 ```
 
