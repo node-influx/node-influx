@@ -1,16 +1,11 @@
-'use strict'
-
-class Host {
+export default class Host {
 
   /**
    * Creates a new Host instance.
    * @param {String} url
    * @param {BackoffStrategy} backoff
    */
-  constructor (url, backoff) {
-    this.backoff = backoff
-    this.url = url
-  }
+  constructor (public url: string, private backoff: BackoffStrategy) {}
 
   /**
    * Marks a failure on the host and returns the length of time it
@@ -18,7 +13,7 @@ class Host {
    * @return {Number} removal time in milliseconds
    */
   fail () {
-    return this.backoff.next()
+    return this.backoff.next();
   }
 
   /**
@@ -26,8 +21,6 @@ class Host {
    * It resets the host's backoff strategy.
    */
   success () {
-    this.backoff.reset()
+    this.backoff.reset();
   }
 }
-
-module.exports = Host

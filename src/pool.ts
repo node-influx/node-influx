@@ -1,23 +1,20 @@
-'use strict'
-
-const Backoffs = require('./backoff')
-const Host = require('./host')
-const request = require('request')
-const url = require('url')
-const _ = require('lodash')
+import Host from "./host";
+import backoffs from "./backoff";
+import * as request from "request";
+import * as _ from "lodash";
 
 /**
  * Status codes that will cause a host to be marked as "failed" if we get
  * them from a request to Influx.
  * @type {Array}
  */
-const resubmitErrorCodes = [
+enum resubmitErrorCodes {
   'ETIMEDOUT',
   'ESOCKETTIMEDOUT',
   'ECONNRESET',
   'ECONNREFUSED',
   'EHOSTUNREACH'
-]
+}
 
 /**
  * @typedef {Object} PoolOptions an options object passed to instantiate
@@ -37,6 +34,46 @@ const resubmitErrorCodes = [
  *     used.
  */
 
+interface PoolOptions {
+  /**
+   * The length of time a host should be removed for upon a connection error,
+   * given in milliseconds. Defaults to 60000ms.
+   */
+  failoverTimeout: number;
+
+  /**
+   * The length of time after which HTTP requests will error
+   * if they do not receive a response.
+   */
+  requestTimeout: number;
+
+  /**
+   * Number of times we should retry running a query
+   * before calling back with an error.
+   */
+  maxRetries: number;
+
+  /**
+   * Request instance to use for talking to Influx.
+   */
+  request: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>;
+
+  /**
+   * Options to configure the backoff policy for the pool.
+   */
+  backoff: {
+    /**
+     * Name of the backoff strategy to use.
+     */
+    kind: string;
+
+    /**
+     * A list of other options to pass into the strategy.
+     */
+    [propName: string]: any;
+  };
+}
+
 /**
  *
  * The Pool maintains a list available Influx hosts and dispatches requests
@@ -45,12 +82,19 @@ const resubmitErrorCodes = [
  */
 class Pool {
 
+  private options: PoolOptions;
+  private index: number;
+  private requestOptions: request.CoreOptions;
+
+  private hostsAvailable: Array<Host>;
+  private hostsDisabled: Array<Host>;
+
   /**
    * Creates a new Pool instance.
    * @param {PoolOptions} options
    */
-  constructor (options) {
-    this.options = _.defaults(options, {
+  constructor (options: PoolOptions) {
+    this.options = <PoolOptions>_.defaults(options, {
       requestTimeout: 30 * 1000,
       maxRetries: 2,
       request: request,
@@ -60,31 +104,29 @@ class Pool {
         random: 1,
         max: 10 * 1000
       }
-    })
+    });
 
-    this._index = 0
-    this._hostsAvailable = []
-    this._hostsDisabled = []
-    this._defaultRequestOptions = { timeout: this.options.requestTimeout }
+    this.index = 0;
+    this.hostsAvailable = [];
+    this.hostsDisabled = [];
+    this.requestOptions = { timeout: this.options.requestTimeout };
   }
 
   /**
    * Sets the length of time after which HTTP requests will error if they
    * do not receive a response.
-   * @param  {Number} value given in milliseconds
-   * @return {Number}
    */
-  setRequestTimeout (value) {
-    this._defaultRequestOptions.timeout = value
-    return value
+  setRequestTimeout (value: number): Pool {
+    this.requestOptions.timeout = value
+    return this;
   }
 
   /**
    * Returns a list of currently active hosts.
    * @return {Host[]}
    */
-  getHostsAvailable () {
-    return this._hostsAvailable.slice()
+  getHostsAvailable(): Array<Host> {
+    return this.hostsAvailable.slice();
   }
 
   /**
@@ -92,57 +134,48 @@ class Pool {
    * errors.
    * @return {Host[]}
    */
-  getHostsDisabled () {
-    return this._hostsDisabled.slice()
+  getHostsDisabled(): Array<Host> {
+    return this.hostsDisabled.slice();
   }
 
   /**
    * Inserts a new host to the pool.
-   * @param  {String} hostname
-   * @param  {Number} port
-   * @param  {String} protocol either "http" or "https"
-   * @return {Host}
    */
-  addHost (hostname, port, protocol) {
-    const hostUrl = url.format({
-      protocol,
-      hostname,
-      port
-    })
-    const bconfig = this.options.backoff
-    const backoff = new Backoffs[bconfig.kind](bconfig)
+  addHost(url: string): Host {
+    const bconfig = this.options.backoff;
+    const backoff = backoffs[bconfig.kind](bconfig);
 
-    const host = new Host(hostUrl, backoff)
-    this._hostsAvailable.push(host)
-    return host
+    const host = new Host(url, backoff);
+    this.hostsAvailable.push(host);
+    return host;
   }
 
   /**
    * Returns true if there's any host available to by queried.
    * @return {Boolean}
    */
-  hostIsAvailable () {
-    return !!this._hostsAvailable[this._index]
+  hostIsAvailable(): boolean {
+    return this.hostsAvailable.length > 0;
   }
 
   /**
    * Returns the next available host for querying.
    * @return {Host}
    */
-  getHost () {
-    const available = this._hostsAvailable
-    const host = available[this._index]
-    this._index = (this._index + 1) % available.length
-    return host
+  private getHost(): Host {
+    const available = this.hostsAvailable;
+    const host = available[this.index];
+    this.index = (this.index + 1) % available.length;
+    return host;
   }
 
   /**
    * Re-enables the provided host, returning it to the pool to query.
    * @param  {Host} host
    */
-  enableHost (host) {
-    _.remove(this._hostsDisabled, host)
-    this._hostsAvailable.push(host)
+  private enableHost(host: Host) {
+    _.remove(this.hostsDisabled, host);
+    this.hostsAvailable.push(host);
   }
 
   /**
@@ -150,12 +183,12 @@ class Pool {
    * re-enabled after a backoff interval
    * @param  {Host} host
    */
-  disableHost (host) {
-    _.remove(this._hostsAvailable, host)
-    this._hostsDisabled.push(host)
-    this._index %= Math.max(1, this._hostsAvailable.length)
+  private disableHost(host: Host) {
+    _.remove(this.hostsAvailable, host);
+    this.hostsDisabled.push(host);
+    this.index %= Math.max(1, this.hostsAvailable.length);
 
-    setTimeout(() => this.enableHost(host), host.fail())
+    setTimeout(() => this.enableHost(host), host.fail());
   }
 
   /**
@@ -163,16 +196,15 @@ class Pool {
    * @param  {Object}   options
    * @param  {Function} callback
    */
-  _request (options, callback) {
+  _request (options: request.CoreOptions, callback: request.RequestCallback, retries: number = 0) {
     if (!this.hostIsAvailable()) {
-      return callback(new ServiceNotAvailableError('No host available'))
+      return callback(new ServiceNotAvailableError('No host available'));
     }
 
-    const host = this.getHost()
-    const requestOptions = _.assign({ retries: 0 }, this._defaultRequestOptions, options)
+    const host = this.getHost();
+    _.defaults(options, this.requestOptions);
 
-    requestOptions.baseUrl = host.url
-    requestOptions.retries++
+    options.baseUrl = host.url;
 
     this.options.request(requestOptions, (err, response, body) => {
       // Resolve an error if we get a >500 status code. Note that we *exclude*

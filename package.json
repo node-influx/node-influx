@@ -4,9 +4,10 @@
   "description": "InfluxDB Client",
   "main": "./lib/index.js",
   "scripts": {
-    "lint": "standard",
+    "compile": "tsc -p src/",
+    "lint": "tslint src/**/*.ts",
     "doc": "esdoc -c esdoc.json",
-    "test": "mocha -R spec -r test/unit/_setup.js test/unit/*.test.js && standard",
+    "test": "mocha -R spec -r test/unit/_setup.js test/unit/*.test.js",
     "integrate": "mocha -R spec test/integration/*.test.js && standard",
     "cover": "istanbul cover _mocha -- -R spec -r test/unit/_setup.js",
     "travis-test": "istanbul cover _mocha --report lcovonly -- -R spec -r test/unit/_setup.js test/unit/*.test.js && npm run lint"
@@ -52,6 +53,9 @@
     "mocha": "^2.4.5",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "standard": "^7.0.1"
+    "standard": "^7.0.1",
+    "tslint": "^3.11.0",
+    "typedoc": "^0.4.3",
+    "typescript": "^1.8.10"
   }
 }
