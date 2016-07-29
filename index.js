@@ -103,7 +103,7 @@ InfluxDB.prototype._parseCallback = function (callback) {
     }
 
     if (_.isObject(body) && body.results && _.isArray(body.results)) {
-      for (var i = 0;i <= body.results.length;++i) {
+      for (var i = 0; i <= body.results.length; ++i) {
         if (body.results[i] && body.results[i].error && body.results[i].error !== '') {
           return callback(new Error(body.results[i].error))
         }
@@ -174,7 +174,7 @@ InfluxDB.prototype.getDatabaseNames = function (callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, _.map(results[0].series[0].values, function (dbarray) {return dbarray[0]}))
+    return callback(err, _.map(results[0].series[0].values, function (dbarray) { return dbarray[0] }))
   })
 }
 
@@ -202,7 +202,7 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
       results = _(results[0].series) // v0.11
         .map('values')
         .flattenDepth(2)
-        .map(function (value) {return value.split(',', 1)[0]})
+        .map(function (value) { return value.split(',', 1)[0] })
         .uniq()
         .value()
     } else {
@@ -211,7 +211,6 @@ InfluxDB.prototype.getSeriesNames = function (measurementName, callback) {
 
     return callback(err, results)
   })
-
 }
 
 InfluxDB.prototype.getSeries = function (measurementName, callback) {
@@ -230,7 +229,6 @@ InfluxDB.prototype.getSeries = function (measurementName, callback) {
     }
     return callback(err, results[0].series)
   })
-
 }
 
 InfluxDB.prototype.dropMeasurement = function (measurementName, callback) {
