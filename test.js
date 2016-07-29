@@ -106,7 +106,6 @@ describe('InfluxDB', function () {
       var url = client.url('query')
       assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
     })
-
   })
 
   describe('#_createKeyTagString', function () {
@@ -224,7 +223,6 @@ describe('InfluxDB', function () {
         done()
       })
     })
-
   })
 
   describe('#setPassword', function () {
@@ -320,16 +318,15 @@ describe('InfluxDB', function () {
     this.timeout(5000)
 
     it('should write a generic point into the database', function (done) {
-      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
+      dbClient.writePoint(info.series.name, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, done)
     })
 
     it('should write a generic point into the database', function (done) {
-      dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, done)
+      dbClient.writePoint(info.series.name, 1, {foo: 'bar', foobar: 'baz'}, done)
     })
 
     it('should write a generic point into the database', function (done) {
       dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, done)
-
     })
 
     it('should write a point with time into the database', function (done) {
@@ -353,18 +350,18 @@ describe('InfluxDB', function () {
     this.timeout(10000)
     it('should write multiple points to the same time series, same column names', function (done) {
       var points = [
-        [{value: 232}, { foobar: 'baz'}],
-        [{value: 212}, { foobar: 'baz'}],
-        [{value: 452}, { foobar: 'baz'}],
+        [{value: 232}, {foobar: 'baz'}],
+        [{value: 212}, {foobar: 'baz'}],
+        [{value: 452}, {foobar: 'baz'}],
         [{value: 122}]
       ]
       dbClient.writePoints(info.series.name, points, done)
     })
     it('should write multiple points to the same time series, differing column names', function (done) {
       var points = [
-        [{value: 232}, { foobar: 'baz'}],
-        [{othervalue: 212}, { foobar: 'baz'}],
-        [{andanothervalue: 452}, { foobar: 'baz'}]
+        [{value: 232}, {foobar: 'baz'}],
+        [{othervalue: 212}, {foobar: 'baz'}],
+        [{andanothervalue: 452}, {foobar: 'baz'}]
       ]
       dbClient.writePoints(info.series.name, points, done)
     })
@@ -373,9 +370,9 @@ describe('InfluxDB', function () {
   describe('#writeSeries', function () {
     it('should write multiple points to multiple time series, same column names', function (done) {
       var points = [
-        [{value: 232}, { foobar: 'baz'}],
-        [{value: 212}, { foobar: 'baz'}],
-        [{value: 452}, { foobar: 'baz'}],
+        [{value: 232}, {foobar: 'baz'}],
+        [{value: 212}, {foobar: 'baz'}],
+        [{value: 452}, {foobar: 'baz'}],
         [{value: 122}]
       ]
       var data = {
@@ -386,9 +383,9 @@ describe('InfluxDB', function () {
     })
     it('should write multiple points to multiple time series, differing column names', function (done) {
       var points = [
-        [{value: 232}, { foobar: 'baz'}],
-        [{othervalue: 212}, { foobar: 'baz'}],
-        [{andanothervalue: 452}, { foobar: 'baz'}]
+        [{value: 232}, {foobar: 'baz'}],
+        [{othervalue: 212}, {foobar: 'baz'}],
+        [{andanothervalue: 452}, {foobar: 'baz'}]
       ]
       var data = {
         series1: points,
@@ -398,9 +395,9 @@ describe('InfluxDB', function () {
     })
     it('should write multiple points to multiple time series, differing column names, specified timestamps', function (done) {
       var points = [
-        [{value: 232, time: 1234567787}, { foobar: 'baz'}],
-        [{othervalue: 212, time: 1234567777}, { foobar: 'baz'}],
-        [{andanothervalue: 452, time: 1234567747}, { foobar: 'baz'}]
+        [{value: 232, time: 1234567787}, {foobar: 'baz'}],
+        [{othervalue: 212, time: 1234567777}, {foobar: 'baz'}],
+        [{andanothervalue: 452, time: 1234567747}, {foobar: 'baz'}]
       ]
       var data = {
         series1: points,
@@ -593,7 +590,6 @@ describe('InfluxDB', function () {
       })
     })
   })
-
 })
 
 // todo:
