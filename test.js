@@ -76,47 +76,51 @@ describe('InfluxDB', function () {
     })
   })
 
-  describe('#url', function () {
-    it('should build a properly formatted url', function () {
-      var url = client.url('query', { db: info.db.name, rp: info.db.retentionPolicy, precision: info.server.timePrecision })
-      assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy + '&precision=' + info.server.timePrecision)
+  describe('#noNetwork', function() {
+    // Tests for library internals, do not send or recieve any data
+
+    describe('#url', function () {
+      it('should build a properly formatted url', function () {
+        var url = client.url('query', { db: info.db.name, rp: info.db.retentionPolicy, precision: info.server.timePrecision })
+        assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy + '&precision=' + info.server.timePrecision)
+      })
+
+      it('should build a properly formatted url', function () {
+        var url = client.url('query')
+        assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
+      })
     })
 
-    it('should build a properly formatted url', function () {
-      var url = client.url('query')
-      assert.equal(url, /* 'http://'+info.server.host+':8086/' + */ 'query?u=' + info.server.username + '&p=' + info.server.password + '&precision=' + info.server.timePrecision + '&db=' + info.db.name + '&rp=' + info.db.retentionPolicy)
+    describe('#_createKeyTagString', function () {
+      it('should build a properly formatted string', function () {
+        var str = client._createKeyTagString({tag_1: 'value', tag2: 'value value', tag3: 'value,value'})
+        assert.equal(str, 'tag_1=value,tag2=value\\ value,tag3=value\\,value')
+      })
     })
-  })
 
-  describe('#_createKeyTagString', function () {
-    it('should build a properly formatted string', function () {
-      var str = client._createKeyTagString({tag_1: 'value', tag2: 'value value', tag3: 'value,value'})
-      assert.equal(str, 'tag_1=value,tag2=value\\ value,tag3=value\\,value')
+    describe('#_createKeyValueString', function () {
+      it('should build a properly formatted string', function () {
+        var str = client._createKeyValueString({a: 1, b: 2})
+        assert.equal(str, 'a=1,b=2')
+      })
     })
-  })
 
-  describe('#_createKeyValueString', function () {
-    it('should build a properly formatted string', function () {
-      var str = client._createKeyValueString({a: 1, b: 2})
-      assert.equal(str, 'a=1,b=2')
-    })
-  })
-
-  describe('parseResult()', function () {
-    it('should build a properly formatted response', function (done) {
-      client._parseResults([{'series': [{'name': 'myseries2', 'tags': {'mytag': 'foobarfoo'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 55]]}, {'name': 'myseries2', 'tags': {'mytag': 'foobarfoo2'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 29]]}]}],
-        function (err, results) {
-          if (err) return done(err)
-          assert.deepEqual(results,
-            [ [ { time: '2015-06-27T06:25:54.411900884Z',
-              value: 55,
-            mytag: 'foobarfoo' },
-              { time: '2015-06-27T06:25:54.411900884Z',
-                value: 29,
-              mytag: 'foobarfoo2' } ] ]
-          )
-          done()
-        })
+    describe('parseResult()', function () {
+      it('should build a properly formatted response', function (done) {
+        client._parseResults([{'series': [{'name': 'myseries2', 'tags': {'mytag': 'foobarfoo'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 55]]}, {'name': 'myseries2', 'tags': {'mytag': 'foobarfoo2'}, 'columns': ['time', 'value'], 'values': [['2015-06-27T06:25:54.411900884Z', 29]]}]}],
+          function (err, results) {
+            if (err) return done(err)
+            assert.deepEqual(results,
+              [ [ { time: '2015-06-27T06:25:54.411900884Z',
+                value: 55,
+              mytag: 'foobarfoo' },
+                { time: '2015-06-27T06:25:54.411900884Z',
+                  value: 29,
+                mytag: 'foobarfoo2' } ] ]
+            )
+            done()
+          })
+      })
     })
   })
 
