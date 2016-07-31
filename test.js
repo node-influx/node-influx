@@ -267,10 +267,8 @@ describe('InfluxDB', function () {
     it('should create a new database without error', function (done) {
       client.createDatabase(info.db.name, done)
     })
-    it('should not throw an error if db already exists', function (done) {
-      client.createDatabase(info.db.name, function (err) {
-        done(err)
-      })
+    afterEach(function (done) {
+      client.dropDatabase(info.db.name, done)
     })
   })
 
@@ -293,6 +291,15 @@ describe('InfluxDB', function () {
 
     afterEach(function (done) {
       client.dropDatabase(info.db.name, done)
+    })
+
+    describe('#duplicateDatabase', function () {
+      it('should report an error if db already exists', function (done) {
+        client.createDatabase(info.db.name, function (err) {
+          assert(err instanceof Error)
+          done()
+        })
+      })
     })
 
     describe('#getDatabaseNames', function () {
