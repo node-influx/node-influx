@@ -27,6 +27,11 @@ describe('InfluxDB', function () {
     }
   }
 
+  beforeEach(function() {
+    client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
+    assert(client instanceof influx.InfluxDB)
+  })
+
   describe('#InfluxDB', function () {
     it('should exist as a function (class)', function () {
       assert(typeof influx.InfluxDB === 'function')
@@ -35,11 +40,8 @@ describe('InfluxDB', function () {
 
   describe('create client', function () {
     it('should create an instance without error', function () {
-      client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
       dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
       failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
-
-      assert(client instanceof influx.InfluxDB)
     })
 
     describe('configured using URLs', function () {
