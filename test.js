@@ -6,7 +6,6 @@ describe('InfluxDB', function () {
   var client
   var dbClient
   var failClient
-  var failoverClient
 
   var info = {
     server: {
@@ -39,13 +38,6 @@ describe('InfluxDB', function () {
       client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
       dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
       failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
-      failoverClient = influx({hosts: [
-          {host: '192.168.255.1'},
-          {host: '192.168.255.2'},
-          {host: '192.168.255.3'},
-          {host: '192.168.255.4'},
-          {host: info.server.host, port: info.server.port}
-      ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
       assert(client instanceof influx.InfluxDB)
     })
@@ -79,20 +71,6 @@ describe('InfluxDB', function () {
         assert.equal(hostsParsed[1].port, 1338)
         assert.equal(hostsParsed[1].protocol, 'https:')
       })
-    })
-  })
-
-  describe('#setRequestTimeout', function () {
-    it('should set the default request timeout value', function () {
-      var timeout = failoverClient.setRequestTimeout(5000)
-      assert.equal(timeout, 5000)
-    })
-  })
-
-  describe('#setFailoverTimeout', function () {
-    it('should set the default request timeout value', function () {
-      var timeout = failoverClient.setFailoverTimeout(2000)
-      assert.equal(timeout, 2000)
     })
   })
 
@@ -469,30 +447,6 @@ describe('InfluxDB', function () {
     })
   })
 
-  describe('#query failover', function () {
-    it('should exceed retry limit', function (done) {
-      this.timeout(30000)
-      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err) {
-        assert(err instanceof Error)
-        done()
-      })
-    })
-  })
-
-  describe('#query failover', function () {
-    it('should read a point from the database after the failed servers have been removed', function (done) {
-      this.timeout(25000)
-      failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
-        assert.equal(err, null)
-        assert(res instanceof Array)
-        assert.equal(res.length, 1)
-        assert(res[0].length >= 2)
-        assert.equal(res[0][0].value, 232)
-        done()
-      })
-    })
-  })
-
   describe('#getMeasurements', function () {
     it('should return array of measurements', function (done) {
       client.getMeasurements(function (err, measurements) {
@@ -587,6 +541,88 @@ describe('InfluxDB', function () {
     it('should not error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
         done(err)
+      })
+    })
+  })
+
+  describe('#failoverClient', function () {
+    var normalClient
+    var failoverClient
+    var failoverdb = 'test_db_failover'
+
+    before(function(done) {
+      normalClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: failoverdb})
+
+      normalClient.createDatabase(failoverdb, function(err, response) {
+        assert.equal(err, null)
+        normalClient.writePoint(info.series.name, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, function(err, response) {
+          assert.equal(err, null)
+          done()
+        })
+      })
+    })
+
+    beforeEach(function(done) {
+      failoverClient = influx({hosts: [
+        {host: '192.168.255.1'},
+        {host: '192.168.255.2'},
+        {host: '192.168.255.3'},
+        {host: '192.168.255.4'},
+        {host: info.server.host, port: info.server.port}
+      ], username: info.server.username, passwort: info.server.password, database: failoverdb})
+
+      done()
+    })
+
+    after(function(done) {
+      normalClient.dropDatabase(failoverdb, done)
+    })
+
+    describe('#setRequestTimeout', function () {
+      it('should set the default request timeout value', function (done) {
+        var timeout = failoverClient.setRequestTimeout(5000)
+        assert.equal(timeout, 5000)
+        done()
+      })
+    })
+
+    describe('#setFailoverTimeout', function () {
+      it('should set the default request timeout value', function (done) {
+        var timeout = failoverClient.setFailoverTimeout(2000)
+        assert.equal(timeout, 2000)
+        done()
+      })
+    })
+
+    describe('#exceedRetryLimit', function () {
+      it('should exceed retry limit', function (done) {
+        // Validate default retry value will still cause failure
+        assert.equal(failoverClient.options.maxRetries, 2)
+        failoverClient.setRequestTimeout(1000)
+        // Should fail after ~3 seconds (third failed retry)
+        this.timeout(4000)
+        failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err) {
+          assert(err instanceof Error)
+          done()
+        })
+      })
+    })
+
+    describe('#queryFailover', function () {
+      it('should read a point from the database after the failed servers have been removed', function (done) {
+        // FIXME: This is a bit of a hack, but there's currently no API to dynamically change this
+        failoverClient.request.options.maxRetries = 5
+        failoverClient.setRequestTimeout(1000)
+        // Should succeed on 5th server it tries (4s of timeouts)
+        this.timeout(10000)
+        failoverClient.query('SELECT value FROM ' + info.series.name + ';', function (err, res) {
+          assert.equal(err, null)
+          assert(res instanceof Array)
+          assert.equal(res.length, 1)
+          assert(res[0].length == 1)
+          assert.equal(res[0][0].value, 232)
+          done()
+        })
       })
     })
   })
