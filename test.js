@@ -294,12 +294,11 @@ describe('InfluxDB', function () {
     it('should delete the database without error', function (done) {
       client.dropDatabase(info.db.name, done)
     })
-    it('should error if database didn\'t exist', function (done) {
+    it('should not error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
         if (err) return done(err)
         client.dropDatabase(info.db.name, function (err) {
-          assert(err instanceof Error)
-          done()
+          done(err)
         })
       })
     })
@@ -315,10 +314,9 @@ describe('InfluxDB', function () {
     })
 
     describe('#duplicateDatabase', function () {
-      it('should report an error if db already exists', function (done) {
+      it('should not report an error if db already exists', function (done) {
         client.createDatabase(info.db.name, function (err) {
-          assert(err instanceof Error)
-          done()
+          done(err)
         })
       })
     })
@@ -506,8 +504,14 @@ describe('InfluxDB', function () {
         it('should return array of series', function (done) {
           client.getSeries(function (err, series) {
             if (err) return done(err)
-            assert(series[0].values instanceof Array)
-            assert.equal(series[0].values.length, 2)
+            var expected = [ {
+              columns: [ 'key' ],
+              values: [
+                [ 'number_test,field1=f1' ],
+                [ 'number_test,field1=f1,field2=f2' ],
+                [ 'string_test' ]
+              ] } ]
+            assert.deepEqual(series, expected)
             done()
           })
         })
