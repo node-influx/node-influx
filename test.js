@@ -273,13 +273,19 @@ describe('InfluxDB', function () {
   })
 
   describe('#dropDatabase', function () {
-    this.timeout(25000)
+    beforeEach(function (done) {
+      client.createDatabase(info.db.name, done)
+    })
     it('should delete the database without error', function (done) {
       client.dropDatabase(info.db.name, done)
     })
-    it('should not error if database didn\'t exist', function (done) {
+    it('should error if database didn\'t exist', function (done) {
       client.dropDatabase(info.db.name, function (err) {
-        done(err)
+        if (err) return done(err)
+        client.dropDatabase(info.db.name, function (err) {
+          assert(err instanceof Error)
+          done()
+        })
       })
     })
   })
