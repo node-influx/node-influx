@@ -13,7 +13,12 @@ before(function (done) {
 
     assert.equal(major, 0)
     assert(minor >= 13)
-    done()
+
+    // Also double-check that basic https is working
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0' // allow self-signed cert
+    request('https://localhost:8084/ping', function (err, response, body) {
+      done(err)
+    })
   })
 })
 
@@ -706,41 +711,31 @@ describe('InfluxDB', function () {
       })
     })
   })
-})
 
-// todo:
-// HTTPS support didn't work, InfluxDB didn't start no matter what. needs to be solved asap
-/* describe('HTTPS connection', function() {
-  var client
+  describe('#HTTPS', function () {
+    var httpsClient
 
-  var dbName = 'https_db'
+    var dbName = 'https_db'
 
-  describe('connect and create test DB', function () {
+    describe('connect and create test DB', function () {
+      before(function () {
+        client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
+        httpsClient = influx({
+          host: info.server.host,
+          port: 8084,
+          protocol: 'https',
+          username: info.server.username,
+          password: info.server.password,
+          precision: info.server.timePrecision
+        })
+      })
 
-    before(function() {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // allow self-signed cert
-
-      client = influx({
-        host: 'localhost',
-        port: 8084,
-        protocol: 'https',
-        username: 'root',
-        password: 'root',
-        timePrecision: 'ms'
+      it('should create and delete database without error', function (done) {
+        httpsClient.createDatabase(dbName, function (err) {
+          if (err) return done(err)
+          httpsClient.dropDatabase(dbName, done)
+        })
       })
     })
-
-    it('should create a new database without error', function (done) {
-      client.createDatabase(dbName, done)
-    })
-
-    it('should throw an error if db already exists', function (done) {
-      client.createDatabase(dbName, function (err) {
-        assert(err instanceof Error)
-        done()
-      })
-    })
-
   })
 })
-*/
