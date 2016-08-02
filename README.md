@@ -446,9 +446,10 @@ As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/bl
 
 ## Testing
 
-Either install InfluxDB or use a docker container to run the service:
+The test suite uses a docker container that runs multiple instances of influxdb
+to validate HTTP, HTTPS, and HTTP Basic Auth.
 
-    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
+    docker run -d -p 8083:8083 -p 8086:8086 -p 8085:8085 -p 8084:8084 -p 9085:9085 -p 9084:9084 --expose 8090 --expose 8099 lab11/docker-influxdb:latest-ci
 
 Then to run the test harness use `npm test`.
 
