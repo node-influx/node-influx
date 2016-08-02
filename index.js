@@ -76,13 +76,17 @@ var InfluxDB = function (options) {
 }
 
 InfluxDB.prototype._parseResults = function (response, callback) {
+  var self = this
   var results = []
   _.each(response, function (result) {
     var tmp = []
     if (result.series) {
       _.each(result.series, function (series) {
         var rows = _.map(series.values, function (values) {
-          return _.extend(_.zipObject(series.columns, values), series.tags)
+          var columnsDesanitized = _.map(series.columns, self._desanitizeString)
+          var valuesDesanitized = _.map(values, self._desanitizeString)
+          var tagsDesanitized = _.forOwn(series.tags, self._desanitizeObjectIter.bind(self))
+          return _.extend(_.zipObject(columnsDesanitized, valuesDesanitized), tagsDesanitized)
         })
         tmp = _.chain(tmp).concat(rows).value()
       })
@@ -289,15 +293,44 @@ InfluxDB.prototype.dropUser = function (username, callback) {
   this.queryDB('drop user "' + username + '"', callback)
 }
 
+// The key is the measurement name and any optional tags separated by commas.
+// Measurement names, tag keys, and tag values must escape any spaces or commas
+// using a backslash (\). For example: \ and \,.
+
+// Strings are text values. All string field values must be surrounded in
+// double-quotes ". If the string contains a double-quote, the double-quote
+// must be escaped with a backslash, e.g. \"
+InfluxDB.prototype._sanitizeString = function (string) {
+  if (typeof string === 'string') {
+    return string.replace(/[ ,\\"]/g, '\\$&')
+  }
+  return string
+}
+InfluxDB.prototype._desanitizeString = function (string) {
+  if (typeof string === 'string') {
+    return string.replace(/[\\]/g, '')
+  }
+  return string
+}
+InfluxDB.prototype._desanitizeObjectIter = function (value, key) {
+  // For passing to _.forOwn and the like
+  var r = {}
+  r[this._desanitizeString(key)] = this._desanitizeString(value)
+  return r
+}
+
 InfluxDB.prototype._createKeyValueString = function (object) {
+  var self = this
   var output = []
   var clone = _.clone(object)
   delete clone.time
   _.forOwn(clone, function (value, key) {
+    var keySafe = self._sanitizeString(key)
     if (typeof value === 'string') {
-      output.push(key + '="' + value + '"')
+      var valueSafe = self._sanitizeString(value)
+      output.push(keySafe + '="' + valueSafe + '"')
     } else {
-      output.push(key + '=' + value)
+      output.push(keySafe + '=' + value)
     }
   })
   return output.join(',')

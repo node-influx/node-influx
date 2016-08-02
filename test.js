@@ -357,7 +357,6 @@ describe('InfluxDB', function () {
 
     describe('#writePoint', function () {
       this.timeout(5000)
-
       it('should write a generic point into the database', function (done) {
         dbClient.writePoint(info.series.numName, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, done)
       })
@@ -576,6 +575,47 @@ describe('InfluxDB', function () {
         it('should bubble errors through', function (done) {
           failClient.dropMeasurement(info.series.numName, function (err) {
             assert(err instanceof Error)
+            done()
+          })
+        })
+      })
+    })
+
+    describe('#specialCharacters', function () {
+      it('should write and read back a field value with spaces and commas', function (done) {
+        var fieldValue = 'this space,that'
+        dbClient.writePoint(info.series.strName, {value: fieldValue}, {}, function (err) {
+          if (err) return done(err)
+          dbClient.query('SELECT value FROM ' + info.series.strName + ';', function (err, res) {
+            if (err) return done(err)
+            assert.equal(res[0][0].value, fieldValue)
+            done()
+          })
+        })
+      })
+
+      it('should write and read back a field value with quote characters', function (done) {
+        var fieldValue = 'single\'double"'
+        dbClient.writePoint(info.series.strName, {value: fieldValue}, {}, function (err) {
+          if (err) return done(err)
+          dbClient.query('SELECT value FROM ' + info.series.strName + ';', function (err, res) {
+            if (err) return done(err)
+            assert.equal(res[0][0].value, fieldValue)
+            done()
+          })
+        })
+      })
+
+      it('should write and read back a field key with spaces and commas', function (done) {
+        var fieldObject = {}
+        var fieldKey = 'key space'
+        var fieldValue = 'value'
+        fieldObject[fieldKey] = fieldValue
+        dbClient.writePoint(info.series.strName, fieldObject, {}, function (err) {
+          if (err) return done(err)
+          dbClient.query('SELECT "' + fieldKey + '" FROM ' + info.series.strName + ';', function (err, res) {
+            if (err) return done(err)
+            assert.equal(res[0][0][fieldKey], fieldValue)
             done()
           })
         })
