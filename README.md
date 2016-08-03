@@ -123,7 +123,7 @@ client.setFailoverTimeout( value )
 Returns an array of available hosts.
 
 ```js
-getHostsAvailable( ) 
+getHostsAvailable( )
 ```
 
 ##### getHostsDisabled
@@ -145,7 +145,7 @@ client.createDatabase(databaseName, function(err, result) {} )
 Returns array of database names - requires cluster admin privileges
 
 ```js
-client.getDatabaseNames( function(err,arrayDatabaseNames){ } ) 
+client.getDatabaseNames( function(err,arrayDatabaseNames){ } )
 ```
 
 ##### dropDatabase
@@ -368,7 +368,7 @@ You can also pass multiple queries at once. The callback returns an array of ser
 ```js
 client.query('SELECT * FROM myseries; SELECT AVG(VALUE) as avgvalue from myseries', function (err, results) {});
 
-// -> results =[ 
+// -> results =[
 //   [ { value : 1, tagname : 'tagvalue'}, {value : 3, othertag : 'value}],
 //   [ {avgvalue : 2.345}]
 // ]
@@ -448,13 +448,13 @@ As Jeff Atwood puts it... [Read the source, Luke](http://www.codinghorror.com/bl
 
 Either install InfluxDB or use a docker container to run the service:
 
-    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb
+    docker run -d -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 tutum/influxdb:0.13
 
 Then to run the test harness use `npm test`.
 
 ## Contributing
 
-If you want to add features, fix bugs or improve node-influx please open a pull-request. 
+If you want to add features, fix bugs or improve node-influx please open a pull-request.
 Please note, we are following [Javascript Standard Style](https://github.com/feross/standard). Before opening a PR
 your code should pass Standard.
 
