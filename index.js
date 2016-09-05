@@ -174,7 +174,16 @@ InfluxDB.prototype.getDatabaseNames = function (callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, _.map(results[0].series[0].values, function (dbarray) { return dbarray[0] }))
+
+    if (_.isArray(results) && !_.isEmpty(results) && _.isArray(results[0].series) &&
+        !_.isEmpty(results[0].series) && _.isArray(results[0].series[0].values)) {
+
+      return callback(err, _.map(results[0].series[0].values, function (dbarray) {
+        if (_.isArray(dbarray) && !_.isEmpty(dbarray)) {
+          return dbarray[0]
+        }
+      }))
+    } else { return callback(new Error('bad response from server', results))}
   })
 }
 
