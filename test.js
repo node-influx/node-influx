@@ -9,6 +9,7 @@ var client
 var dbClient
 var failClient
 var failoverClient
+var emptyClient
 
 var info = {
   server: {
@@ -32,29 +33,29 @@ var info = {
 
 function writeFixtures (done) {
   async.series([
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, cb)
     },
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, cb)
     },
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.name, {time: 1234567890, value: 232}, {}, cb)
     },
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.name, {time: new Date(), value: 232}, {}, cb)
     },
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.strName, {value: 'my test string'}, {}, cb)
     },
-    (cb) => {
+    function(cb) {
       dbClient.writePoint(info.series.strName, 'my second test string', {}, cb)
     }
   ], function () {
     return done()
   })
 }
-before((done) => {
+before(function(done) {
   client = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name, retentionPolicy: info.db.retentionPolicy})
   dbClient = influx({host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: info.db.name})
   failClient = influx({host: info.server.host, port: 6543, username: info.server.username, password: info.server.password, database: info.db.name})
@@ -66,6 +67,7 @@ before((done) => {
       {host: info.server.host, port: info.server.port}
   ], username: info.server.username, passwort: info.server.password, database: info.db.name})
 
+  emptyClient = influx({ host: info.server.host, port: info.server.port, username: info.server.username, password: info.server.password, database: 'empty_database'})
   assert(client instanceof influx.InfluxDB)
   return client.createDatabase(info.db.name, done)
 })
@@ -282,10 +284,10 @@ describe('InfluxDB', function () {
       username: 'revokeAdminPrivileges',
       passowrd: 'password'
     }
-    beforeEach((done) => {
+    beforeEach(function(done) {
       client.createUser(testUser.username, testUser.password, true, done)
     })
-    afterEach((done) => {
+    afterEach(function(done) {
       client.dropUser(testUser.username, done)
     })
     it('should revoke admin privileges without error', function (done) {
@@ -508,8 +510,8 @@ describe('InfluxDB', function () {
   })
 
   describe('#getSeries', function () {
-    before((done) => {
-      client.createDatabase(info.db.name, () => {
+    before(function(done) {
+      client.createDatabase(info.db.name, function() {
         return writeFixtures(done)
       })
     })
@@ -530,11 +532,20 @@ describe('InfluxDB', function () {
         done()
       })
     })
+    it('should support empty databases', function(done) {
+      return emptyClient.createDatabase('empty_database', function() {
+        emptyClient.getSeries('a_series', function(err, series) {
+          assert.ifError(err);
+          assert.deepEqual(series, []);
+          return done();
+        })
+      })
+    })
     it('should bubble errors through')
   })
 
   describe('#getSeriesNames', function () {
-    before((done) => {
+    before(function(done) {
       writeFixtures(done)
     })
     it('should return array of series names', function (done) {
