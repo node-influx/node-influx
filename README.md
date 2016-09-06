@@ -261,7 +261,7 @@ var point = { attr : value, time : new Date()};
 client.writePoint(seriesName, values, tags, [options], function(err, response) { })
 ```
 
-`values` can be either an objekt or a single value. For the latter the columname is set to `value`.
+`values` can be either an object or a single value. For the latter the columname is set to `value`.
 You can set the time by passing an object propety called `time`. The time an be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
 
 The parameter `options` is an optional and can have following fields:
