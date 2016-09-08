@@ -174,7 +174,17 @@ InfluxDB.prototype.getDatabaseNames = function (callback) {
     if (err) {
       return callback(err, results)
     }
-    return callback(err, _.map(results[0].series[0].values, function (dbarray) { return dbarray[0] }))
+
+    var names = _.get(results, '[0].series[0].values')
+    if (!_.isArray(names)) {
+      return callback(new Error('bad response from server', results))
+    }
+
+    callback(null, names.map(function (dbarray) {
+      if (_.isArray(dbarray)) {
+        return dbarray[0]
+      }
+    }))
   })
 }
 
