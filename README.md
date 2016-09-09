@@ -39,20 +39,20 @@ var influx = require('influx')
 var client = influx({
 
   //cluster configuration
-  hosts : [
+  hosts: [
     {
-      host : 'localhost',
-      port : 8060, //optional. default 8086
-      protocol : 'http' //optional. default 'http'
+      host: 'localhost',
+      port: 8060, //optional. default 8086
+      protocol: 'http' //optional. default 'http'
     }
   ],
   // or single-host configuration
-  host : 'localhost',
-  port : 8086, // optional, default 8086
-  protocol : 'http', // optional, default 'http'
-  username : 'dbuser',
-  password : 'f4ncyp4ass',
-  database : 'my_database'
+  host: 'localhost',
+  port: 8086, // optional, default 8086
+  protocol: 'http', // optional, default 'http'
+  username: 'dbuser',
+  password: 'f4ncyp4ass',
+  database: 'my_database'
 })
 
 ```
@@ -90,12 +90,12 @@ client = influx({
 | host | hostname, e.g. 'localhost' |
 | port [optional] |  influxdb port, default: 8086 |
 | protocol [optional] |  protocol, default: http |
-| hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port : 8086},...] Port is optional |
+| hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port: 8086},...] Port is optional |
 | depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
 | requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
-| maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default : 2 |
-| timePrecision [optional] |Time precision, default : ms |
+| maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default: 2 |
+| timePrecision [optional] |Time precision, default: ms |
 
 
 ## Functions
@@ -137,7 +137,7 @@ client.getHostsDisabled( )
 Creates a new database - requires cluster admin privileges
 
 ```js
-client.createDatabase(databaseName, function(err, result) {} )
+client.createDatabase(databaseName, function (err, result) { })
 ```
 
 
@@ -145,14 +145,14 @@ client.createDatabase(databaseName, function(err, result) {} )
 Returns array of database names - requires cluster admin privileges
 
 ```js
-client.getDatabaseNames( function(err,arrayDatabaseNames){ } )
+client.getDatabaseNames(function (err,arrayDatabaseNames) { })
 ```
 
 ##### dropDatabase
 Drops a database inluding all measurements/series - requires cluster admin privileges
 
 ```js
-dropDatabase ( databaseName, function(err,response) { })
+dropDatabase (databaseName, function (err,response) { })
 ```
 
 
@@ -160,7 +160,7 @@ dropDatabase ( databaseName, function(err,response) { })
 Returns array of measurements - requires database admin privileges
 
 ```js
-client.getMeasurements(function(err,arrayMeasurements){ } )
+client.getMeasurements(function (err,arrayMeasurements) { })
 ```
 
 
@@ -168,7 +168,7 @@ client.getMeasurements(function(err,arrayMeasurements){ } )
 Drops a measurement from a database - requires database admin privileges
 
 ```js
-dropSeries ( measurementName, function(err,response) { })
+dropSeries (measurementName, function (err,response) { })
 ```
 
 
@@ -176,14 +176,14 @@ dropSeries ( measurementName, function(err,response) { })
 Returns array of series names from given measurement, or database if `measurementName` is omitted - requires database admin privileges
 
 ```js
-client.getSeries([measurementName], function(err,arraySeriesNames){} )
+client.getSeries([measurementName], function (err,arraySeriesNames) { })
 ```
 
 ##### getSeriesNames
 Returns array of series names from given measurement - requires database admin privileges
 
 ```js
-client.getSeriesNames([measurementName], function(err,arraySeriesNames){} ) { }
+client.getSeriesNames([measurementName], function (err,arraySeriesNames) { })
 ```
 
 
@@ -191,7 +191,7 @@ client.getSeriesNames([measurementName], function(err,arraySeriesNames){} ) { }
 Drops a series from a database - requires database admin privileges
 
 ```js
-dropSeries ( seriesId, function(err,response) { })
+dropSeries (seriesId, function (err,response) { })
 ```
 
 
@@ -207,14 +207,14 @@ client.getUsers(function (err, users) { } )
 Creates a new database user - requires cluster admin privileges
 
 ```js
-client.createUser(username, password, isAdmin, function(err,response) { })
+client.createUser(username, password, isAdmin, function (err,response) { })
 ```
 
 ##### setPassword
 Sets the users password - requires admin privileges
 
 ```js
-client.setPassword(username, password, function (err, reponse) {} )
+client.setPassword(username, password, function (err, reponse) { })
 ```
 
 
@@ -222,34 +222,34 @@ client.setPassword(username, password, function (err, reponse) {} )
 Grants privilege for the given user - requires admin privileges
 
 ```js
-client.grantPrivilege(privilege, databaseName, userName, function (err, reponse) {} )
+client.grantPrivilege(privilege, databaseName, userName, function (err, reponse) { })
 ```
 
 ##### revokePrivilege
 Revokes privilege for the given user - requires admin privileges
 
 ```js
-client.revokePrivilege(privilege, databaseName, userName, function (err, reponse) {} )
+client.revokePrivilege(privilege, databaseName, userName, function (err, reponse) { })
 ```
 
 ##### grantAdminPrivileges
 Grants admin privileges for the given user - requires admin privileges
 
 ```js
-client.grantAdminPrivileges(userName, function (err, reponse) {} )
+client.grantAdminPrivileges(userName, function (err, reponse) { })
 ```
 
 ##### revokeAdminPrivileges
 Revokes all admin privileges for the given user - requires admin privileges
 
 ```js
-client.revokeAdminPrivileges(userName, function (err, reponse) {} )
+client.revokeAdminPrivileges(userName, function (err, reponse) { })
 ```
 
 ##### dropUser
 Drops the given user - requires admin privileges
 ```js
-client.dropUser(userName, function(err,response) {] )
+client.dropUser(userName, function (err,response) { })
 ```
 
 
@@ -257,8 +257,7 @@ client.dropUser(userName, function(err,response) {] )
 Writes a point to a series - requires database user privileges
 
 ```js
-var point = { attr : value, time : new Date()};
-client.writePoint(seriesName, values, tags, [options], function(err, response) { })
+client.writePoint(seriesName, values, tags, [options], function (err, response) { })
 ```
 
 `values` can be either an object or a single value. For the latter the columname is set to `value`.
@@ -273,13 +272,13 @@ The parameter `options` is an optional and can have following fields:
 ###### example
 ```js
 //write a single point with two values and two tags. time is omitted
-client.writePoint(info.series.name, {value: 232, value2: 123}, { foo: 'bar', foobar: 'baz'}, done)
+client.writePoint(info.series.name, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, done)
 
-//write a single point with the value "1". The value "1" corresponds to { value : 1 }
-client.writePoint(info.series.name, 1, { foo: 'bar', foobar: 'baz'}, done)
+//write a single point with the value "1". The value "1" corresponds to {value: 1}
+client.writePoint(info.series.name, 1, {foo: 'bar', foobar: 'baz'}, done)
 
 //write a single point, providing an integer timestamp and time precision 's' for seconds
-client.writePoint(info.series.name, {time: 1234567890, value: 232}, null, {precision : 's'}, done)
+client.writePoint(info.series.name, {time: 1234567890, value: 232}, null, {precision: 's'}, done)
 
 //write a single point, providing a Date object. Precision is set to default 'ms' for milliseconds.
 client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
@@ -294,15 +293,15 @@ Writes multiple points to a series - requires database user privileges
 ```js
 var points = [
   //first value with tag
-  [{value: 232}, { tag: 'foobar'}],
+  [{value: 232}, {tag: 'foobar'}],
   //second value with different tag
-  [{value: 212}, { someothertag: 'baz'}],
+  [{value: 212}, {someothertag: 'baz'}],
   //third value, passed as integer. Different tag
-  [123, { foobar: 'baz'}],
+  [123, {foobar: 'baz'}],
   //value providing timestamp, without tags
-  [{value: 122, time : new Date()}]
+  [{value: 122, time: new Date()}]
 ]
-client.writePoints(seriesName, points, [options], callback) { }
+client.writePoints(seriesName, points, [options], callback) { })
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -316,31 +315,31 @@ Writes multiple point to multiple series - requires database user privileges
 ```js
 var points = [
   //first value with tag
-  [{value: 232}, { tag: 'foobar'}],
+  [{value: 232}, {tag: 'foobar'}],
   //second value with different tag
-  [{value: 212}, { someothertag: 'baz'}],
+  [{value: 212}, {someothertag: 'baz'}],
   //third value, passed as integer. Different tag
-  [123, { foobar: 'baz'}],
+  [123, {foobar: 'baz'}],
   //value providing timestamp, without tags
-  [{value: 122, time : new Date()}]
+  [{value: 122, time: new Date()}]
 ]
 
 var points2 = [
   //first value with tag
-  [{value: 1232}, { tag: 'foobar'}],
+  [{value: 1232}, {tag: 'foobar'}],
   //second value with different tag
-  [{value: 223212}, { someothertag: 'baz'}],
+  [{value: 223212}, {someothertag: 'baz'}],
   //third value, passed as integer. Different tag
-  [12345, { foobar: 'baz'}],
+  [12345, {foobar: 'baz'}],
   //value providing timestamp, without tags
-  [{value: 23122, time : new Date()}]
+  [{value: 23122, time: new Date()}]
 ]
 var series = {
-    series_name_one : points,
-    series_name_two : points2
+    series_name_one: points,
+    series_name_two: points2
 };
 
-client.writeSeries(series, [options], function(err,response) { })
+client.writeSeries(series, [options], function (err,response) { })
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -355,7 +354,7 @@ Queries the database and returns an array of parsed responses. - requires databa
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.query([database], query, function(err, results) { })
+client.query([database], query, function (err, results) { })
 
 ```
 
@@ -369,8 +368,8 @@ You can also pass multiple queries at once. The callback returns an array of ser
 client.query('SELECT * FROM myseries; SELECT AVG(VALUE) as avgvalue from myseries', function (err, results) {});
 
 // -> results =[
-//   [ { value : 1, tagname : 'tagvalue'}, {value : 3, othertag : 'value}],
-//   [ {avgvalue : 2.345}]
+//   [ {value: 1, tagname: 'tagvalue'}, {value: 3, othertag: 'value}],
+//   [ {avgvalue: 2.345}]
 // ]
 
 ```
@@ -381,7 +380,7 @@ Same as function `query` but returns the raw response from InfluxDB.
 
 ```js
 var query = 'SELECT MEDIAN(column) FROM myseries WHERE time > now() - 24h';
-client.queryRaw([database], query, function(err, results) { })
+client.queryRaw([database], query, function (err, results) { })
 
 ```
 
@@ -397,14 +396,14 @@ client.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_
 Fetches all continuous queries from a database - requires database admin privileges
 
 ```js
-getContinuousQueries( function(err,arrayContinuousQueries) { })
+getContinuousQueries(function (err,arrayContinuousQueries) { })
 ```
 
 ##### dropContinuousQuery
 Drops a continuous query from a database - requires database admin privileges
 
 ```js
-dropContinuousQuery( queryName, [databaseName], callback) { }
+dropContinuousQuery(queryName, [databaseName], callback) { })
 ```
 
 
@@ -413,7 +412,7 @@ dropContinuousQuery( queryName, [databaseName], callback) { }
 Fetches all retention policies from a database.
 
 ```js
-client.getRetentionPolicies(databaseName, function(err,response) {} )
+client.getRetentionPolicies(databaseName, function (err,response) {})
 ```
 
 ##### createRetentionPolicy
@@ -421,7 +420,7 @@ client.getRetentionPolicies(databaseName, function(err,response) {} )
 Creates a new retention policy - requires admin privileges.
 
 ```js
-client.createRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function(err,response) {} )
+client.createRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err,response) {})
 ```
 
 ##### example
@@ -434,7 +433,7 @@ client.createRetentionPolicy('my_ret_pol_name', 'my_database', '1d', 1, true, fu
 Alters an existing retention policy - requires admin privileges.
 
 ```js
-client.alterRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function(err,response) {} )
+client.alterRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err,response) {})
 ```
 
 
