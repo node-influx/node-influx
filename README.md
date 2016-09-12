@@ -257,7 +257,7 @@ client.dropUser(userName, function (err,response) { })
 Writes a point to a series - requires database user privileges
 
 ```js
-client.writePoint(seriesName, values, tags, [options], function (err, response) { })
+client.writePoint(seriesName, values, tags, [options], function (err) { })
 ```
 
 `values` can be either an object or a single value. For the latter the columname is set to `value`.
@@ -289,7 +289,13 @@ client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
 ###### writePoints
 Writes multiple points to a series - requires database user privileges
 
-`Points` is an array of points. Each point containing two objects - the actual values and tags.
+```js
+client.writePoints(seriesName, points, [options], function (err) { })
+```
+
+`points` is an array of points. Each point containing two objects - the actual values and tags.
+
+###### example
 ```js
 var points = [
   //first value with tag
