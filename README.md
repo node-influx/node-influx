@@ -457,9 +457,7 @@ If you want to add features, fix bugs or improve node-influx please open a pull-
 Please note, we are following [Javascript Standard Style](https://github.com/feross/standard). Before opening a PR
 your code should pass Standard.
 
- `npm install standard`
- `standard`
-
+ `npm run lint`
 
 
 ## Licence
