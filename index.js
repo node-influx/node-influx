@@ -313,6 +313,12 @@ InfluxDB.prototype._createKeyValueString = function (object) {
   return output.join(',')
 }
 
+/**
+ * Return a sorted string of comma-separated key=value tags, with escaped values
+ * @param object
+ * @returns {string}
+ * @private
+ */
 InfluxDB.prototype._createKeyTagString = function (object) {
   var output = []
   _.forOwn(object, function (value, key) {
@@ -322,7 +328,8 @@ InfluxDB.prototype._createKeyTagString = function (object) {
       output.push(key + '=' + value)
     }
   })
-  return output.join(',')
+  // "For best performance you should sort tags by key before sending them to the database."
+  return output.sort().join(',')
 }
 
 InfluxDB.prototype._prepareValues = function (series) {
