@@ -26,7 +26,7 @@ Interested in becoming a maintainer? Please help out with issues and pull-reques
 
 Version 4.x.x is compatible with InfluxDB 0.9.x
 
-Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have updates by core contributers, please consider upgrading.
+Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have updates by core contributors, please consider upgrading.
 
 
 ## Usage
@@ -145,14 +145,14 @@ client.createDatabase(databaseName, function (err, result) { })
 Returns array of database names - requires cluster admin privileges
 
 ```js
-client.getDatabaseNames(function (err,arrayDatabaseNames) { })
+client.getDatabaseNames(function (err, arrayDatabaseNames) { })
 ```
 
 ##### dropDatabase
 Drops a database inluding all measurements/series - requires cluster admin privileges
 
 ```js
-dropDatabase (databaseName, function (err,response) { })
+dropDatabase (databaseName, function (err, response) { })
 ```
 
 
@@ -160,7 +160,7 @@ dropDatabase (databaseName, function (err,response) { })
 Returns array of measurements - requires database admin privileges
 
 ```js
-client.getMeasurements(function (err,arrayMeasurements) { })
+client.getMeasurements(function (err, arrayMeasurements) { })
 ```
 
 
@@ -168,7 +168,7 @@ client.getMeasurements(function (err,arrayMeasurements) { })
 Drops a measurement from a database - requires database admin privileges
 
 ```js
-dropSeries (measurementName, function (err,response) { })
+dropSeries (measurementName, function (err, response) { })
 ```
 
 
@@ -176,14 +176,14 @@ dropSeries (measurementName, function (err,response) { })
 Returns array of series names from given measurement, or database if `measurementName` is omitted - requires database admin privileges
 
 ```js
-client.getSeries([measurementName], function (err,arraySeriesNames) { })
+client.getSeries([measurementName], function (err, arraySeriesNames) { })
 ```
 
 ##### getSeriesNames
 Returns array of series names from given measurement - requires database admin privileges
 
 ```js
-client.getSeriesNames([measurementName], function (err,arraySeriesNames) { })
+client.getSeriesNames([measurementName], function (err, arraySeriesNames) { })
 ```
 
 
@@ -191,7 +191,7 @@ client.getSeriesNames([measurementName], function (err,arraySeriesNames) { })
 Drops a series from a database - requires database admin privileges
 
 ```js
-dropSeries (seriesId, function (err,response) { })
+dropSeries (seriesId, function (err, response) { })
 ```
 
 
@@ -207,14 +207,14 @@ client.getUsers(function (err, users) { } )
 Creates a new database user - requires cluster admin privileges
 
 ```js
-client.createUser(username, password, isAdmin, function (err,response) { })
+client.createUser(username, password, isAdmin, function (err, response) { })
 ```
 
 ##### setPassword
 Sets the users password - requires admin privileges
 
 ```js
-client.setPassword(username, password, function (err, reponse) { })
+client.setPassword(username, password, function (err, response) { })
 ```
 
 
@@ -222,34 +222,34 @@ client.setPassword(username, password, function (err, reponse) { })
 Grants privilege for the given user - requires admin privileges
 
 ```js
-client.grantPrivilege(privilege, databaseName, userName, function (err, reponse) { })
+client.grantPrivilege(privilege, databaseName, userName, function (err, response) { })
 ```
 
 ##### revokePrivilege
 Revokes privilege for the given user - requires admin privileges
 
 ```js
-client.revokePrivilege(privilege, databaseName, userName, function (err, reponse) { })
+client.revokePrivilege(privilege, databaseName, userName, function (err, response) { })
 ```
 
 ##### grantAdminPrivileges
 Grants admin privileges for the given user - requires admin privileges
 
 ```js
-client.grantAdminPrivileges(userName, function (err, reponse) { })
+client.grantAdminPrivileges(userName, function (err, response) { })
 ```
 
 ##### revokeAdminPrivileges
 Revokes all admin privileges for the given user - requires admin privileges
 
 ```js
-client.revokeAdminPrivileges(userName, function (err, reponse) { })
+client.revokeAdminPrivileges(userName, function (err, response) { })
 ```
 
 ##### dropUser
 Drops the given user - requires admin privileges
 ```js
-client.dropUser(userName, function (err,response) { })
+client.dropUser(userName, function (err, response) { })
 ```
 
 
@@ -257,11 +257,13 @@ client.dropUser(userName, function (err,response) { })
 Writes a point to a series - requires database user privileges
 
 ```js
-client.writePoint(seriesName, values, tags, [options], function (err, response) { })
+client.writePoint(seriesName, values, tags, [options], function (err) { })
 ```
 
-`values` can be either an object or a single value. For the latter the columname is set to `value`.
-You can set the time by passing an object propety called `time`. The time an be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
+`values` can be either an object or a single value. In the latter case, the field key is set to `value`.
+You can set the time by passing an object property called `time`. The time can be either an integer value or a Date object. When providing a single value, don't forget to adjust the time precision accordingly. The default value is `ms`.
+
+The `tags` will be automatically sorted, for maximum write throughput performance.
 
 The parameter `options` is an optional and can have following fields:
 - `db`: Database to work with
@@ -289,19 +291,23 @@ client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
 ###### writePoints
 Writes multiple points to a series - requires database user privileges
 
-`Points` is an array of points. Each point containing two objects - the actual values and tags.
+```js
+ client.writePoints(seriesName, points, [options], function (err) { })
+ ```
+
+`Points` is an array of points. Each point is an array of two objects - the [field set](https://docs.influxdata.com/influxdb/v1.0/write_protocols/line_protocol_tutorial/#field-set), and the [tag set](https://docs.influxdata.com/influxdb/v1.0/write_protocols/line_protocol_tutorial/#tag-set). If you want to add a timestamp, add a `time` key in the first object. (We're looking for input on this API - see [#182](https://github.com/node-influx/node-influx/issues/182).)
 ```js
 var points = [
-  //first value with tag
+  // One field with one tag
   [{value: 232}, {tag: 'foobar'}],
-  //second value with different tag
-  [{value: 212}, {someothertag: 'baz'}],
-  //third value, passed as integer. Different tag
+  // One field with two tags
+  [{value: 212}, {tag1: 'baz', tag2: 'quux'}],
+  // Field with just value (key defaults to 'value'). Different tag.
   [123, {foobar: 'baz'}],
-  //value providing timestamp, without tags
+  // Timestamp, one field, no tags
   [{value: 122, time: new Date()}]
-]
-client.writePoints(seriesName, points, [options], callback) { })
+];
+client.writePoints(seriesName, points, [options], callback)
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -313,33 +319,33 @@ The parameter `options` is an optional and can have following fields:
 Writes multiple point to multiple series - requires database user privileges
 
 ```js
-var points = [
-  //first value with tag
+var points1 = [
+  // One field with one tag
   [{value: 232}, {tag: 'foobar'}],
-  //second value with different tag
-  [{value: 212}, {someothertag: 'baz'}],
-  //third value, passed as integer. Different tag
+  // One field with two tags
+  [{value: 212}, {tag1: 'baz', tag2: 'quux'}],
+  // Field with just value (key defaults to 'value'). Different tag.
   [123, {foobar: 'baz'}],
-  //value providing timestamp, without tags
+  // Timestamp, one field, no tags
   [{value: 122, time: new Date()}]
 ]
 
 var points2 = [
-  //first value with tag
+  // One field with one tag
   [{value: 1232}, {tag: 'foobar'}],
-  //second value with different tag
+  // Another field with a different tag
   [{value: 223212}, {someothertag: 'baz'}],
-  //third value, passed as integer. Different tag
+  // Third field
   [12345, {foobar: 'baz'}],
-  //value providing timestamp, without tags
+  // Timestamp, one field, no tags
   [{value: 23122, time: new Date()}]
-]
+];
 var series = {
-    series_name_one: points,
+    series_name_one: points1,
     series_name_two: points2
 };
 
-client.writeSeries(series, [options], function (err,response) { })
+client.writeSeries(series, [options], function (err, response) { })
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -389,21 +395,21 @@ client.queryRaw([database], query, function (err, results) { })
 Creates a continuous query - requires admin privileges
 
 ```js
-client.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM ' + info.series.name + ' GROUP BY time(1h) ', function (err, res) {} )
+client.createContinuousQuery('testQuery', 'SELECT COUNT(value) INTO valuesCount_1h FROM ' + info.series.name + ' GROUP BY time(1h) ', function (err, results) {} )
 ```
 
 ##### getContinuousQueries
 Fetches all continuous queries from a database - requires database admin privileges
 
 ```js
-getContinuousQueries(function (err,arrayContinuousQueries) { })
+client.getContinuousQueries(function (err, arrayContinuousQueries) { })
 ```
 
 ##### dropContinuousQuery
 Drops a continuous query from a database - requires database admin privileges
 
 ```js
-dropContinuousQuery(queryName, [databaseName], callback) { })
+client.dropContinuousQuery(queryName, [databaseName], function (err, results) { })
 ```
 
 
@@ -412,7 +418,7 @@ dropContinuousQuery(queryName, [databaseName], callback) { })
 Fetches all retention policies from a database.
 
 ```js
-client.getRetentionPolicies(databaseName, function (err,response) {})
+client.getRetentionPolicies(databaseName, function (err, response) { })
 ```
 
 ##### createRetentionPolicy
@@ -420,12 +426,12 @@ client.getRetentionPolicies(databaseName, function (err,response) {})
 Creates a new retention policy - requires admin privileges.
 
 ```js
-client.createRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err,response) {})
+client.createRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err, response) { })
 ```
 
 ##### example
 ```js
-client.createRetentionPolicy('my_ret_pol_name', 'my_database', '1d', 1, true, function (err,resonse) {})
+client.createRetentionPolicy('my_ret_pol_name', 'my_database', '1d', 1, true, function (err, response) { })
 ```
 
 ##### alterRetentionPolicy
@@ -433,7 +439,7 @@ client.createRetentionPolicy('my_ret_pol_name', 'my_database', '1d', 1, true, fu
 Alters an existing retention policy - requires admin privileges.
 
 ```js
-client.alterRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err,response) {})
+client.alterRetentionPolicy(rpName, databaseName, duration, replication, isDefault, function (err, response) { })
 ```
 
 
@@ -453,13 +459,13 @@ Then to run the test harness use `npm test`.
 
 ## Contributing
 
-If you want to add features, fix bugs or improve node-influx please open a pull-request.
-Please note, we are following [Javascript Standard Style](https://github.com/feross/standard). Before opening a PR
-your code should pass Standard.
+If you want to add features, fix bugs or improve `node-influx`, please open a pull-request.
+Please note, we are following [Javascript Standard Style](https://github.com/feross/standard).
+Before opening a PR, your code should pass Standard:
 
- `npm run lint`
+    npm run lint
 
 
-## Licence
+## License
 
 MIT

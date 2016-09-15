@@ -110,16 +110,18 @@ describe('InfluxDB', function () {
     })
 
     describe('#_createKeyTagString', function () {
-      it('should build a properly formatted string', function () {
+      it('should build a properly formatted tags string', function () {
         var str = client._createKeyTagString({tag_1: 'value', tag2: 'value value', tag3: 'value,value'})
         assert.equal(str, 'tag2=value\\ value,tag3=value\\,value,tag_1=value')  // tags should be sorted
       })
     })
 
     describe('#_createKeyValueString', function () {
-      it('should build a properly formatted string', function () {
+      it('should build a properly formatted fieldset', function () {
         var str = client._createKeyValueString({a: 1, b: 2})
         assert.equal(str, 'a=1,b=2')
+        str = client._createKeyValueString({'temp=rature': 82, 'location place': 'us-midwest', 'comma, and quote': "'= "})
+        assert.equal(str, 'temp\\=rature=82,location\\ place="us-midwest",comma\\,\\ and\\ quote="\'= "')
       })
     })
 
@@ -382,6 +384,7 @@ describe('InfluxDB', function () {
         dbClient.writePoint(info.series.strName, 'my second test string', {}, done)
       })
 
+      // TODO there's nothing special about "length". Test instead fo keywords, https://docs.influxdata.com/influxdb/latest/query_language/spec/#keywords
       it('should write a point that has "length" in its keys', function (done) {
         dbClient.writePoint(info.series.strName, {length: 3}, {length: '5'}, done)
       })
@@ -484,6 +487,27 @@ describe('InfluxDB', function () {
             assert.equal(res.length, 1)
             assert.equal(res[0].series.length, 1)
             done()
+          })
+        })
+      })
+
+      describe('#escapingRoundtrip', function () {
+        it('should escape, write, read, and unescape a point', function (done) {
+          dbClient.writePoint(info.series.numName,
+              {'value,= 1': ',"= ', '"': 2},
+              {tag1: 'escapingRoundTrip', 'commas, and = signs': 'space != ,'}, function (err) {
+            assert.equal(err, null)
+            dbClient.query('SELECT * FROM ' + info.series.numName + " WHERE tag1='escapingRoundTrip';", function (err, res) {
+              assert.equal(err, null)
+              assert(res instanceof Array)
+              assert.equal(res.length, 1, 'one series')
+              assert.equal(res[0].length, 1, 'one result')
+              assert.equal(res[0][0].tag1, 'escapingRoundTrip', 'the right result')
+              assert.equal(res[0][0]['value,= 1'], ',"= ', '[,= ]-escaping field keys and values')
+              assert.equal(res[0][0]['"'], 2, 'escaping quotes in field keys')
+              assert.equal(res[0][0]['commas, and = signs'], 'space != ,', 'escaping tag keys and values')
+              done()
+            })
           })
         })
       })

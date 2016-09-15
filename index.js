@@ -16,6 +16,16 @@ var defaultOptions = {
   timePrecision: 'ms'
 }
 
+/**
+ * Backslash-escape commas, equal signs and spaces per
+ * https://docs.influxdata.com/influxdb/v1.0/write_protocols/line_protocol_tutorial/#special-characters-and-keywords
+ * @param {string} s
+ * @returns {string}
+ */
+function escape (s) {
+  return s.replace(/[ ,=]/g, '\\$&')
+}
+
 function parseOptionsUrl (url_) {
   var parsed = url.parse(url_)
 
@@ -305,9 +315,9 @@ InfluxDB.prototype._createKeyValueString = function (object) {
   delete clone.time
   _.forOwn(clone, function (value, key) {
     if (typeof value === 'string') {
-      output.push(key + '="' + value + '"')
+      output.push(escape(key) + '="' + value.replace(/"/g, '\\"') + '"')  // For string field values use a backslash character to escape double quotes
     } else {
-      output.push(key + '=' + value)
+      output.push(escape(key) + '=' + value)
     }
   })
   return output.join(',')
@@ -323,9 +333,9 @@ InfluxDB.prototype._createKeyTagString = function (object) {
   var output = []
   _.forOwn(object, function (value, key) {
     if (typeof value === 'string') {
-      output.push(key + '=' + value.replace(/ /g, '\\ ').replace(/,/g, '\\,').replace(/=/g, '\\='))
+      output.push(escape(key) + '=' + escape(value))
     } else {
-      output.push(key + '=' + value)
+      output.push(escape(key) + '=' + value)
     }
   })
   // "For best performance you should sort tags by key before sending them to the database."
@@ -335,8 +345,8 @@ InfluxDB.prototype._createKeyTagString = function (object) {
 InfluxDB.prototype._prepareValues = function (series) {
   var self = this
   var output = []
-  _.forEach(series, function (values, seriesName) {
-    _.each(values, function (points) {
+  _.forEach(series, function (fields, seriesName) {
+    _.each(fields, function (points) {
       var line = seriesName.replace(/ /g, '\\ ').replace(/,/g, '\\,')
       if (points[1] && _.isObject(points[1]) && _.keys(points[1]).length > 0) {
         line += ',' + self._createKeyTagString(points[1])
@@ -386,8 +396,8 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
   }, this._parseCallback(args.callback))
 }
 
-InfluxDB.prototype.writePoint = function (seriesName, values, tags, options, callback) {
-  this.writePoints(seriesName, [[values, tags]], options, callback)
+InfluxDB.prototype.writePoint = function (seriesName, fields, tags, options, callback) {
+  this.writePoints(seriesName, [[fields, tags]], options, callback)
 }
 
 InfluxDB.prototype.writePoints = function (seriesName, points, options, callback) {
