@@ -384,8 +384,7 @@ describe('InfluxDB', function () {
         dbClient.writePoint(info.series.strName, 'my second test string', {}, done)
       })
 
-      // TODO there's nothing special about "length". Test instead fo keywords, https://docs.influxdata.com/influxdb/latest/query_language/spec/#keywords
-      it('should write a point that has "length" in its keys', function (done) {
+      it('should write a point that has "length" in its keys (#126)', function (done) {
         dbClient.writePoint(info.series.strName, {length: 3}, {length: '5'}, done)
       })
     })
