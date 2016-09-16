@@ -525,7 +525,7 @@ describe('InfluxDB', function () {
       })
 
       describe('#getSeries', function () {
-        it('should return array of series', function (done) {
+        it('getSeries without name should return array of series', function (done) {
           client.getSeries(function (err, series) {
             if (err) return done(err)
             var expected = [ {

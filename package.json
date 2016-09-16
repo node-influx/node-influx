@@ -27,6 +27,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "got": "^6.5.0",
     "lodash": "^4.11.1",
     "request": "2.x"
   },
