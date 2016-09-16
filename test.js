@@ -95,7 +95,7 @@ describe('InfluxDB', function () {
   })
 
   describe('#noNetwork', function () {
-    // Tests for library internals, do not send or recieve any data
+    // Tests for library internals, do not send or receive any data
 
     describe('#url', function () {
       it('should build a properly formatted url', function () {
@@ -162,7 +162,7 @@ describe('InfluxDB', function () {
     })
   })
 
-  describe('#disabledHosts', function () {
+  describe('#failedHost', function () {
     it('should return failed host', function (done) {
       // Issue any request so that library disables a host
       failClient.getUsers(function () {
@@ -493,8 +493,8 @@ describe('InfluxDB', function () {
       describe('#escapingRoundtrip', function () {
         it('should escape, write, read, and unescape a point', function (done) {
           dbClient.writePoint(info.series.numName,
-              {'value,= 1': ',"= ', '"': 2},
-              {tag1: 'escapingRoundTrip', 'commas, and = signs': 'space != ,'}, function (err) {
+              {'value,= 1': ',"= ', ',= "': ',= "'},
+              {tag1: 'escapingRoundTrip', '"commas, and = signs"': '"space != ,"'}, function (err) {
             assert.equal(err, null)
             dbClient.query('SELECT * FROM ' + info.series.numName + " WHERE tag1='escapingRoundTrip';", function (err, res) {
               assert.equal(err, null)
@@ -503,8 +503,8 @@ describe('InfluxDB', function () {
               assert.equal(res[0].length, 1, 'one result')
               assert.equal(res[0][0].tag1, 'escapingRoundTrip', 'the right result')
               assert.equal(res[0][0]['value,= 1'], ',"= ', '[,= ]-escaping field keys and values')
-              assert.equal(res[0][0]['"'], 2, 'escaping quotes in field keys')
-              assert.equal(res[0][0]['commas, and = signs'], 'space != ,', 'escaping tag keys and values')
+              assert.equal(res[0][0][',= "'], ',= "', 'escaping commas, equals, spaces, quotes in field keys and values')
+              assert.equal(res[0][0]['"commas, and = signs"'], '"space != ,"', 'escaping tag keys and values')
               done()
             })
           })

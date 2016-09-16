@@ -23,7 +23,7 @@ var defaultOptions = {
  * @returns {string}
  */
 function escape (s) {
-  return s.replace(/[ ,=]/g, '\\$&')
+  return s.replace(/[,= ]/g, '\\$&')
 }
 
 function parseOptionsUrl (url_) {
@@ -47,6 +47,13 @@ function parseOptionsUrl (url_) {
   return options
 }
 
+/**
+ * Figure out if the user passed an options object or not.
+ * This only exists because we're not using ES6 default parameters.
+ * @param options
+ * @param callback
+ * @returns {{callback: (*|_.noop), options: (*|{})}}
+ */
 function resolveOptCallback (options, callback) {
   if (typeof options === 'function') {
     callback = options
