@@ -91,7 +91,7 @@ client = influx({
 | port [optional] |  influxdb port, default: 8086 |
 | protocol [optional] |  protocol, default: http |
 | hosts [optional] | Array of hosts for cluster configuration, e.g. [ {host: 'localhost', port: 8086},...] Port is optional |
-| depreciatedLogging [optional] | logging function for depreciated warnings, defaults to console.log |
+| depreciatedLogging [optional] | logging function for deprecated warnings, defaults to console.log |
 | failoverTimeout [optional] |  number of ms node-influx will take a host out of the balancing after a request failed, default: 60000 |
 | requestTimeout [optional] | number of ms to wait before a request times out. defaults to 'null' (waits until connection is closed). Use with caution! |
 | maxRetries [options] | max number of retries until a request raises an error (e.g. 'no hosts available'), default: 2 |
