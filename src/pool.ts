@@ -1,7 +1,6 @@
-import Host from "./host";
 import backoffs from "./backoff";
+import Host from "./host";
 import * as request from "request";
-
 
 /**
  * Status codes that will cause a host to be marked as "failed" if we get
@@ -9,11 +8,11 @@ import * as request from "request";
  * @type {Array}
  */
 const resubmitErrorCodes = [
-  'ETIMEDOUT',
-  'ESOCKETTIMEDOUT',
-  'ECONNRESET',
-  'ECONNREFUSED',
-  'EHOSTUNREACH'
+  "ETIMEDOUT",
+  "ESOCKETTIMEDOUT",
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "EHOSTUNREACH",
 ];
 
 /**
@@ -43,16 +42,16 @@ export interface PoolOptions {
   failoverTimeout: number;
 
   /**
-   * The length of time after which HTTP requests will error
-   * if they do not receive a response.
-   */
-  requestTimeout: number;
-
-  /**
    * Number of times we should retry running a query
    * before calling back with an error.
    */
   maxRetries: number;
+
+  /**
+   * The length of time after which HTTP requests will error
+   * if they do not receive a response.
+   */
+  requestTimeout: number;
 
   /**
    * Request instance to use for talking to Influx.
@@ -103,15 +102,15 @@ export default class Pool {
    */
   constructor (options: PoolOptions) {
     this.options = Object.assign({
-      requestTimeout: 30 * 1000,
-      maxRetries: 2,
-      request: request,
       backoff: {
-        kind: 'exponential',
         initial: 300,
+        kind: "exponential",
+        max: 10 * 1000,
         random: 1,
-        max: 10 * 1000
-      }
+      },
+      maxRetries: 2,
+      requestTimeout: 30 * 1000,
+      request,
     }, options);
 
     this.index = 0;
@@ -124,8 +123,8 @@ export default class Pool {
    * Sets the length of time after which HTTP requests will error if they
    * do not receive a response.
    */
-  setRequestTimeout (value: number): Pool {
-    this.requestOptions.timeout = value
+  public setRequestTimeout (value: number): Pool {
+    this.requestOptions.timeout = value;
     return this;
   }
 
@@ -133,7 +132,7 @@ export default class Pool {
    * Returns a list of currently active hosts.
    * @return {Host[]}
    */
-  getHostsAvailable(): Array<Host> {
+  public getHostsAvailable(): Array<Host> {
     return this.hostsAvailable.slice();
   }
 
@@ -142,14 +141,14 @@ export default class Pool {
    * errors.
    * @return {Host[]}
    */
-  getHostsDisabled(): Array<Host> {
+  public getHostsDisabled(): Array<Host> {
     return this.hostsDisabled.slice();
   }
 
   /**
    * Inserts a new host to the pool.
    */
-  addHost(url: string): Host {
+  public addHost(url: string): Host {
     const bconfig = this.options.backoff;
     const backoff = backoffs[bconfig.kind](bconfig);
 
@@ -159,11 +158,32 @@ export default class Pool {
   }
 
   /**
-   * Returns true if there's any host available to by queried.
+   * Returns true if there"s any host available to by queried.
    * @return {Boolean}
    */
-  hostIsAvailable(): boolean {
+  public hostIsAvailable(): boolean {
     return this.hostsAvailable.length > 0;
+  }
+
+  /**
+   * Runs a GET request against an Influx server.
+   * @param {Object} options  options for the `request` library. Note that
+   *     the baseUrl for the host will be set automatically.
+   * @param {Function} callback
+   */
+  public get (options, callback) {
+    this.request(options, callback);
+  }
+
+  /**
+   * Runs a POST request against an Influx server.
+   * @param {Object} options  options for the `request` library. Note that
+   *      baseUrl for the host will be set automatically.
+   * @param {Function} callback
+   */
+  public post (options, callback) {
+    options.method = "POST";
+    this.request(options, callback);
   }
 
   /**
@@ -210,7 +230,7 @@ export default class Pool {
     retries: number = 0
   ) {
     if (!this.hostIsAvailable()) {
-      return callback(new ServiceNotAvailableError('No host available'), null, null);
+      return callback(new ServiceNotAvailableError("No host available"), null, null);
     }
 
     const host = this.getHost();
@@ -222,15 +242,15 @@ export default class Pool {
       // and trying to retry those queries on other hosts would just lead
       // to a domino effect of crashing servers.
       if (!err && response.statusCode > 500) {
-        err = new ServiceNotAvailableError(response.statusMessage)
+        err = new ServiceNotAvailableError(response.statusMessage);
       }
 
       if (!err) {
-        host.success()
-        return callback(err, response, body)
+        host.success();
+        return callback(err, response, body);
       }
 
-      this.handleRequestError(err, host, retries, resolved, callback)
+      this.handleRequestError(err, host, retries, resolved, callback);
     });
   }
 
@@ -240,34 +260,13 @@ export default class Pool {
     callback: request.RequestCallback
   ) {
     if (resubmitErrorCodes.indexOf(err.code) !== -1 || err instanceof ServiceNotAvailableError) {
-      this.disableHost(host)
+      this.disableHost(host);
       if (this.options.maxRetries >= retries && this.hostIsAvailable()) {
-        return this.request(options, callback, retries + 1)
+        return this.request(options, callback, retries + 1);
       }
     }
 
-    return callback(err, null, null)
-  }
-
-  /**
-   * Runs a GET request against an Influx server.
-   * @param {Object} options  options for the `request` library. Note that
-   *     the baseUrl for the host will be set automatically.
-   * @param {Function} callback
-   */
-  get (options, callback) {
-    this.request(options, callback)
-  }
-
-  /**
-   * Runs a POST request against an Influx server.
-   * @param {Object} options  options for the `request` library. Note that
-   *      baseUrl for the host will be set automatically.
-   * @param {Function} callback
-   */
-  post (options, callback) {
-    options.method = 'POST'
-    this.request(options, callback)
+    return callback(err, null, null);
   }
 
 }

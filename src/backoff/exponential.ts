@@ -36,12 +36,12 @@ export class ExponentialBackoff implements BackoffStrategy {
     this.counter = 0;
   }
 
-  next(): number {
+  public next(): number {
     const count = (this.counter++) - Math.round(Math.random() * this.options.random);
-    return Math.min(this.options.max, this.options.initial * (1 << Math.max(count, 0)));
+    return Math.min(this.options.max, this.options.initial * Math.pow(2, Math.max(count, 0)));
   }
 
-  reset(): void {
+  public reset(): void {
     this.counter = 0;
   }
 

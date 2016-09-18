@@ -14,7 +14,7 @@ export default class Host {
    * should be removed from the pool
    * @return {Number} removal time in milliseconds
    */
-  fail () {
+  public fail () {
     return this.backoff.next();
   }
 
@@ -22,7 +22,7 @@ export default class Host {
    * Should be called when a successful operation is run against the host.
    * It resets the host's backoff strategy.
    */
-  success () {
+  public success () {
     this.backoff.reset();
   }
 
