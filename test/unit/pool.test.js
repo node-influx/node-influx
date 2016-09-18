@@ -1,6 +1,6 @@
 'use strict'
 
-const Pool = require('../../lib/pool')
+const Pool = require('../../lib/pool');
 const sinon = require('sinon')
 
 describe('pool', () => {
@@ -10,7 +10,7 @@ describe('pool', () => {
   beforeEach(() => {
     request = sinon.stub()
     clock = sinon.useFakeTimers()
-    pool = new Pool({
+    pool = new Pool.default({
       request,
       backoff: {
         kind: 'exponential',
@@ -21,7 +21,7 @@ describe('pool', () => {
     })
 
     for (let i = 0; i < 2; i++) {
-      pool.addHost('127.0.0.1', 1000 + i, 'http')
+      pool.addHost(`http://127.0.0.1:${1000 + i}`)
     }
   })
 
@@ -44,7 +44,6 @@ describe('pool', () => {
       expect(request).to.have.been.calledWith({
         baseUrl: 'http://127.0.0.1:1000',
         uri: '/foo',
-        retries: 1,
         timeout: 30000
       })
       done()
@@ -126,10 +125,12 @@ describe('pool', () => {
   })
 
   it('gets enabled/disabled hosts', () => {
-    expect(pool.getHostsAvailable().map((h) => h.url)).to.deep.equal([
-      'http://127.0.0.1:1000',
-      'http://127.0.0.1:1001'
-    ])
+    expect(pool.getHostsAvailable()
+      .map((h) => h.url))
+      .to.deep.equal([
+        'http://127.0.0.1:1000',
+        'http://127.0.0.1:1001'
+      ])
     expect(pool.getHostsDisabled().length).to.equal(0)
 
     request.onCall(0).yields(undefined, { statusCode: 502 })

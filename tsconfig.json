@@ -2,8 +2,11 @@
 	"compilerOptions": {
 		"declaration": true,
 		"module": "commonjs",
-		"target": "es5",
-		"noImplicitAny": true,
+		"target": "es6",
 		"outDir": "lib"
-	}
+	},
+  "exclude": [
+    "node_modules",
+    "src/index.ts"
+  ]
 }

@@ -11,4 +11,5 @@ export interface BackoffStrategy {
    * Resets the backoff counter.
    */
   reset(): void;
+
 }

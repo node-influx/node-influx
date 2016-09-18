@@ -1,20 +1,20 @@
 import Host from "./host";
 import backoffs from "./backoff";
 import * as request from "request";
-import * as _ from "lodash";
+
 
 /**
  * Status codes that will cause a host to be marked as "failed" if we get
  * them from a request to Influx.
  * @type {Array}
  */
-enum resubmitErrorCodes {
+const resubmitErrorCodes = [
   'ETIMEDOUT',
   'ESOCKETTIMEDOUT',
   'ECONNRESET',
   'ECONNREFUSED',
   'EHOSTUNREACH'
-}
+];
 
 /**
  * @typedef {Object} PoolOptions an options object passed to instantiate
@@ -34,7 +34,8 @@ enum resubmitErrorCodes {
  *     used.
  */
 
-interface PoolOptions {
+export interface PoolOptions {
+
   /**
    * The length of time a host should be removed for upon a connection error,
    * given in milliseconds. Defaults to 60000ms.
@@ -72,7 +73,14 @@ interface PoolOptions {
      */
     [propName: string]: any;
   };
+
 }
+
+/**
+ * An ServiceNotAvailableError is returned as an error from requests that
+ * result in a > 500 error code.
+ */
+export class ServiceNotAvailableError extends Error {}
 
 /**
  *
@@ -80,7 +88,7 @@ interface PoolOptions {
  * to them. If there are errors connecting to hosts, it will disable that
  * host for a period of time.
  */
-class Pool {
+export default class Pool {
 
   private options: PoolOptions;
   private index: number;
@@ -94,7 +102,7 @@ class Pool {
    * @param {PoolOptions} options
    */
   constructor (options: PoolOptions) {
-    this.options = <PoolOptions>_.defaults(options, {
+    this.options = Object.assign({
       requestTimeout: 30 * 1000,
       maxRetries: 2,
       request: request,
@@ -104,7 +112,7 @@ class Pool {
         random: 1,
         max: 10 * 1000
       }
-    });
+    }, options);
 
     this.index = 0;
     this.hostsAvailable = [];
@@ -174,7 +182,7 @@ class Pool {
    * @param  {Host} host
    */
   private enableHost(host: Host) {
-    _.remove(this.hostsDisabled, host);
+    this.hostsDisabled = this.hostsDisabled.filter(h => h !== host);
     this.hostsAvailable.push(host);
   }
 
@@ -184,7 +192,7 @@ class Pool {
    * @param  {Host} host
    */
   private disableHost(host: Host) {
-    _.remove(this.hostsAvailable, host);
+    this.hostsAvailable = this.hostsAvailable.filter(h => h !== host);
     this.hostsDisabled.push(host);
     this.index %= Math.max(1, this.hostsAvailable.length);
 
@@ -196,17 +204,19 @@ class Pool {
    * @param  {Object}   options
    * @param  {Function} callback
    */
-  _request (options: request.CoreOptions, callback: request.RequestCallback, retries: number = 0) {
+  private request (
+    options: request.RequiredUriUrl & request.CoreOptions,
+    callback: request.RequestCallback,
+    retries: number = 0
+  ) {
     if (!this.hostIsAvailable()) {
-      return callback(new ServiceNotAvailableError('No host available'));
+      return callback(new ServiceNotAvailableError('No host available'), null, null);
     }
 
     const host = this.getHost();
-    _.defaults(options, this.requestOptions);
+    const resolved = Object.assign({ baseUrl: host.url }, this.requestOptions, options);
 
-    options.baseUrl = host.url;
-
-    this.options.request(requestOptions, (err, response, body) => {
+    this.options.request(resolved, (err, response, body) => {
       // Resolve an error if we get a >500 status code. Note that we *exclude*
       // 500 error codes. Sometimes malformed queries to influx cause panics,
       // and trying to retry those queries on other hosts would just lead
@@ -220,19 +230,23 @@ class Pool {
         return callback(err, response, body)
       }
 
-      this._handleRequestError(err, host, requestOptions, callback)
-    })
+      this.handleRequestError(err, host, retries, resolved, callback)
+    });
   }
 
-  _handleRequestError (err, host, requestOptions, callback) {
+  private handleRequestError (
+    err: any, host: Host, retries: number,
+    options: request.RequiredUriUrl & request.CoreOptions,
+    callback: request.RequestCallback
+  ) {
     if (resubmitErrorCodes.indexOf(err.code) !== -1 || err instanceof ServiceNotAvailableError) {
       this.disableHost(host)
-      if (this.options.maxRetries >= requestOptions.retries && this.hostIsAvailable()) {
-        return this._request(requestOptions, callback)
+      if (this.options.maxRetries >= retries && this.hostIsAvailable()) {
+        return this.request(options, callback, retries + 1)
       }
     }
 
-    return callback(err)
+    return callback(err, null, null)
   }
 
   /**
@@ -242,7 +256,7 @@ class Pool {
    * @param {Function} callback
    */
   get (options, callback) {
-    this._request(options, callback)
+    this.request(options, callback)
   }
 
   /**
@@ -253,16 +267,7 @@ class Pool {
    */
   post (options, callback) {
     options.method = 'POST'
-    this._request(options, callback)
+    this.request(options, callback)
   }
-}
 
-/**
- * An ServiceNotAvailableError is returned as an error from requests that
- * result in a > 500 error code.
- */
-class ServiceNotAvailableError extends Error {
 }
-
-module.exports = Pool
-module.exports.ServiceNotAvailableError = ServiceNotAvailableError

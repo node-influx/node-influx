@@ -1,3 +1,5 @@
+import { BackoffStrategy } from "./backoff/backoff";
+
 export default class Host {
 
   /**
@@ -23,4 +25,5 @@ export default class Host {
   success () {
     this.backoff.reset();
   }
+
 }

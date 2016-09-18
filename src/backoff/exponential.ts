@@ -1,3 +1,5 @@
+import { BackoffStrategy } from "./backoff";
+
 /**
  * ExponentialOptions are passed into the ExponentialBackoff constructor. The
  * backoff equation is, in general, min(max, initial ^ n), where `n` is
@@ -5,6 +7,7 @@
  * given in milliseconds.
  */
 export interface ExponentialOptions {
+
   /**
    * The initial delay passed to the equation.
    */
@@ -18,6 +21,7 @@ export interface ExponentialOptions {
    * max is the maximum value of the delay.
    */
   max: number;
+
 }
 
 export class ExponentialBackoff implements BackoffStrategy {
@@ -40,4 +44,5 @@ export class ExponentialBackoff implements BackoffStrategy {
   reset(): void {
     this.counter = 0;
   }
+
 }

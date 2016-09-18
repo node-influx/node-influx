@@ -1,16 +1,9 @@
-const Base = require('../../lib/backoff/base')
-const Exp = require('../../lib/backoff/exponential')
-const pkg = require('../../lib/backoff')
+const Exp = require('../../lib/backoff/exponential').ExponentialBackoff
+const pkg = require('../../lib/backoff').default
 
 describe('backoff strategies', () => {
   it('exposes backoff strategies in the index package', () => {
-    expect(pkg.exponential).to.equal(Exp)
-  })
-
-  it('throws an error in base methods', () => {
-    const base = new Base()
-    expect(() => base.next()).to.throw(/not implemented/)
-    expect(() => base.reset()).to.throw(/not implemented/)
+    expect(pkg.exponential({})).to.be.an.instanceof(Exp)
   })
 
   describe('exponential strategy', () => {
