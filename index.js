@@ -112,6 +112,7 @@ InfluxDB.prototype._parseCallback = function (callback) {
       return callback(new Error(body.error || (typeof body === 'object' ? JSON.stringify(body) : (body || res.statusCode))))
     }
 
+    // Look for errors in the response body
     if (_.isObject(body) && body.results && _.isArray(body.results)) {
       for (var i = 0; i <= body.results.length; ++i) {
         if (body.results[i] && body.results[i].error && body.results[i].error !== '') {
@@ -170,13 +171,29 @@ InfluxDB.prototype.queryDB = function (query, options, callback) {
   }, this._parseCallback(args.callback))
 }
 
+/**
+ * Send a POST request. Used for commands that have side effects, e.g.
+ * 'CREATE DATABASE' or 'DROP USER'. GET is now deprecated for these.
+ * @param query
+ * @param options
+ * @param callback
+ */
+InfluxDB.prototype.updateDB = function (query, options, callback) {
+  var args = resolveOptCallback(options, callback)
+
+  this.request.post({
+    url: this.url('query', args.options, {q: query}),
+    json: true
+  }, this._parseCallback(args.callback))
+}
+
 // creates a new database
 InfluxDB.prototype.createDatabase = function (databaseName, callback) {
-  this.queryDB('create database "' + databaseName + '"', callback)
+  this.updateDB('create database "' + databaseName + '"', callback)
 }
 
 InfluxDB.prototype.dropDatabase = function (databaseName, callback) {
-  this.queryDB('drop database "' + databaseName + '"', callback)
+  this.updateDB('drop database "' + databaseName + '"', callback)
 }
 
 InfluxDB.prototype.getDatabaseNames = function (callback) {
@@ -256,12 +273,14 @@ InfluxDB.prototype.dropMeasurement = function (measurementName, callback) {
 }
 
 InfluxDB.prototype.dropSeries = function (seriesId, callback) {
-  this.queryDB('drop series ' + seriesId, callback)
+  this.updateDB('drop series ' + seriesId, callback)
 }
 
 InfluxDB.prototype.getUsers = function (callback) {
   var self = this
 
+  // TODO strip unused arguments from quoery. Now we have:
+  // query?u=...&p=...&q=show%20users&precision=ms&db=...&rp=...
   this.queryDB('show users', function (err, results) {
     if (err) {
       return callback(err, results)
@@ -282,31 +301,31 @@ InfluxDB.prototype.createUser = function (username, password, isAdmin, callback)
   if (isAdmin) {
     query += ' with all privileges'
   }
-  this.queryDB(query, callback)
+  this.updateDB(query, callback)
 }
 
 InfluxDB.prototype.setPassword = function (username, password, callback) {
-  this.queryDB('set password for "' + username + '" = \'' + password + "'", callback)
+  this.updateDB('set password for "' + username + '" = \'' + password + "'", callback)
 }
 
 InfluxDB.prototype.grantPrivilege = function (privilege, databaseName, userName, callback) {
-  this.queryDB('grant ' + privilege + ' on "' + databaseName + '" to "' + userName + '"', callback)
+  this.updateDB('grant ' + privilege + ' on "' + databaseName + '" to "' + userName + '"', callback)
 }
 
 InfluxDB.prototype.revokePrivilege = function (privilege, databaseName, userName, callback) {
-  this.queryDB('revoke ' + privilege + ' on "' + databaseName + '" from "' + userName + '"', callback)
+  this.updateDB('revoke ' + privilege + ' on "' + databaseName + '" from "' + userName + '"', callback)
 }
 
 InfluxDB.prototype.grantAdminPrivileges = function (userName, callback) {
-  this.queryDB('grant all privileges to "' + userName + '"', callback)
+  this.updateDB('grant all privileges to "' + userName + '"', callback)
 }
 
 InfluxDB.prototype.revokeAdminPrivileges = function (userName, callback) {
-  this.queryDB('revoke all privileges from "' + userName + '"', callback)
+  this.updateDB('revoke all privileges from "' + userName + '"', callback)
 }
 
 InfluxDB.prototype.dropUser = function (username, callback) {
-  this.queryDB('drop user "' + username + '"', callback)
+  this.updateDB('drop user "' + username + '"', callback)
 }
 
 InfluxDB.prototype._createKeyValueString = function (object) {
@@ -442,7 +461,7 @@ InfluxDB.prototype.createContinuousQuery = function (queryName, queryString, dat
   var query = 'CREATE CONTINUOUS QUERY ' + queryName + ' ON "' + databaseName + '" BEGIN ' +
     queryString +
     ' END'
-  this.queryDB(query, callback)
+  this.updateDB(query, callback)
 }
 
 InfluxDB.prototype.getContinuousQueries = function (callback) {
@@ -470,7 +489,7 @@ InfluxDB.prototype.createRetentionPolicy = function (rpName, databaseName, durat
     query += ' default'
   }
 
-  this.queryDB(query, callback)
+  this.updateDB(query, callback)
 }
 
 InfluxDB.prototype.getRetentionPolicies = function (databaseName, callback) {
@@ -490,7 +509,7 @@ InfluxDB.prototype.alterRetentionPolicy = function (rpName, databaseName, durati
     query += ' default'
   }
 
-  this.queryDB(query, callback)
+  this.updateDB(query, callback)
 }
 
 InfluxDB.prototype.getHostsAvailable = function () {
