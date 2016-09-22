@@ -160,7 +160,7 @@ declare namespace influx {
          * Writes a point to a series - requires database user privileges
          */
         writePoint(seriesName: string, values: PointValues, callback?: (err: Error) => void): void;
-        
+
         /**
          * Writes a point to a series - requires database user privileges
          */
@@ -252,7 +252,7 @@ declare namespace influx {
         alterRetentionPolicy(policyName: string, databaseName: string, duration: string, replication: number, isDefault: boolean, callback: (err: Error) => void): void;
     }
 
-    type TimePrecision = "ns"|"us"|"ms"|"s"|"m"|"h"|"d"|"w"|"m"|"y";
+    type TimePrecision = "ns"|"u"|"ms"|"s"|"m"|"h"|"d"|"w"|"m"|"y";
 
     interface Options {
         /**
