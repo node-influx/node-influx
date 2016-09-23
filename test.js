@@ -110,9 +110,9 @@ describe('InfluxDB', function () {
     })
 
     describe('#_createKeyTagString', function () {
-      it('should build a properly formatted string', function () {
+      it('should build a properly formatted tags string', function () {
         var str = client._createKeyTagString({tag_1: 'value', tag2: 'value value', tag3: 'value,value'})
-        assert.equal(str, 'tag2=value\\ value,tag3=value\\,value,tag_1=value')
+        assert.equal(str, 'tag2=value\\ value,tag3=value\\,value,tag_1=value')  // tags should be sorted
       })
     })
 
@@ -525,7 +525,7 @@ describe('InfluxDB', function () {
       })
 
       describe('#getSeries', function () {
-        it('should return array of series', function (done) {
+        it('getSeries without name should return array of series', function (done) {
           client.getSeries(function (err, series) {
             if (err) return done(err)
             var expected = [ {
