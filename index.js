@@ -276,7 +276,7 @@ InfluxDB.prototype.getSeries = function (measurementName, callback) {
 }
 
 InfluxDB.prototype.dropMeasurement = function (measurementName, callback) {
-  this.queryDB('drop measurement "' + measurementName + '"', callback)
+  this.updateDB('drop measurement "' + measurementName + '"', callback)
 }
 
 InfluxDB.prototype.dropSeries = function (seriesId, callback) {
@@ -484,7 +484,7 @@ InfluxDB.prototype.dropContinuousQuery = function (queryName, databaseName, call
     callback = databaseName
     databaseName = this.options.database
   }
-  this.queryDB('DROP CONTINUOUS QUERY "' + queryName + '" ON "' + databaseName + '"', callback)
+  this.updateDB('DROP CONTINUOUS QUERY "' + queryName + '" ON "' + databaseName + '"', callback)
 }
 
 InfluxDB.prototype.createRetentionPolicy = function (rpName, databaseName, duration, replication, isDefault, callback) {
