@@ -1,19 +1,20 @@
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
-var request = require('request')
+var fetch = require('node-fetch')
 
 before(function (done) {
   // Before doing anything validate that InfluxDB is a recent version and running
-  request('http://localhost:8086/ping', function (err, response, body) {
-    if (err) return done(err)
-    var version = response.headers['x-influxdb-version']
+  fetch('http://localhost:8086/ping').then(function (response) {
+    var version = response.headers.get('x-influxdb-version')
     var major = version.split('.')[0]
     var minor = version.split('.')[1]
 
     assert.equal(major, 0)
     assert(minor >= 13)
     done()
+  }).catch(function (error) {
+    return done(error)
   })
 })
 

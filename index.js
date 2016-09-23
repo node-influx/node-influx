@@ -109,14 +109,20 @@ InfluxDB.prototype._parseResults = function (response, callback) {
   return callback(null, results)
 }
 
+/**
+ * Return a function that calls the callback with either the error or the results
+ * @param callback
+ * @returns {Function}
+ * @private
+ */
 InfluxDB.prototype._parseCallback = function (callback) {
   return function (err, res, body) {
     if (typeof callback === 'undefined') return
     if (err) {
       return callback(err)
     }
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      return callback(new Error(body.error || (typeof body === 'object' ? JSON.stringify(body) : (body || res.statusCode))))
+    if (res.status < 200 || res.status >= 300) {
+      return callback(new Error(body.error || (typeof body === 'object' ? JSON.stringify(body) : (body || res.status))))
     }
 
     // Look for errors in the response body
@@ -173,8 +179,7 @@ InfluxDB.prototype.queryDB = function (query, options, callback) {
   var args = resolveOptCallback(options, callback)
 
   this.request.get({
-    url: this.url('query', args.options, {q: query}),
-    json: true
+    url: this.url('query', args.options, {q: query})
   }, this._parseCallback(args.callback))
 }
 
@@ -189,8 +194,7 @@ InfluxDB.prototype.updateDB = function (query, options, callback) {
   var args = resolveOptCallback(options, callback)
 
   this.request.post({
-    url: this.url('query', args.options, {q: query}),
-    json: true
+    url: this.url('query', args.options, {q: query})
   }, this._parseCallback(args.callback))
 }
 
