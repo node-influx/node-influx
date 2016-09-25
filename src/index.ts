@@ -3,17 +3,18 @@ import { Pool, PoolOptions } from "./pool";
 import * as grammar from "./grammar";
 import * as url from "url";
 
-const defaultHost = Object.freeze({
+const defaultHost: HostConfig = Object.freeze({
   host: "127.0.0.1",
   port: 8086,
-  protocol: "http",
+  protocol: <"http"> "http",
 });
 
-const defaultOptions = Object.freeze(Object.assign({
+const defaultOptions: ClusterConfig = Object.freeze({
+  database: null,
+  hosts: [],
   password: "root",
-  timePrecision: "ms",
   username: "root",
-}, defaultHost));
+});
 
 /**
  * @typedef {Object} HostConfig
@@ -101,7 +102,7 @@ function parseOptionsUrl(addr: string): SingleHostConfig {
   const options: SingleHostConfig = {
     host: parsed.hostname,
     port: Number(parsed.port),
-    protocol: <"http" | "https"> parsed.protocol,
+    protocol: <"http" | "https"> parsed.protocol.slice(0, -1),
   };
 
   if (parsed.auth) {
@@ -114,6 +115,24 @@ function parseOptionsUrl(addr: string): SingleHostConfig {
 
   return options;
 }
+
+/**
+ * Works similarly to Object.assign, but only overwrites
+ * properties that resolve to undefined.
+ */
+function defaults<T>(target: T, ...srcs: T[]): T {
+  srcs.forEach(src => {
+    Object.keys(src).forEach(key => {
+      if (target[key] === undefined) {
+        target[key] = src[key];
+      }
+    });
+  });
+
+  return target;
+}
+
+function noop () { /* ignore */ }
 
 /**
  * InfluxDB is the primary means of querying the database.
@@ -143,10 +162,17 @@ export class InfluxDB {
    */
   constructor(url: string);
 
-  constructor (options: any) {
+  /**
+   * Connects to a local, default Influx instance.
+   */
+  constructor();
+
+  constructor (options?: any) {
     // Figure out how to parse whatever we were passed in into a ClusterConfig.
     if (typeof options === "string") { // plain URI => SingleHostConfig
       options = parseOptionsUrl(options);
+    } else if (!options) {
+      options = defaultHost;
     }
     if (!options.hasOwnProperty("hosts")) { // SingleHostConfig => ClusterConfig
       options = {
@@ -159,27 +185,62 @@ export class InfluxDB {
     }
 
     const resolved = <ClusterConfig> options;
+    resolved.hosts = resolved.hosts.map(host => {
+      return defaults({
+        host: host.host,
+        port: host.port,
+        protocol: host.protocol,
+      }, defaultHost);
+    });
+
     this.pool = new Pool(resolved.pool);
-    this.options = Object.assign({}, resolved, defaultOptions);
+    this.options = defaults(resolved, defaultOptions);
 
     resolved.hosts.forEach(host => {
-      const h = Object.assign(host, defaultHost);
-      this.pool.addHost(`${h.protocol}://${h.host}:${h.port}`);
+      this.pool.addHost(`${host.protocol}://${host.host}:${host.port}`);
     });
   }
 
   /**
    * Creates a new database with the provided name.
    */
-  public createDatabase (databaseName: string, callback: (Error) => void) {
-    this.pool.discard({
-      method: "GET",
+  public createDatabase (databaseName: string, callback: (err: Error) => void = noop) {
+    this.pool.discard(this.getQueryOpts({
+      q: `create database ${grammar.quoteEscaper.escape(databaseName)}`,
+    }), callback);
+  }
+
+  /**
+   * Deletes a database with the provided name.
+   */
+  public dropDatabase (databaseName: string, callback: (err: Error) => void = noop) {
+    this.pool.discard(this.getQueryOpts({
+      q: `drop database ${grammar.quoteEscaper.escape(databaseName)}`,
+    }), callback);
+  }
+
+
+  /**
+   * Returns array of database names. Requires cluster admin privileges.
+   */
+  public getDatabaseNames (callback: (err: Error, names: string[]) => void) {
+    this.pool.json(this.getQueryOpts({
+      q: `show databases`,
+    }), callback);
+  }
+
+  /**
+   * Creates options to be passed into the pool to query databases.
+   */
+  private getQueryOpts (params: any, method: string = "GET"): any {
+    return {
+      method,
       path: "/query",
-      query: {
+      query: Object.assign({
+        epoch: 'u',
         p: this.options.password,
-        q: `create database ${grammar.quoteEscaper.escape(databaseName)}`,
         u: this.options.username,
-      },
-    }, callback);
+      }, params),
+    };
   }
 }

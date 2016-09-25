@@ -38,7 +38,10 @@ Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have update
 Create a client instance (`database` not required for all methods):
 
 ```js
-var influx = require('influx')
+import { InfluxDB } from 'influx';
+
+// Connect to a single host by passing its address:
+const client = new InfluxDB()
 
 var client = influx({
 
