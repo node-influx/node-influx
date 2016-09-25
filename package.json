@@ -42,8 +42,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^6.0.38",
-    "@types/node-fetch": "0.0.4",
-    "@types/request": "0.0.30",
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
     "istanbul": "^0.4.3",
@@ -52,7 +50,6 @@
     "sinon-chai": "^2.8.0",
     "standard": "^7.0.1",
     "tslint": "^3.11.0",
-    "typedoc": "^0.4.3",
     "typescript": "^2.0.0"
   }
 }

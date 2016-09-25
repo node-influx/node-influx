@@ -63,11 +63,12 @@ describe('pool', () => {
       servers[0].onRequest = (req, res) => {
         let data = ''
         req.on('data', chunk => {
-          data += chunk.toString()})
+          data += chunk.toString()
+        })
         req.on('end', () => {
           expect(data).to.equal('asdf')
           expect(req.method).to.equal('POST')
-          expect(req.url).to.equal('/foo?a=42')
+          expect(req.url).to.equal('/bar?a=42')
           res.writeHead(200)
           res.end('ok')
         })
@@ -75,7 +76,7 @@ describe('pool', () => {
 
       pool.text({
         method: 'POST',
-        path: '/foo',
+        path: '/bar',
         query: { a: 42 },
         body: 'asdf',
       }, (err, data) => {
@@ -91,7 +92,7 @@ describe('pool', () => {
         res.end()
       }
 
-      pool.discard({ method: 'GET', path: '/foo' }, (err) => {
+      pool.discard({ method: 'GET', path: '/' }, (err) => {
         expect(err).to.be.undefined
         done()
       })
@@ -103,7 +104,7 @@ describe('pool', () => {
         res.end('{"foo":42}')
       }
 
-      pool.json({ method: 'GET', path: '/foo' }, (err, data) => {
+      pool.json({ method: 'GET', path: '/' }, (err, data) => {
         expect(err).to.be.undefined
         expect(data).to.deep.equal({ foo: 42 })
         done()
@@ -116,9 +117,28 @@ describe('pool', () => {
         res.end('{')
       }
 
-      pool.json({ method: 'GET', path: '/foo' }, err => {
+      pool.json({ method: 'GET', path: '/' }, err => {
         expect(err).to.not.be.undefined
         done()
+      })
+    })
+
+    describe('request source error handling', done => {
+      const methods = ['json', 'text', 'discard'];
+      beforeEach(done => {
+        async.each(
+          servers,
+          (server, done) => server.close(done),
+          done
+        );
+      })
+      methods.forEach(method => {
+        it(method, done => {
+          pool[method]({ method: 'GET', path: '/' }, err => {
+            expect(err).not.be.undefined
+            done()
+          })
+        })
       })
     })
   })
@@ -135,13 +155,13 @@ describe('pool', () => {
         res.end()
       }
 
-      pool.discard({ method: 'GET', path: '/foo' }, () => {
+      pool.discard({ method: 'GET', path: '/' }, () => {
         expect(served).to.be.true
         done()
       })
     }
 
-    pool.discard({ method: 'GET', path: '/foo' }, () => {
+    pool.discard({ method: 'GET', path: '/' }, () => {
     })
   })
 
@@ -158,23 +178,10 @@ describe('pool', () => {
     })
 
     pool.timeout = 1
-    pool.text({ method: 'GET', path: '/foo' }, err => {
+    pool.text({ method: 'GET', path: '/' }, err => {
       expect(err).be.an.instanceof(Pool.ServiceNotAvailableError)
       done()
     })
-  })
-
-  it('handles network errors', done => {
-    async.each(
-      servers,
-      (server, done) => server.close(done),
-      () => {
-        pool.text({ method: 'GET', path: '/foo' }, err => {
-          expect(err).not.be.undefined
-          done()
-        })
-      }
-    )
   })
 
   it('retries on a request error', (done) => {
@@ -187,7 +194,7 @@ describe('pool', () => {
       res.end('ok now')
     }
 
-    pool.text({ method: 'GET', path: '/foo' }, (err, body) => {
+    pool.text({ method: 'GET', path: '/' }, (err, body) => {
       expect(err).to.be.undefined
       expect(body).to.equal('ok now')
       done()
@@ -203,7 +210,7 @@ describe('pool', () => {
     })
 
     expect(pool.hostIsAvailable()).to.be.true
-    pool.discard({ method: 'GET', path: '/foo' }, (err) => {
+    pool.discard({ method: 'GET', path: '/' }, (err) => {
       expect(err).to.be.an.instanceof(Pool.ServiceNotAvailableError)
       expect(pool.hostIsAvailable()).to.be.false
       done()
@@ -216,7 +223,7 @@ describe('pool', () => {
       res.end()
     }
 
-    pool.discard({ method: 'GET', path: '/foo' }, (err) => {
+    pool.discard({ method: 'GET', path: '/' }, (err) => {
       expect(err).to.be.an.instanceof(Pool.RequestError)
       expect(err.res.statusCode).to.equal(400)
       expect(pool.hostIsAvailable()).to.be.true
@@ -240,7 +247,7 @@ describe('pool', () => {
       res.end('ok now')
     }
 
-    pool.discard({ method: 'GET', path: '/foo' }, () => {
+    pool.discard({ method: 'GET', path: '/' }, () => {
       expect(pool.getHostsAvailable().map((h) => Number(h.url.port))).to.deep.equal([serverPorts[1]])
       expect(pool.getHostsDisabled().map((h) => Number(h.url.port))).to.deep.equal([serverPorts[0]])
       done()
@@ -255,11 +262,11 @@ describe('pool', () => {
           res.end()
         }
       })
-      pool.discard({ method: 'GET', path: '/foo' }, () => done())
+      pool.discard({ method: 'GET', path: '/' }, () => done())
     })
 
     it('should error if there are no available hosts', (done) => {
-      pool.discard({ method: 'GET', path: '/foo' }, (err) => {
+      pool.discard({ method: 'GET', path: '/' }, (err) => {
         expect(err).to.be.an.instanceof(Pool.ServiceNotAvailableError)
         expect(err.message).to.equal('No host available')
         done()
@@ -275,7 +282,7 @@ describe('pool', () => {
     it('should back off if failures continue', done => {
       clock.tick(300)
       expect(pool.hostIsAvailable()).to.be.true
-      pool.discard({ method: 'GET', path: '/foo' }, () => {
+      pool.discard({ method: 'GET', path: '/' }, () => {
         expect(pool.hostIsAvailable()).to.be.false
 
         clock.tick(300)
@@ -296,7 +303,7 @@ describe('pool', () => {
         }
       })
 
-      pool.discard({ method: 'GET', path: '/foo' }, err => {
+      pool.discard({ method: 'GET', path: '/' }, err => {
         expect(err).to.be.undefined
 
         servers.forEach(server => {
@@ -306,7 +313,7 @@ describe('pool', () => {
           }
         })
 
-        pool.discard({ method: 'GET', path: '/foo' }, err => {
+        pool.discard({ method: 'GET', path: '/' }, err => {
           expect(pool.hostIsAvailable()).to.be.false
           clock.tick(300)
           expect(pool.hostIsAvailable()).to.be.true
