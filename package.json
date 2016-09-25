@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.11.1",
-    "request": "2.x"
+    "node-fetch": "^1.6.2"
   },
   "devDependencies": {
     "coveralls": "^2.11.1",

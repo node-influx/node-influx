@@ -740,7 +740,7 @@ describe('InfluxDB', function () {
 
     describe('#queryFailover', function () {
       it('should read a point from the database after the failed servers have been removed', function (done) {
-        // FIXME: This is a bit of a hack, but there's currently no API to dynamically change this
+        // FIXME: This is a bit of a hack, but there's currently no API to dynamically change maxRetries
         failoverClient.request.options.maxRetries = 5
         failoverClient.setRequestTimeout(1000)
         // Should succeed on 5th server it tries (4s of timeouts)
