@@ -12,6 +12,7 @@ export interface ExponentialOptions {
    * The initial delay passed to the equation.
    */
   initial: number;
+
   /**
    * Random factor to subtract from the `n` count.
    */
@@ -36,13 +37,19 @@ export class ExponentialBackoff implements BackoffStrategy {
     this.counter = 0;
   }
 
-  public next(): number {
-    const count = (this.counter++) - Math.round(Math.random() * this.options.random);
+  public getDelay(): number {
+    const count = this.counter - Math.round(Math.random() * this.options.random);
     return Math.min(this.options.max, this.options.initial * Math.pow(2, Math.max(count, 0)));
   }
 
-  public reset(): void {
-    this.counter = 0;
+  public next(): BackoffStrategy {
+    const next = new ExponentialBackoff(this.options);
+    next.counter = this.counter + 1;
+    return next;
+  }
+
+  public reset(): BackoffStrategy {
+    return new ExponentialBackoff(this.options);
   }
 
 }

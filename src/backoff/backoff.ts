@@ -1,15 +1,19 @@
 export interface BackoffStrategy {
 
   /**
-   * Next increments the backoff counter and
-   * returns the next backoff duration.
-   * @return {Number} duration in milliseconds
+   * getDelay returns the amount of delay of the current backoff.
    */
-  next(): number;
+  getDelay(): number;
 
   /**
-   * Resets the backoff counter.
+   * Next is called when a failure occurs on a host to
+   * return the next backoff amount.
    */
-  reset(): void;
+  next(): BackoffStrategy;
+
+  /**
+   * Returns a strategy with a reset backoff counter.
+   */
+  reset(): BackoffStrategy;
 
 }

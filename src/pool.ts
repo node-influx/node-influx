@@ -1,6 +1,9 @@
-import backoffs from "./backoff";
+import { BackoffStrategy } from "./backoff/backoff";
+import { ExponentialBackoff } from "./backoff/exponential";
 import Host from "./host";
-import * as request from "request";
+
+import * as http from "http";
+import * as querystring from "querystring";
 
 /**
  * Status codes that will cause a host to be marked as "failed" if we get
@@ -14,24 +17,6 @@ const resubmitErrorCodes = [
   "ECONNREFUSED",
   "EHOSTUNREACH",
 ];
-
-/**
- * @typedef {Object} PoolOptions an options object passed to instantiate
- *     or configure a pool of Influx connections.
- * @property {Object} [options.failoverTimeout=60000] the length of time a
- *     host should be removed for upon a connection error
- * @property {Number} [options.maxRetries=2] number of times we should retry
- *     running a query before calling back with an error
- * @property {Object} [options.requestTimeout=30000] the length of time after
- *     which HTTP requests will error if they do not receive a response
- * @property {Function} [options.request] function called to make an HTTP
- *     request, defaults to the `request` module
- * @property {Object} [options.backoff] configuration for the backoff strategy
- *     used when connections fail. It contains a `kind` with other config
- *     data for the specific kind.
- * @property {String} [options.backoff.kind] the name of the backoff strategy
- *     used.
- */
 
 export interface PoolOptions {
 
@@ -54,24 +39,40 @@ export interface PoolOptions {
   requestTimeout: number;
 
   /**
-   * Request instance to use for talking to Influx.
+   * Options to configure the backoff policy for the pool. Defaults
+   * to using exponential backoff.
    */
-  request: request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>;
+  backoff: BackoffStrategy;
+
+}
+
+export interface PoolRequestOptions {
 
   /**
-   * Options to configure the backoff policy for the pool.
+   * Request method.
    */
-  backoff: {
-    /**
-     * Name of the backoff strategy to use.
-     */
-    kind: string;
+  method: "GET" | "POST";
 
-    /**
-     * A list of other options to pass into the strategy.
-     */
-    [propName: string]: any;
-  };
+  /**
+   * Path to hit on the database server, must begin with a leading slash.
+   */
+  path: string;
+
+  /**
+   * Query string to be appended to the request path.
+   */
+  query?: any;
+
+  /**
+   * Request body to include.
+   */
+  body?: string;
+
+  /**
+   * For internal use only, a counter of the number of times we've retried
+   * running this request.
+   */
+  retries?: number;
 
 }
 
@@ -82,19 +83,31 @@ export interface PoolOptions {
 export class ServiceNotAvailableError extends Error {}
 
 /**
+ * An RequestError is returned as an error from requests that
+ * result in a 300 <= error code <= 500.
+ */
+export class RequestError extends Error {
+
+  constructor(public req: http.ClientRequest, public res: http.IncomingMessage) {
+    super(`A ${res.statusCode} ${res.statusMessage} erro occurred`);
+  }
+
+}
+
+/**
  *
  * The Pool maintains a list available Influx hosts and dispatches requests
  * to them. If there are errors connecting to hosts, it will disable that
  * host for a period of time.
  */
-export default class Pool {
+export class Pool {
 
   private options: PoolOptions;
   private index: number;
-  private requestOptions: request.CoreOptions;
+  private timeout: number;
 
-  private hostsAvailable: Array<Host>;
-  private hostsDisabled: Array<Host>;
+  private hostsAvailable: Set<Host>;
+  private hostsDisabled: Set<Host>;
 
   /**
    * Creates a new Pool instance.
@@ -102,30 +115,19 @@ export default class Pool {
    */
   constructor (options: PoolOptions) {
     this.options = Object.assign({
-      backoff: {
+      backoff: new ExponentialBackoff({
         initial: 300,
-        kind: "exponential",
         max: 10 * 1000,
         random: 1,
-      },
+      }),
       maxRetries: 2,
       requestTimeout: 30 * 1000,
-      request,
     }, options);
 
     this.index = 0;
-    this.hostsAvailable = [];
-    this.hostsDisabled = [];
-    this.requestOptions = { timeout: this.options.requestTimeout };
-  }
-
-  /**
-   * Sets the length of time after which HTTP requests will error if they
-   * do not receive a response.
-   */
-  public setRequestTimeout (value: number): Pool {
-    this.requestOptions.timeout = value;
-    return this;
+    this.hostsAvailable = new Set<Host>();
+    this.hostsDisabled = new Set<Host>();
+    this.timeout = this.options.requestTimeout;
   }
 
   /**
@@ -133,7 +135,7 @@ export default class Pool {
    * @return {Host[]}
    */
   public getHostsAvailable(): Array<Host> {
-    return this.hostsAvailable.slice();
+    return Array.from(this.hostsAvailable);
   }
 
   /**
@@ -142,18 +144,15 @@ export default class Pool {
    * @return {Host[]}
    */
   public getHostsDisabled(): Array<Host> {
-    return this.hostsDisabled.slice();
+    return Array.from(this.hostsDisabled);
   }
 
   /**
    * Inserts a new host to the pool.
    */
   public addHost(url: string): Host {
-    const bconfig = this.options.backoff;
-    const backoff = backoffs[bconfig.kind](bconfig);
-
-    const host = new Host(url, backoff);
-    this.hostsAvailable.push(host);
+    const host = new Host(url, this.options.backoff.reset());
+    this.hostsAvailable.add(host);
     return host;
   }
 
@@ -162,28 +161,143 @@ export default class Pool {
    * @return {Boolean}
    */
   public hostIsAvailable(): boolean {
-    return this.hostsAvailable.length > 0;
+    return this.hostsAvailable.size > 0;
   }
 
   /**
-   * Runs a GET request against an Influx server.
-   * @param {Object} options  options for the `request` library. Note that
-   *     the baseUrl for the host will be set automatically.
-   * @param {Function} callback
+   * Makes a request and calls back with the response, parsed as JSON.
+   * An error is returned on a non-2xx status code or on a parsing exception.
    */
-  public get (options, callback) {
-    this.request(options, callback);
+  public json(options: PoolRequestOptions, callback: (err: Error, res: any) => void) {
+    this.text(options, (err, res) => {
+      if (err) {
+        return callback(err, null);
+      }
+
+      let text: string;
+      try {
+        text = JSON.parse(res);
+      } catch (err) {
+        return callback(err, null);
+      }
+
+      callback(undefined, text);
+    });
   }
 
   /**
-   * Runs a POST request against an Influx server.
-   * @param {Object} options  options for the `request` library. Note that
-   *      baseUrl for the host will be set automatically.
-   * @param {Function} callback
+   * Makes a request and calls back with the plain text response,
+   * if possible. An error is returned on a non-2xx status code.
    */
-  public post (options, callback) {
-    options.method = "POST";
-    this.request(options, callback);
+  public text(options: PoolRequestOptions, callback: (err: Error, res: string) => void) {
+    this.stream(options, (err, res) => {
+      if (err) {
+        return callback(err, null);
+      }
+
+      let output = "";
+      res.setEncoding("utf8");
+      res.on("data", str => { output = output + str; });
+      res.on("end", () => callback(undefined, output));
+    });
+  }
+
+  /**
+   * Makes a request and discards any response body it receives.
+   * An error is returned on a non-2xx status code.
+   */
+  public discard(options: PoolRequestOptions, callback: (err: Error) => void) {
+    this.stream(options, (err, res) => {
+      if (err) {
+        return callback(err);
+      }
+
+      res.on("data", () => { /* ignore */ });
+      res.on("end", () => callback(undefined));
+    });
+  }
+
+  /**
+   * Makes a request and calls back with the IncomingMessage stream,
+   * if possible. An error is returned on a non-2xx status code.
+   */
+  public stream(
+    options: PoolRequestOptions,
+    callback: (err: Error, res: http.IncomingMessage) => void
+  ) {
+    if (!this.hostIsAvailable()) {
+      return callback(new ServiceNotAvailableError("No host available"), null);
+    }
+
+    // In Node, responses can come in after `timeout` events are fired,
+    // but we don't want to fire callbacks twice. Create guarding functions
+    // to prevent this.
+    let isHandled = false;
+    const shouldHandle = () => {
+      const should = !isHandled;
+      isHandled = true;
+      return should;
+    };
+
+    let path = options.path;
+    if (options.query) {
+      path += "?" + querystring.stringify(options.query);
+    }
+
+    const host = this.getHost();
+    const req = http.request({
+      headers: { "content-length": options.body ? options.body.length : 0 },
+      hostname: host.url.hostname,
+      method: options.method,
+      path,
+      port: Number(host.url.port),
+      protocol: host.url.protocol,
+    }, res => {
+      if (!shouldHandle()) {
+        return;
+      }
+
+      // Resolve an error if we get a >500 status code. Note that we *exclude*
+      // 500 error codes. Sometimes malformed queries to influx cause panics,
+      // and trying to retry those queries on other hosts would just lead
+      // to a domino effect of crashing servers.
+      if (res.statusCode > 500) {
+        return this.handleRequestError(
+          new ServiceNotAvailableError(res.statusMessage),
+          host, options, callback
+        );
+      }
+
+      if (res.statusCode >= 300) {
+        return callback(new RequestError(req, res), res);
+      }
+
+      host.success();
+      return callback(undefined, res);
+    });
+
+    // Handle network or HTTP parsing errors:
+    req.on("error", err => {
+      if (shouldHandle()) {
+        this.handleRequestError(err, host, options, callback);
+      }
+    });
+
+    // Handle timeouts:
+    req.setTimeout(this.timeout, () => {
+      if (shouldHandle()) {
+        this.handleRequestError(
+          new ServiceNotAvailableError("Request timed out"),
+          host, options, callback
+        );
+      }
+    });
+
+    // Write out the body:
+    if (options.body) {
+      req.write(options.body);
+    }
+    req.end();
   }
 
   /**
@@ -191,7 +305,7 @@ export default class Pool {
    * @return {Host}
    */
   private getHost(): Host {
-    const available = this.hostsAvailable;
+    const available = Array.from(this.hostsAvailable);
     const host = available[this.index];
     this.index = (this.index + 1) % available.length;
     return host;
@@ -202,71 +316,40 @@ export default class Pool {
    * @param  {Host} host
    */
   private enableHost(host: Host) {
-    this.hostsDisabled = this.hostsDisabled.filter(h => h !== host);
-    this.hostsAvailable.push(host);
+    this.hostsDisabled.delete(host);
+    this.hostsAvailable.add(host);
   }
 
   /**
    * Disables the provided host, removing it from the query pool. It will be
    * re-enabled after a backoff interval
-   * @param  {Host} host
    */
   private disableHost(host: Host) {
-    this.hostsAvailable = this.hostsAvailable.filter(h => h !== host);
-    this.hostsDisabled.push(host);
-    this.index %= Math.max(1, this.hostsAvailable.length);
+    this.hostsAvailable.delete(host);
+    this.hostsDisabled.add(host);
+    this.index %= Math.max(1, this.hostsAvailable.size);
 
     setTimeout(() => this.enableHost(host), host.fail());
   }
 
-  /**
-   * Runs a request
-   * @param  {Object}   options
-   * @param  {Function} callback
-   */
-  private request (
-    options: request.RequiredUriUrl & request.CoreOptions,
-    callback: request.RequestCallback,
-    retries: number = 0
-  ) {
-    if (!this.hostIsAvailable()) {
-      return callback(new ServiceNotAvailableError("No host available"), null, null);
-    }
-
-    const host = this.getHost();
-    const resolved = Object.assign({ baseUrl: host.url }, this.requestOptions, options);
-
-    this.options.request(resolved, (err, response, body) => {
-      // Resolve an error if we get a >500 status code. Note that we *exclude*
-      // 500 error codes. Sometimes malformed queries to influx cause panics,
-      // and trying to retry those queries on other hosts would just lead
-      // to a domino effect of crashing servers.
-      if (!err && response.statusCode > 500) {
-        err = new ServiceNotAvailableError(response.statusMessage);
-      }
-
-      if (!err) {
-        host.success();
-        return callback(err, response, body);
-      }
-
-      this.handleRequestError(err, host, retries, resolved, callback);
-    });
-  }
-
   private handleRequestError (
-    err: any, host: Host, retries: number,
-    options: request.RequiredUriUrl & request.CoreOptions,
-    callback: request.RequestCallback
+    err: any, host: Host,
+    options: PoolRequestOptions,
+    callback: (err: Error, res: http.IncomingMessage) => void
   ) {
-    if (resubmitErrorCodes.indexOf(err.code) !== -1 || err instanceof ServiceNotAvailableError) {
-      this.disableHost(host);
-      if (this.options.maxRetries >= retries && this.hostIsAvailable()) {
-        return this.request(options, callback, retries + 1);
-      }
+    if (!(err instanceof ServiceNotAvailableError) &&
+        resubmitErrorCodes.indexOf(err.code) === -1) {
+      return callback(err, null);
     }
 
-    return callback(err, null, null);
+    this.disableHost(host);
+    const retries = options.retries || 0;
+    if (retries < this.options.maxRetries && this.hostIsAvailable()) {
+      options.retries = retries + 1;
+      return this.stream(options, callback);
+    }
+
+    callback(err, null);
   }
 
 }

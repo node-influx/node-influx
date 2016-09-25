@@ -6,7 +6,6 @@
 		"outDir": "lib"
 	},
   "exclude": [
-    "node_modules",
-    "src/index.ts"
+    "node_modules"
   ]
 }

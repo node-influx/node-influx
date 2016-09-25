@@ -5,8 +5,8 @@
   "main": "./lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc",
-    "lint": "tslint src/**.ts -e src/index.ts && standard ./test",
-    "test": "npm run build && mocha -R spec -r test/unit/_setup.js test/unit/*.test.js",
+    "lint": "tslint src/**.ts && standard ./test",
+    "test": "npm run build && mocha -R spec -r test/unit/_setup.js test/unit/*.test.js && npm run lint",
     "integrate": "npm run build && mocha -R spec test/integration/*.test.js && standard",
     "cover": "npm run build && istanbul cover _mocha -- -R spec -r test/unit/_setup.js test/unit/*.test.js ",
     "travis-test": "npm run build && istanbul cover _mocha --report lcovonly -- -R spec -r test/unit/_setup.js test/unit/*.test.js && npm run lint"
@@ -42,6 +42,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^6.0.38",
+    "@types/node-fetch": "0.0.4",
     "@types/request": "0.0.30",
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",

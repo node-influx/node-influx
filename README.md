@@ -14,17 +14,21 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
 [![Bountysource](https://img.shields.io/bountysource/team/node-influx/activity.svg?style=flat-square)](https://www.bountysource.com/teams/node-influx) - Reward the contributors for their efforts on upcoming tasks.
 
-[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
-
-Interested in becoming a maintainer? Please help out with issues and pull-requests and open an [issue introducing yourself](https://github.com/node-influx/node-influx/issues/new)! After we've seen you're involved with the project, we'll add you up :+1:
-
 ## Installation
 
     $ npm install influx
 
+## Features
+
+ * Simple API for nearly all Influx operations
+ * Fully supported in Node and the browser
+ * Zero dependencies
+
 ## Compatibility
 
-Version 4.x.x is compatible with InfluxDB 0.9.x
+Version 5.x.x is compatible with InfluxDB 1.x on Node 6 and modern browsers
+
+Version 4.x.x is compatible with InfluxDB 0.9.x - 0.13.x on Node 0.12 and onwards
 
 Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have updates by core contributers, please consider upgrading.
 
