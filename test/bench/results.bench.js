@@ -1,11 +1,29 @@
 'use strict'
 
 const Results = require('../../lib/results').Results
-const count = 10000
+const _ = require('lodash')
+const count = 1000
+
+function parseOld (response) {
+  let results = []
+  _.each(response, function (result) {
+    let tmp = []
+    if (result.series) {
+      _.each(result.series, function (series) {
+        let rows = _.map(series.values, function (values) {
+          return _.extend(_.zipObject(series.columns, values), series.tags)
+        })
+        tmp = _.chain(tmp).concat(rows).value()
+      })
+    }
+    results.push(tmp)
+  })
+  return results
+}
 
 suite(`results: ${count} grouped results`, () => {
   const series = []
-  const grouped = { results: [{ series }] }
+  const grouped = { results: [{ series}] }
 
   for (let i = 0; i < count; i++) {
     series.push({
@@ -24,7 +42,8 @@ suite(`results: ${count} grouped results`, () => {
 
   const r = Results.parse(grouped)
   bench('parsing', () => Results.parse(grouped))
-  bench('getting all groups', () => r.groups())
+  bench('parsing (old)', () => parseOld(grouped.results))
+  bench('computing groups', () => r.groups())
   bench('searching for present', () => r.group({ tag: `value${count - 1}` }))
   bench('searching for absent', () => r.group({ tag: `a` }))
   bench('searching for wrong type', () => r.group({ tag2: `a` }))
@@ -50,4 +69,5 @@ suite(`results: ${count} flat results`, () => {
   }
 
   bench('parsing', () => Results.parse(grouped))
+  bench('parsing (old)', () => parseOld(grouped.results))
 })

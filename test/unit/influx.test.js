@@ -90,6 +90,7 @@ describe('influxdb', () => {
           method: 'GET',
           path: '/query',
           query: Object.assign({
+            epoch: 'u',
             u: 'root',
             p: 'root',
           }, options)
@@ -106,9 +107,9 @@ describe('influxdb', () => {
 
     it('.dropDatabase()', done => {
       expectQuery('discard', 'drop database "foo"')
-      influx.createDatabase('foo')
+      influx.dropDatabase('foo')
       expectQuery('discard', 'drop database "f\\"oo"')
-      influx.createDatabase('f"oo', done)
+      influx.dropDatabase('f"oo', done)
     })
   })
 })

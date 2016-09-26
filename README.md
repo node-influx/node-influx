@@ -22,6 +22,7 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 
  * Simple API for nearly all Influx operations
  * Fully supported in Node and the browser
+ * Performant, processing millions of rows/sec on modest hardware
  * Zero dependencies
 
 ## Compatibility

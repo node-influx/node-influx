@@ -219,13 +219,12 @@ export class InfluxDB {
     }), callback);
   }
 
-
   /**
    * Returns array of database names. Requires cluster admin privileges.
    */
   public getDatabaseNames (callback: (err: Error, names: string[]) => void) {
     this.pool.json(this.getQueryOpts({
-      q: `show databases`,
+      q: "show databases",
     }), callback);
   }
 
@@ -237,7 +236,7 @@ export class InfluxDB {
       method,
       path: "/query",
       query: Object.assign({
-        epoch: 'u',
+        epoch: "u",
         p: this.options.password,
         u: this.options.username,
       }, params),

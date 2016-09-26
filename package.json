@@ -45,6 +45,7 @@
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
     "istanbul": "^0.4.3",
+    "lodash": "^4.16.2",
     "mocha": "^2.4.5",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",

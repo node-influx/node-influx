@@ -17,10 +17,10 @@ export type Row = {
 };
 
 export interface ResponseSeries {
-  name: string,
-  columns: string[],
-  tags?: Tags,
-  values: Row[],
+  name: string;
+  columns: string[];
+  tags?: Tags;
+  values: Row[];
 }
 
 function getMicrotime() {
@@ -44,13 +44,35 @@ function dateFromMicrotime(microtime: number): Date {
  */
 export class Results extends Array<Row> {
 
-  private groupsComputed = false;
   private groupsTagsKeys: string[];
   private groupRows: { tags: Tags, rows: Row[] }[] = [];
+
+  /**
+   * From parses out a response to a result or list of responses.
+   * There are three situations we cover here:
+   *  1. A single query without groups, like `select * from myseries`
+   *  2. A single query with groups, generated with a `group by` statement
+   *     which groups by series *tags*, grouping by times is case (1)
+   *  3. Multiple queries of types 1 and 2
+   */
+  public static parse(res: Response): Results[] | Results {
+    if (res.results.length === 1) { // normalize case 3
+      return new Results(res.results[0].series);
+    } else {
+      return res.results.map(result => new Results(result.series));
+    }
+  }
 
   constructor(series: ResponseSeries[] = []) {
     super();
 
+    if (series[0].tags) {
+      this.groupsTagsKeys = Object.keys(series[0].tags);
+    } else {
+      this.groupsTagsKeys = [];
+    }
+
+    let nextGroup = new Array<Row>();
     for (let i = 0, lastEnd = 0; i < series.length; i++, lastEnd = this.length) {
       const columns = series[i].columns;
       const values = series[i].values;
@@ -60,21 +82,23 @@ export class Results extends Array<Row> {
         const obj: Row = { time: dateFromMicrotime(<number> values[k][timeCol])};
         for (let j = 0; j < columns.length; j++) {
           if (j === timeCol) {
-            continue
+            continue;
           }
           obj[columns[j]] = values[k][j];
         }
+        for (let j = 0; j < this.groupsTagsKeys.length; j++) {
+          obj[this.groupsTagsKeys[j]] = series[i].tags[this.groupsTagsKeys[j]];
+        }
+
         this.push(obj);
+        nextGroup.push(obj);
       }
 
       this.groupRows.push({
+        rows: nextGroup,
         tags: series[i].tags || {},
-        rows: this.slice(lastEnd),
       });
-
-      if (i === 0 && series[i].tags) {
-        this.groupsTagsKeys = Object.keys(series[i].tags);
-      }
+      nextGroup = [];
     }
   }
 
@@ -96,7 +120,7 @@ export class Results extends Array<Row> {
     const srcKeys = this.groupsTagsKeys;
     const dstKeys = Object.keys(matcher);
     if (srcKeys.length === 0 || srcKeys.length !== dstKeys.length) {
-      return []
+      return [];
     }
 
     L:
@@ -119,21 +143,5 @@ export class Results extends Array<Row> {
    */
   public groups(): { tags: Tags, rows: Row[] }[] {
     return this.groupRows;
-  }
-
-  /**
-   * From parses out a response to a result or list of responses.
-   * There are three situations we cover here:
-   *  1. A single query without groups, like `select * from myseries`
-   *  2. A single query with groups, generated with a `group by` statement
-   *     which groups by series *tags*, grouping by times is case (1)
-   *  3. Multiple queries of types 1 and 2
-   */
-  public static parse(res: Response): Results[] | Results {
-    if (res.results.length === 1) { // normalize case 3
-      return new Results(res.results[0].series);
-    } else {
-      return res.results.map(result => new Results(result.series))
-    }
   }
 }
