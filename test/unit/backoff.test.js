@@ -3,7 +3,6 @@
 const Exp = require('../../lib/backoff/exponential').ExponentialBackoff
 
 describe('backoff strategies', () => {
-
   describe('exponential strategy', () => {
     it('appears to work', () => {
       let exp = new Exp({

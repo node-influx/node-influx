@@ -7,9 +7,7 @@ const http = require('http')
 const async = require('async')
 
 describe('pool', () => {
-
   let pool
-  let request
   let clock
   let servers
 
@@ -78,7 +76,7 @@ describe('pool', () => {
         method: 'POST',
         path: '/bar',
         query: { a: 42 },
-        body: 'asdf',
+        body: 'asdf'
       }, (err, data) => {
         expect(err).to.be.undefined
         expect(data).to.equal('ok')
@@ -124,13 +122,13 @@ describe('pool', () => {
     })
 
     describe('request source error handling', done => {
-      const methods = ['json', 'text', 'discard'];
+      const methods = ['json', 'text', 'discard']
       beforeEach(done => {
         async.each(
           servers,
           (server, done) => server.close(done),
           done
-        );
+        )
       })
       methods.forEach(method => {
         it(method, done => {
@@ -314,6 +312,7 @@ describe('pool', () => {
         })
 
         pool.discard({ method: 'GET', path: '/' }, err => {
+          expect(err).not.to.be.undefined
           expect(pool.hostIsAvailable()).to.be.false
           clock.tick(300)
           expect(pool.hostIsAvailable()).to.be.true

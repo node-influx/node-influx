@@ -1,3 +1,4 @@
+'use strict'
 
 const InfluxDB = require('../../lib').InfluxDB
 const sinon = require('sinon')
@@ -13,8 +14,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '127.0.0.1',
           port: 8086,
-          protocol: 'http',
-        }],
+          protocol: 'http'
+        }]
       })
     })
 
@@ -27,8 +28,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 1337,
-          protocol: 'https',
-        }],
+          protocol: 'https'
+        }]
       })
     })
 
@@ -41,8 +42,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 8086,
-          protocol: 'http',
-        }],
+          protocol: 'http'
+        }]
       })
     })
 
@@ -54,8 +55,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 8086,
-          protocol: 'http',
-        }],
+          protocol: 'http'
+        }]
       })
     })
   })
@@ -79,7 +80,7 @@ describe('influxdb', () => {
       }
     })
 
-    expectQuery = (method, options, ...yields) => {
+    const expectQuery = (method, options, ...yields) => {
       if (typeof options === 'string') {
         options = { q: options }
       }
@@ -92,7 +93,7 @@ describe('influxdb', () => {
           query: Object.assign({
             epoch: 'u',
             u: 'root',
-            p: 'root',
+            p: 'root'
           }, options)
         })
       })
