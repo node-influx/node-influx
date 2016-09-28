@@ -11,10 +11,7 @@ export interface Response {
 
 export type Tags = { [name: string]: string };
 
-export type Row = {
-  time?: Date,
-  [prop: string]: number | string | boolean | Date
-};
+export type Row = any; // :/
 
 export interface ResponseSeries {
   name: string;
@@ -154,4 +151,18 @@ export function parse(res: Response): Results[] | Results {
   } else {
     return res.results.map(result => parseInner(result.series));
   }
+}
+
+/**
+ * parseSingle asserts that the response contains a single result,
+ * and returns that result.
+ * @throws {Error} if the number of results is not exactly one
+ */
+export function parseSingle(res: Response): Results {
+  if (res.results.length !== 1) {
+    throw new Error("node-influx expected the results length to equal 1, but " +
+      `it was ${0}. Please report this here: https://git.io/influx-err`);
+  }
+
+  return parseInner(res.results[0].series);
 }

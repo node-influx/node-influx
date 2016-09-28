@@ -1,7 +1,7 @@
 'use strict'
 
 const grammar = require('../../lib/grammar')
-const escapeTables = require('./escapeTables.fixture')
+const escapeTables = require('../fixture/escapeTables')
 
 describe('grammar', () => {
   Object.keys(escapeTables).forEach(escaper => {

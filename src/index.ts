@@ -1,4 +1,5 @@
 import { Pool, PoolOptions } from "./pool";
+import { Response, parseSingle } from "./results";
 
 import * as grammar from "./grammar";
 import * as url from "url";
@@ -225,7 +226,13 @@ export class InfluxDB {
   public getDatabaseNames (callback: (err: Error, names: string[]) => void) {
     this.pool.json(this.getQueryOpts({
       q: "show databases",
-    }), callback);
+    }), (err: Error, res: Response) => {
+      if (err) {
+        return callback(err, undefined);
+      }
+
+      callback(undefined, parseSingle(res).map(row => row.name as string));
+    });
   }
 
   /**

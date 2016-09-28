@@ -38,7 +38,8 @@
       "after",
       "expect",
       "suite",
-      "bench"
+      "bench",
+      "dbFixture"
     ]
   },
   "license": "MIT",
@@ -49,6 +50,7 @@
     "istanbul": "^0.4.3",
     "lodash": "^4.16.2",
     "mocha": "^2.4.5",
+    "node-fetch": "^1.6.3",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "standard": "^7.0.1",

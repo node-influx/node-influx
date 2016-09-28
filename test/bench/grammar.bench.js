@@ -1,7 +1,7 @@
 'use strict'
 
 const grammar = require('../../lib/grammar')
-const escapeTables = require('../unit/escapeTables.fixture')
+const escapeTables = require('../fixture/escapeTables')
 
 suite('grammar: escape many replacements', () => {
   const escaper = grammar.tagEscaper

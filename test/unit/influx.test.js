@@ -112,5 +112,14 @@ describe('influxdb', () => {
       expectQuery('discard', 'drop database "f\\"oo"')
       influx.dropDatabase('f"oo', done)
     })
+
+    it('.getDatabaseNames()', done => {
+      expectQuery('json', 'show databases', undefined, dbFixture('showDatabases'))
+      influx.getDatabaseNames((err, names) => {
+        expect(err).to.be.undefined
+        expect(names).to.deep.equal(['_internal', 'influx_test_gen'])
+        done()
+      })
+    })
   })
 })
