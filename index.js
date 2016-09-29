@@ -116,7 +116,18 @@ InfluxDB.prototype._parseCallback = function (callback) {
       return callback(err)
     }
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      return callback(new Error(body.error || (typeof body === 'object' ? JSON.stringify(body) : (body || res.statusCode))))
+      var errorMessage
+      if (!body) {
+        errorMessage = 'No body received with status code ' + res.statusCode + ' from Influx.'
+      } else if (body.error) {
+        errorMessage = body.error
+      } else if (typeof body === 'object') {
+        errorMessage = JSON.stringify(body)
+      } else {
+        errorMessage = body
+      }
+
+      return callback(new Error(errorMessage))
     }
 
     // Look for errors in the response body
