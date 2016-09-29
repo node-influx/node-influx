@@ -11,9 +11,6 @@
               "series_1,my_tag=0"
             ],
             [
-              "series_1,my_tag=1"
-            ],
-            [
               "series_1,my_tag=2"
             ],
             [
@@ -30,6 +27,9 @@
             ],
             [
               "series_1,my_tag=8"
+            ],
+            [
+              "series_1,my_tag=9"
             ]
           ]
         }

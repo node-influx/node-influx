@@ -8,25 +8,28 @@
           ],
           "values": [
             [
+              "series_0,my_tag=0"
+            ],
+            [
               "series_0,my_tag=1"
             ],
             [
-              "series_0,my_tag=3"
-            ],
-            [
-              "series_0,my_tag=4"
-            ],
-            [
               "series_0,my_tag=5"
+            ],
+            [
+              "series_0,my_tag=6"
+            ],
+            [
+              "series_0,my_tag=7"
+            ],
+            [
+              "series_0,my_tag=8"
             ],
             [
               "series_0,my_tag=9"
             ],
             [
               "series_1,my_tag=0"
-            ],
-            [
-              "series_1,my_tag=1"
             ],
             [
               "series_1,my_tag=2"
@@ -47,7 +50,7 @@
               "series_1,my_tag=8"
             ],
             [
-              "series_2,my_tag=0"
+              "series_1,my_tag=9"
             ],
             [
               "series_2,my_tag=1"
@@ -62,7 +65,13 @@
               "series_2,my_tag=4"
             ],
             [
+              "series_2,my_tag=5"
+            ],
+            [
               "series_2,my_tag=6"
+            ],
+            [
+              "series_2,my_tag=7"
             ],
             [
               "series_2,my_tag=8"

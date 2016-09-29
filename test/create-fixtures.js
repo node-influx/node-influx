@@ -27,7 +27,10 @@ const queries = [
   write(fs.readFileSync(path.join(__dirname, 'fixtures_test_data.txt')), { db }),
   fixture('showMeasurements', 'show measurements', { db }),
   fixture('showSeries', 'show series', { db }),
-  fixture('showSeriesFromOne', 'show series from series_1', { db })
+  fixture('showSeriesFromOne', 'show series from series_1', { db }),
+  fixture('selectFromOne', 'select * from series_0 where my_tag = \'1\' order by time desc', { db }),
+  fixture('selectFromGroup', 'select top(my_value, 1) from series_0 group by my_tag order by time desc', { db }),
+  fixture('error', 'this is not a valid query!')
 ]
 
 const influxHost = process.env.INFLUX_HOST || 'http://localhost:8086'

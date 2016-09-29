@@ -1,6 +1,7 @@
 import { Pool, PoolOptions } from "./pool";
 import { Response, parseSingle } from "./results";
 
+import * as b from "./builder";
 import * as grammar from "./grammar";
 import * as url from "url";
 
@@ -118,6 +119,22 @@ function parseOptionsUrl(addr: string): SingleHostConfig {
 }
 
 /**
+ * Takes an Influx callback and returns a new callback which attempts to extract
+ * a column, by name, from the output and pass it into the original callback.
+ */
+function extractColumnInto(column: string, callback: (err: Error, results: string[]) => void)
+: (err: Error, res: Response) => void {
+
+  return (err, res) => {
+    if (err) {
+      return callback(err, undefined);
+    }
+
+    callback(undefined, parseSingle(res).map(r => r[column]));
+  };
+}
+
+/**
  * Works similarly to Object.assign, but only overwrites
  * properties that resolve to undefined.
  */
@@ -204,35 +221,133 @@ export class InfluxDB {
 
   /**
    * Creates a new database with the provided name.
+   * @example
+   * influx.createDatabase('mydb', (err) => done(err))
    */
   public createDatabase (databaseName: string, callback: (err: Error) => void = noop) {
     this.pool.discard(this.getQueryOpts({
       q: `create database ${grammar.quoteEscaper.escape(databaseName)}`,
-    }), callback);
+    }, "POST"), callback);
   }
 
   /**
    * Deletes a database with the provided name.
+   * @example
+   * influx.createDatabase('mydb', (err) => done(err))
    */
   public dropDatabase (databaseName: string, callback: (err: Error) => void = noop) {
     this.pool.discard(this.getQueryOpts({
       q: `drop database ${grammar.quoteEscaper.escape(databaseName)}`,
-    }), callback);
+    }, "POST"), callback);
   }
 
   /**
    * Returns array of database names. Requires cluster admin privileges.
+   * @example
+   * influx.getMeasurements((err, names) => {
+   *   console.log('My database names are: ' + names.join(', '))
+   * })
    */
   public getDatabaseNames (callback: (err: Error, names: string[]) => void) {
-    this.pool.json(this.getQueryOpts({
-      q: "show databases",
-    }), (err: Error, res: Response) => {
-      if (err) {
-        return callback(err, undefined);
-      }
+    this.pool.json(
+      this.getQueryOpts({ q: "show databases" }),
+      extractColumnInto("name", callback)
+    );
+  }
 
-      callback(undefined, parseSingle(res).map(row => row.name as string));
-    });
+  /**
+   * Returns array of measurements.
+   * @example
+   * influx.getMeasurements((err, names) => {
+   *   console.log('My measurement names are: ' + names.join(', '))
+   * })
+   */
+  public getMeasurements (callback: (err: Error, measurements: string[]) => void) {
+    this.pool.json(
+      this.getQueryOpts({ q: "show measurements" }),
+      extractColumnInto("name", callback)
+    );
+  }
+
+  /**
+   * Returns a list of all series in the database.
+   */
+  public getSeries (callback: (err: Error, measurements: string[]) => void);
+
+  /**
+   * Returns a list of all series within the target measurement.
+   * @example
+   * influx.getSeries((err, names) => {
+   *   console.log('My series names are: ' + names.join(', '))
+   * })
+   *
+   * influx.getSeries("my_measurement", (err, names) => {
+   *   console.log('My series names in my_measurement are: ' + names.join(', '))
+   * })
+   */
+  public getSeries (measurement: string, callback: (err: Error, measurements: string[]) => void);
+
+  public getSeries (m: any, callback?: (err: Error, measurements: string[]) => void) {
+    let query = "show series";
+    if (typeof m === "string") {
+      query += ` from ${grammar.quoteEscaper.escape(m)}`;
+    } else {
+      callback = m;
+    }
+
+    this.pool.json(
+      this.getQueryOpts({ q: query }),
+      extractColumnInto("key", callback)
+    );
+  }
+
+  /**
+   * Removes a measurement from the database.
+   * @example
+   * dropMeasurement('my_measurement', err => done(err))
+   * // => DROP MEASUREMENT "my_measurement"
+   */
+  public dropMeasurement(measurementName: string, callback: (err: Error) => void = noop) {
+    this.pool.discard(this.getQueryOpts({
+      q: `drop measurement ${grammar.quoteEscaper.escape(measurementName)}`,
+    }, "POST"), callback);
+  }
+
+  /**
+   * Removes a one or more series from InfluxDB.
+   *
+   * @example
+   * // The following pairs of queries are equivalent: you can chose either to
+   * // use our builder or pass in string directly. The builder takes care
+   * // of escaping and most syntax handling for you.
+   *
+   * influx.dropSeries({ where: e => e.tag('cpu').equals.value('cpu8') }, err => done(err))
+   * influx.dropSeries({ where: '"cpu" = \'cpu8\'' }, err => done(err))
+   * // DROP SERIES WHERE "cpu" = 'cpu8'
+   *
+   * influx.dropSeries({ measurement: m => m.name('cpu').policy('autogen') }, err => done(err))
+   * influx.dropSeries({ measurement: '"cpu"."autogen"' }, err => done(err))
+   * // DROP SERIES FROM "autogen"."cpu"
+   *
+   * influx.dropSeries({
+   *   measurement: m => m.name('cpu').policy('autogen')
+   *   where: e => e.tag('cpu').equals.value('cpu8')
+   * }, err => done(err))
+   * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
+   */
+  public dropSeries(
+    options: b.measurement | b.where | (b.measurement & b.where),
+    callback: (err: Error) => void = noop
+  ) {
+    let q = "drop series";
+    if ("measurement" in options) {
+      q += " from " + b.parseMeasurement(<b.measurement> options);
+    }
+    if ("where" in options) {
+      q += " where " + b.parseWhere(<b.where> options);
+    }
+
+    this.pool.discard(this.getQueryOpts({ q }, "POST"), callback);
   }
 
   /**

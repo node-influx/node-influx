@@ -82,3 +82,34 @@ export const measurementEscaper = new Escaper([",", " "]);
  * quoteEscaper escapes quoted values, such as database names.
  */
 export const quoteEscaper = new Escaper(["\""], "\"");
+
+/**
+ * stringLitEscaper escapes single quotes in string literals.
+ */
+export const stringLitEscaper = new Escaper(["'"], "'");
+
+function leftPad(str: string, length: number, pad: string) {
+  while (str.length < length) {
+    str = pad + str;
+  }
+  return str;
+}
+
+/**
+ * formatDate converts the Date instance to Influx's date query format.
+ */
+export function formatDate(date: Date) {
+  // In our Results we add a getMicrotime function to store more precise
+  // values, when possible. Pull that here if we're able.
+  const decimal = typeof (<any> date).getMicrotime === "function"
+    ? (<any> date).getMicrotime()
+    : date.getUTCMilliseconds();
+
+  return "\"" + leftPad(String(date.getUTCFullYear()), 2, "0")
+     + "-" + leftPad(String(date.getUTCMonth()), 2, "0")
+     + "-" + leftPad(String(date.getUTCDay()), 2, "0")
+     + " " + leftPad(String(date.getUTCHours()), 2, "0")
+     + ":" + leftPad(String(date.getUTCMinutes()), 2, "0")
+     + ":" + leftPad(String(date.getUTCSeconds()), 2, "0")
+     + "." + decimal + "\"";
+}

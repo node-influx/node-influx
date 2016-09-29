@@ -80,15 +80,15 @@ describe('influxdb', () => {
       }
     })
 
-    const expectQuery = (method, options, ...yields) => {
+    const expectQuery = (method, options, httpMethod = 'POST', yields = null) => {
       if (typeof options === 'string') {
         options = { q: options }
       }
 
-      pool[method].yields(...yields)
+      pool[method].yields(undefined, yields)
       expectations.push(() => {
         expect(pool[method]).to.have.been.calledWith({
-          method: 'GET',
+          method: httpMethod,
           path: '/query',
           query: Object.assign({
             epoch: 'u',
@@ -114,11 +114,110 @@ describe('influxdb', () => {
     })
 
     it('.getDatabaseNames()', done => {
-      expectQuery('json', 'show databases', undefined, dbFixture('showDatabases'))
+      expectQuery('json', 'show databases', 'GET', dbFixture('showDatabases'))
       influx.getDatabaseNames((err, names) => {
         expect(err).to.be.undefined
         expect(names).to.deep.equal(['_internal', 'influx_test_gen'])
         done()
+      })
+    })
+
+    it('.getMeasurements()', done => {
+      expectQuery('json', 'show measurements', 'GET', dbFixture('showMeasurements'))
+      influx.getMeasurements((err, names) => {
+        expect(err).to.be.undefined
+        expect(names).to.deep.equal(['series_0', 'series_1', 'series_2'])
+        done()
+      })
+    })
+
+    it('.getSeries() from all', done => {
+      expectQuery('json', 'show series', 'GET', dbFixture('showSeries'))
+      influx.getSeries((err, names) => {
+        expect(err).to.be.undefined
+        expect(names).to.deep.equal([
+          'series_0,my_tag=0',
+          'series_0,my_tag=1',
+          'series_0,my_tag=5',
+          'series_0,my_tag=6',
+          'series_0,my_tag=7',
+          'series_0,my_tag=8',
+          'series_0,my_tag=9',
+          'series_1,my_tag=0',
+          'series_1,my_tag=2',
+          'series_1,my_tag=4',
+          'series_1,my_tag=5',
+          'series_1,my_tag=6',
+          'series_1,my_tag=7',
+          'series_1,my_tag=8',
+          'series_1,my_tag=9',
+          'series_2,my_tag=1',
+          'series_2,my_tag=2',
+          'series_2,my_tag=3',
+          'series_2,my_tag=4',
+          'series_2,my_tag=5',
+          'series_2,my_tag=6',
+          'series_2,my_tag=7',
+          'series_2,my_tag=8',
+          'series_2,my_tag=9'
+        ])
+        done()
+      })
+    })
+
+    it('.getSeries() from single', done => {
+      expectQuery('json', 'show series from "series_1"', 'GET', dbFixture('showSeriesFromOne'))
+      influx.getSeries('series_1', (err, names) => {
+        expect(err).to.be.undefined
+        expect(names).to.deep.equal([
+          'series_1,my_tag=0',
+          'series_1,my_tag=2',
+          'series_1,my_tag=4',
+          'series_1,my_tag=5',
+          'series_1,my_tag=6',
+          'series_1,my_tag=7',
+          'series_1,my_tag=8',
+          'series_1,my_tag=9'
+        ])
+        done()
+      })
+    })
+
+    it('.dropMeasurement()', done => {
+      expectQuery('discard', 'drop measurement "series_1"')
+      influx.dropMeasurement('series_1', (err) => {
+        expect(err).to.be.undefined
+        done()
+      })
+    })
+
+    describe('.dropSeries()', () => {
+      it('drops with only from clause by string', () => {
+        expectQuery('discard', 'drop series from "series_0"')
+        influx.dropSeries({ measurement: 'series_0' })
+      })
+
+      it('drops with only from clause by builder', () => {
+        expectQuery('discard', 'drop series from "series_0"')
+        influx.dropSeries({ measurement: m => m.name('series_0') })
+      })
+
+      it('drops with only where clause by string', () => {
+        expectQuery('discard', 'drop series where "my_tag" = 1')
+        influx.dropSeries({ where: '"my_tag" = 1' })
+      })
+
+      it('drops with only where clause by builder', () => {
+        expectQuery('discard', 'drop series where "my_tag" = 1')
+        influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) })
+      })
+
+      it('drops with both', () => {
+        expectQuery('discard', 'drop series from "series_0" where "my_tag" = 1')
+        influx.dropSeries({
+          measurement: m => m.name('series_0'),
+          where: e => e.tag('my_tag').equals.value(1)
+        })
       })
     })
   })
