@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
-var fetch = require('node-fetch')
+var fetch = require('isomorphic-fetch')
 
 before(function (done) {
   // Before doing anything validate that InfluxDB is a recent version and running
