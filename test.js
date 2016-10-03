@@ -370,6 +370,22 @@ describe('InfluxDB', function () {
         dbClient.writePoint(info.series.numName, {time: 1234567890, value: 232}, {}, done)
       })
 
+      it('should write a point with RFC3339 timestamp and read it back', function (done) {
+        var timestamp = '2016-10-02T20:50:00Z'
+        dbClient.writePoint(info.series.numName, {time: timestamp, tag1: 'timestampRoundTrip'}, {}, function (err) {
+          assert.equal(err, null)
+          dbClient.query('SELECT * FROM ' + info.series.numName + " WHERE tag1='timestampRoundTrip';", function (err, res) {
+            assert.equal(err, null)
+            assert(res instanceof Array)
+            assert.equal(res.length, 1, 'one series')
+            assert.equal(res[0].length, 1, 'one result')
+            assert.equal(res[0][0].tag1, 'timestampRoundTrip', 'incorrect point')
+            assert.equal(res[0][0].time, timestamp, 'timestamp mismatch')
+            done()
+          })
+        })
+      })
+
       it('should write a point with time into the database', function (done) {
         dbClient.writePoint(info.series.numName, {time: new Date(), value: 232}, {}, done)
       })
@@ -501,7 +517,7 @@ describe('InfluxDB', function () {
                 assert(res instanceof Array)
                 assert.equal(res.length, 1, 'one series')
                 assert.equal(res[0].length, 1, 'one result')
-                assert.equal(res[0][0].tag1, 'escapingRoundTrip', 'the right result')
+                assert.equal(res[0][0].tag1, 'escapingRoundTrip', 'incorrect point')
                 assert.equal(res[0][0]['value,= 1'], ',"= ', '[,= ]-escaping field keys and values')
                 assert.equal(res[0][0][',= "'], ',= "', 'escaping commas, equals, spaces, quotes in field keys and values')
                 assert.equal(res[0][0]['"commas, and = signs"'], '"space != ,"', 'escaping tag keys and values')
