@@ -1,24 +1,113 @@
 import { formatDate, quoteEscaper, stringLitEscaper } from "./grammar";
 
+export interface BaseExpression<T> {
+  /**
+   * Inserts a tag name in the expression.
+   */
+  tag(name: string): T;
+
+  /**
+   * Inserts a field name in the expression.
+   */
+  field(name: string): T;
+
+  /**
+   * Chains on a value to the expression. An error will be thrown if the
+   * value is a type we can't represent in InfluxQL, primarily `null` or
+   * `undefined.`
+   */
+  value(value: any): T;
+}
+
+export interface ExpressionHead extends BaseExpression<BinaryOp> {}
+
+export interface ExpressionTail extends BaseExpression<ExpressionHead> {}
+
+export interface BinaryOp {
+  /**
+   * Adds an "AND" operator
+   */
+  and: ExpressionTail;
+
+  /**
+   * Adds an "OR" operator
+   */
+  or: ExpressionTail;
+
+  /**
+   * Adds a "+" addition symbol
+   */
+  plus: ExpressionTail;
+
+  /**
+   * Adds a "*" multiplication symbol
+   */
+  times: ExpressionTail;
+
+  /**
+   * Adds a "-" subtraction symbol
+   */
+  minus: ExpressionTail;
+
+  /**
+   * Adds a "/" division symbol
+   */
+  div: ExpressionTail;
+
+  /**
+   * Adds a "=" symbol
+   */
+  equals: ExpressionTail;
+
+  /**
+   * Adds a "=~" comparator to select entries matching a regex.
+   */
+  matches: ExpressionTail;
+
+  /**
+   * Adds a "!~" comparator to select entries not matching a regex.
+   */
+  doesntMatch: ExpressionTail;
+
+  /**
+   * Adds a "!=" comparator to select entries not equaling a certain value.
+   */
+  notEqual: ExpressionTail;
+
+  /**
+   * Adds a ">" symbol
+   */
+  gt: ExpressionTail;
+
+  /**
+   * Adds a ">=" symbol
+   */
+  gte: ExpressionTail;
+
+  /**
+   * Adds a "<" symbol
+   */
+  lt: ExpressionTail;
+
+  /**
+   * Adds a "<=" symbol
+   */
+  lte: ExpressionTail;
+}
+
 /**
  * Expression is used to build filtering expressions, like those used in WHERE
  * clauses.
  */
-export class Expression {
+export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
 
   private query = new Array<string>();
 
-  /**
-   * Inserts a tag name in the expression.
-   */
   public tag(name: string): this {
     this.field(name);
     return this;
   }
 
-  /**
-   * Inserts a field name in the expression.
-   */
   public field(name: string): this {
     this.query.push(quoteEscaper.escape(name));
     return this;
@@ -29,9 +118,6 @@ export class Expression {
     return this;
   }
 
-  /**
-   * Chains on a value to the "where" expression.
-   */
   public value(value: any): this {
     switch (typeof value) {
       case "number":
@@ -68,113 +154,71 @@ export class Expression {
     }
   }
 
-  /**
-   * Adds an "AND" operator
-   */
   get and(): this {
     this.query.push("AND");
     return this;
   }
 
-  /**
-   * Adds an "OR" operator
-   */
   get or(): this {
     this.query.push("OR");
     return this;
   }
 
-  /**
-   * Adds a "+" addition symbol
-   */
   get plus(): this {
     this.query.push("+");
     return this;
   }
 
-  /**
-   * Adds a "*" multiplication symbol
-   */
   get times(): this {
     this.query.push("*");
     return this;
   }
 
-  /**
-   * Adds a "-" subtraction symbol
-   */
   get minus(): this {
     this.query.push("-");
     return this;
   }
 
-  /**
-   * Adds a "/" division symbol
-   */
   get div(): this {
     this.query.push("/");
     return this;
   }
 
-  /**
-   * Adds a "=" symbol
-   */
   get equals(): this {
     this.query.push("=");
     return this;
   }
 
-  /**
-   * Adds a "=~" comparator to select entries matching a regex.
-   */
   get matches(): this {
     this.query.push("=~");
     return this;
   }
 
-  /**
-   * Adds a "!~" comparator to select entries not matching a regex.
-   */
   get doesntMatch(): this {
     this.query.push("!~");
     return this;
   }
 
-  /**
-   * Adds a "!=" comparator to select entries not equaling a certain value.
-   */
   get notEqual(): this {
     this.query.push("!=");
     return this;
   }
 
-  /**
-   * Adds a ">" symbol
-   */
   get gt(): this {
     this.query.push(">");
     return this;
   }
 
-  /**
-   * Adds a ">=" symbol
-   */
   get gte(): this {
     this.query.push(">=");
     return this;
   }
 
-  /**
-   * Adds a "<" symbol
-   */
   get lt(): this {
     this.query.push("<");
     return this;
   }
 
-  /**
-   * Adds a "<=" symbol
-   */
   get lte(): this {
     this.query.push("<=");
     return this;
@@ -221,13 +265,13 @@ export class Measurement {
 }
 
 export type measurement = { measurement: string | ((m: Measurement) => Measurement) };
-export type where = { where: string | ((e: Expression) => Expression) };
+export type where = { where: string | ((e: ExpressionHead) => Expression) };
 
 export function parseMeasurement(q: measurement): string {
   if (typeof q.measurement === "function") {
     return q.measurement(new Measurement()).toString();
   }
-  return quoteEscaper.escape(q.measurement);
+  return q.measurement;
 }
 
 export function parseWhere(q: where): string {

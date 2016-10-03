@@ -330,7 +330,7 @@ export class InfluxDB {
    * // DROP SERIES FROM "autogen"."cpu"
    *
    * influx.dropSeries({
-   *   measurement: m => m.name('cpu').policy('autogen')
+   *   measurement: m => m.name('cpu').policy('autogen'),
    *   where: e => e.tag('cpu').equals.value('cpu8')
    * }, err => done(err))
    * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
@@ -348,6 +348,60 @@ export class InfluxDB {
     }
 
     this.pool.discard(this.getQueryOpts({ q }, "POST"), callback);
+  }
+
+  /**
+   * Returns a list of users on the Influx database.
+   *
+   * @example
+   * influx.getUsers((err, users) => {
+   *   users.forEach(user => {
+   *     if (user.admin) {
+   *       console.log(user.user, 'is an admin!')
+   *     } else {
+   *       console.log(user.user, 'is not an admin!')
+   *     }
+   *   })
+   * })
+   */
+  public getUsers(callback: (err: Error, results: { user: string, admin: boolean}[]) => void) {
+    this.pool.json(this.getQueryOpts({ q: "show users" }), (err, res) => {
+      if (err) {
+        callback(err, undefined);
+      } else {
+        callback(undefined, parseSingle(res));
+      }
+    });
+  }
+
+  public createUser(username: string, password: string, isAdmin: boolean, callback?: any);
+  public createUser(username: string, password: string, callback?: any);
+
+  /**
+   * Creates a new InfluxDB user.
+   *
+   * @example
+   * createUser('connor', 'pa55w0rd', true); // make 'connor' an admin
+   *
+   * // make non-admins:
+   * createUser('not_admin', 'pa55w0rd');
+   */
+  public createUser(
+    username: string, password: string,
+    adminOrCallback?: boolean | ((err: Error) => void),
+    callback: (err: Error) => void = noop,
+  ) {
+    let admin = Boolean(adminOrCallback);
+    if (typeof adminOrCallback === "function") {
+      admin = false;
+      callback = adminOrCallback;
+    }
+
+    this.pool.discard(this.getQueryOpts({
+      q: `create user ${grammar.quoteEscaper.escape(username)} with password `
+        + grammar.stringLitEscaper.escape(password)
+        + (admin ? " with all privileges" : ""),
+    }, "POST"), callback);
   }
 
   /**

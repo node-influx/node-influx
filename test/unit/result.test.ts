@@ -1,6 +1,5 @@
-'use strict'
-
-const results = require('../../lib/results')
+import * as results from "../../src/results";
+import { expect } from "./helpers";
 
 describe('results', () => {
   it('parses a empty result', () => {
@@ -15,11 +14,11 @@ describe('results', () => {
           values: []
         }]
       }]
-    }).slice()).to.deep.equal([])
-  })
+    }).slice()).to.deep.equal([]);
+  });
 
   it('parses a simple table of results', () => {
-    const r = results.parse({
+    const r = results.parseSingle({
       results: [{
         series: [{
           name: 'test_series',
@@ -33,22 +32,22 @@ describe('results', () => {
           ]
         }]
       }]
-    })
+    });
 
     expect(r.slice()).to.deep.equal([
       { time: new Date(1474819971787), mean: 42 },
       { time: new Date(1474821271999), mean: 44 }
-    ])
+    ]);
 
     expect(r.groups()).to.deep.equal([
       { tags: {}, rows: r.slice() }
-    ])
+    ]);
 
-    expect(r.group({ tag: 'a' })).to.deep.equal([])
-  })
+    expect(r.group({ tag: 'a' })).to.deep.equal([]);
+  });
 
   it('parses grouped results', () => {
-    const r = results.parse({
+    const r = results.parseSingle({
       results: [{
         series: [{
           name: 'test_series',
@@ -72,30 +71,30 @@ describe('results', () => {
           ]
         }]
       }]
-    })
+    });
 
     expect(r.slice()).to.deep.equal([
       { tag: 'a', mean: 1 },
       { tag: 'a', mean: 2 },
       { tag: 'b', mean: 3 },
       { tag: 'b', mean: 4 }
-    ])
+    ]);
 
     expect(r.groups()).to.deep.equal([
       { tags: { tag: 'a' }, rows: [{ tag: 'a', mean: 1 }, { tag: 'a', mean: 2 }] },
       { tags: { tag: 'b' }, rows: [{ tag: 'b', mean: 3 }, { tag: 'b', mean: 4 }] }
-    ])
+    ]);
 
     expect(r.group({ tag: 'a' })).to.deep.equal([
       { tag: 'a', mean: 1 },
       { tag: 'a', mean: 2 }
-    ])
+    ]);
 
     expect(r.group({ tag: 'b' })).to.deep.equal([
       { tag: 'b', mean: 3 },
       { tag: 'b', mean: 4 }
-    ])
+    ]);
 
-    expect(r.group({ tag: 'c' })).to.deep.equal([])
-  })
-})
+    expect(r.group({ tag: 'c' })).to.deep.equal([]);
+  });
+});

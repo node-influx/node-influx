@@ -7,15 +7,15 @@ describe('builder', () => {
     tt.forEach((testCase, i) => {
       if (testCase.throws) {
         it(`throws on case #${i}`, () => {
-          expect(e => testCase.expr(new Ctor()).toString()).to.throw(testCase.throws)
-        })
+          expect(e => testCase.expr(new Ctor()).toString()).to.throw(testCase.throws);
+        });
       } else {
         it(`creates \`${testCase.val}\``, () => {
-          expect(testCase.expr(new Ctor()).toString()).to.equal(testCase.val)
-        })
+          expect(testCase.expr(new Ctor()).toString()).to.equal(testCase.val);
+        });
       }
-    })
-  }
+    });
+  };
 
   describe('expression', () => {
     runTT(Builder.Expression, [
@@ -51,8 +51,8 @@ describe('builder', () => {
         expr: e => e.field('a').equals.value(null),
         throws: /doesn't know how to encode/
       }
-    ])
-  })
+    ]);
+  });
 
   describe('measurement', () => {
     runTT(Builder.Measurement, [
@@ -72,6 +72,6 @@ describe('builder', () => {
         expr: m => m.name('measure"ment').db('d"b').policy('po"licy'),
         val: '"d\\"b"."po\\"licy"."measure\\"ment"'
       }
-    ])
-  })
-})
+    ]);
+  });
+});

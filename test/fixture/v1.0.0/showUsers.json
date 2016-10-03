@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "series": [
+        {
+          "columns": [
+            "user",
+            "admin"
+          ],
+          "values": [
+            [
+              "john",
+              true
+            ],
+            [
+              "steve",
+              false
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

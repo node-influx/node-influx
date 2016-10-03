@@ -21,16 +21,29 @@ const db = 'influx_test_gen'
 const fs = require('fs')
 
 const queries = [
-  update(`drop database "${db}"`), // clean up from any old/failed tests
+  // clean up from any old/failed tests:
+  update(`drop database "${db}"`),
+  update(`drop user john`),
+  update(`drop user steve`),
+
   update(`create database "${db}"`),
   fixture('showDatabases', 'show databases'),
+
+  update('create user "john" with password \'password\' with all privileges', { db }),
+  update('create user "steve" with password \'password\'', { db }),
+  fixture('showUsers', 'show users', { db }),
+
   write(fs.readFileSync(path.join(__dirname, 'fixtures_test_data.txt')), { db }),
   fixture('showMeasurements', 'show measurements', { db }),
   fixture('showSeries', 'show series', { db }),
   fixture('showSeriesFromOne', 'show series from series_1', { db }),
   fixture('selectFromOne', 'select * from series_0 where my_tag = \'1\' order by time desc', { db }),
   fixture('selectFromGroup', 'select top(my_value, 1) from series_0 group by my_tag order by time desc', { db }),
-  fixture('error', 'this is not a valid query!')
+  fixture('error', 'this is not a valid query!'),
+
+  update(`drop user john`),
+  update(`drop user steve`),
+  update(`drop database "${db}"`),
 ]
 
 const influxHost = process.env.INFLUX_HOST || 'http://localhost:8086'
@@ -75,7 +88,14 @@ function update (query, params = {}) {
   return () => fetch(
     `${influxHost}/query?${querystring.stringify(params)}`,
     { method: 'POST' }
-  ).then(res => res.buffer())
+  ).then(res => {
+    if (!res.ok) {
+      return res.text().then(body => {
+        throw new Error(`Unsuccessful update. Response: ${res.status}, body: ${body}`)
+      })
+    }
+    return res.buffer();
+  })
 }
 
 /**
@@ -117,5 +137,9 @@ exports.boot = () => {
 if (require.main === module) {
   exports.boot()
   .then(() => process.exit(0))
+  .catch(err => {
+    console.error(err.stack || err)
+    process.exit(1)
+  })
 }
 

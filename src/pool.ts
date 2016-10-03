@@ -24,25 +24,25 @@ export interface PoolOptions {
    * The length of time a host should be removed for upon a connection error,
    * given in milliseconds. Defaults to 60000ms.
    */
-  failoverTimeout: number;
+  failoverTimeout?: number;
 
   /**
    * Number of times we should retry running a query
    * before calling back with an error.
    */
-  maxRetries: number;
+  maxRetries?: number;
 
   /**
    * The length of time after which HTTP requests will error
    * if they do not receive a response.
    */
-  requestTimeout: number;
+  requestTimeout?: number;
 
   /**
    * Options to configure the backoff policy for the pool. Defaults
    * to using exponential backoff.
    */
-  backoff: BackoffStrategy;
+  backoff?: BackoffStrategy;
 
 }
 
