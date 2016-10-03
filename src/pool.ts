@@ -168,37 +168,26 @@ export class Pool {
    * Makes a request and calls back with the response, parsed as JSON.
    * An error is returned on a non-2xx status code or on a parsing exception.
    */
-  public json(options: PoolRequestOptions, callback: (err: Error, res: any) => void) {
-    this.text(options, (err, res) => {
-      if (err) {
-        return callback(err, null);
-      }
-
-      let text: string;
-      try {
-        text = JSON.parse(res);
-      } catch (err) {
-        return callback(err, null);
-      }
-
-      callback(undefined, text);
-    });
+  public json(options: PoolRequestOptions): Promise<any> {
+    return this.text(options).then(res => JSON.parse(res));
   }
 
   /**
-   * Makes a request and calls back with the plain text response,
-   * if possible. An error is returned on a non-2xx status code.
+   * Makes a request and resolves with the plain text response,
+   * if possible. An error is raised on a non-2xx status code.
    */
-  public text(options: PoolRequestOptions, callback: (err: Error, res: string) => void) {
-    this.stream(options, (err, res) => {
-      if (err) {
-        return callback(err, null);
-      }
+  public text(options: PoolRequestOptions): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.stream(options, (err, res) => {
+        if (err) {
+          return reject(err);
+        }
 
-      let output = "";
-      res.setEncoding("utf8");
-      res.on("data", str => { output = output + str; });
-      res.on("end", () => callback(undefined, output));
+        let output = "";
+        res.setEncoding("utf8");
+        res.on("data", str => { output = output + str; });
+        res.on("end", () => resolve(output));
+      });
     });
   }
 
@@ -206,14 +195,16 @@ export class Pool {
    * Makes a request and discards any response body it receives.
    * An error is returned on a non-2xx status code.
    */
-  public discard(options: PoolRequestOptions, callback: (err: Error) => void) {
-    this.stream(options, (err, res) => {
-      if (err) {
-        return callback(err);
-      }
+  public discard(options: PoolRequestOptions): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.stream(options, (err, res) => {
+        if (err) {
+          return reject(err);
+        }
 
-      res.on("data", () => { /* ignore */ });
-      res.on("end", () => callback(undefined));
+        res.on("data", () => { /* ignore */ });
+        res.on("end", () => resolve());
+      });
     });
   }
 

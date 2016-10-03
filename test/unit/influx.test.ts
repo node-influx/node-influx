@@ -91,7 +91,7 @@ describe('influxdb', () => {
         options = { q: options }
       }
 
-      pool[method].yields(undefined, yields)
+      pool[method].returns(Promise.resolve(yields));
       expectations.push(() => {
         expect(pool[method]).to.have.been.calledWith({
           method: httpMethod,
@@ -105,42 +105,37 @@ describe('influxdb', () => {
       });
     };
 
-    it('.createDatabase()', done => {
+    it('.createDatabase()', () => {
       expectQuery('discard', 'create database "foo"');
       influx.createDatabase('foo');
       expectQuery('discard', 'create database "f\\"oo"');
-      influx.createDatabase('f"oo', done);
+      influx.createDatabase('f"oo');
     });
 
-    it('.dropDatabase()', done => {
+    it('.dropDatabase()', () => {
       expectQuery('discard', 'drop database "foo"');
       influx.dropDatabase('foo');
       expectQuery('discard', 'drop database "f\\"oo"');
-      influx.dropDatabase('f"oo', done);
+      influx.dropDatabase('f"oo');
     });
 
-    it('.getDatabaseNames()', done => {
+    it('.getDatabaseNames()', () => {
       expectQuery('json', 'show databases', 'GET', dbFixture('showDatabases'));
-      influx.getDatabaseNames((err, names) => {
-        expect(err).to.be.undefined;
+      return influx.getDatabaseNames().then(names => {
         expect(names).to.deep.equal(['_internal', 'influx_test_gen']);
-        done();
       });
     });
 
-    it('.getMeasurements()', done => {
+    it('.getMeasurements()', () => {
       expectQuery('json', 'show measurements', 'GET', dbFixture('showMeasurements'));
-      influx.getMeasurements((err, names) => {
-        expect(err).to.be.undefined;
+      return influx.getMeasurements().then(names => {
         expect(names).to.deep.equal(['series_0', 'series_1', 'series_2']);
-        done();
       });
     });
 
-    it('.getSeries() from all', done => {
+    it('.getSeries() from all', () => {
       expectQuery('json', 'show series', 'GET', dbFixture('showSeries'));
-      influx.getSeries((err, names) => {
-        expect(err).to.be.undefined;
+      return influx.getSeries().then(names => {
         expect(names).to.deep.equal([
           'series_0,my_tag=0',
           'series_0,my_tag=1',
@@ -167,14 +162,12 @@ describe('influxdb', () => {
           'series_2,my_tag=8',
           'series_2,my_tag=9'
         ]);
-        done();
       });
     });
 
-    it('.getSeries() from single', done => {
+    it('.getSeries() from single', () => {
       expectQuery('json', 'show series from "series_1"', 'GET', dbFixture('showSeriesFromOne'));
-      influx.getSeries('series_1', (err, names) => {
-        expect(err).to.be.undefined
+      return influx.getSeries('series_1').then(names => {
         expect(names).to.deep.equal([
           'series_1,my_tag=0',
           'series_1,my_tag=2',
@@ -185,16 +178,12 @@ describe('influxdb', () => {
           'series_1,my_tag=8',
           'series_1,my_tag=9'
         ]);
-        done();
       });
     });
 
-    it('.dropMeasurement()', done => {
+    it('.dropMeasurement()', () => {
       expectQuery('discard', 'drop measurement "series_1"');
-      influx.dropMeasurement('series_1', (err) => {
-        expect(err).to.be.undefined;
-        done();
-      });
+      return influx.dropMeasurement('series_1');
     });
 
     describe('.dropSeries()', () => {
@@ -227,34 +216,28 @@ describe('influxdb', () => {
       });
     });
 
-    it('.getUsers()', done => {
+    it('.getUsers()', () => {
       expectQuery('json', 'show users', 'GET', dbFixture('showUsers'));
-      influx.getUsers((err, names) => {
-        expect(err).to.be.undefined;
+      return influx.getUsers().then(names => {
         expect(names.slice()).to.deep.equal([
           { user: 'john', admin: true },
           { user: 'steve', admin: false },
         ]);
-        done();
       });
     });
 
     describe('.createUser()', () => {
-      it('works with admin specified == true', done => {
+      it('works with admin specified == true', () => {
         expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\' with all privileges');
-        influx.createUser('con"nor', 'pa55\'word', true, done);
+        return influx.createUser('con"nor', 'pa55\'word', true);
       });
-      it('works with admin specified == false', done => {
+      it('works with admin specified == false', () => {
         expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
-        influx.createUser('con"nor', 'pa55\'word', false, done);
+        return influx.createUser('con"nor', 'pa55\'word', false);
       });
-      it('works with admin unspecified', done => {
+      it('works with admin unspecified', () => {
         expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
-        influx.createUser('con"nor', 'pa55\'word', done);
-      });
-      it('works with callback unspecified', () => {
-        expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
-        influx.createUser('con"nor', 'pa55\'word');
+        return influx.createUser('con"nor', 'pa55\'word');
       });
     });
   });
