@@ -102,8 +102,8 @@ export function formatDate(date: Date) {
   // In our Results we add a getMicrotime function to store more precise
   // values, when possible. Pull that here if we're able.
   const decimal = typeof (<any> date).getMicrotime === "function"
-    ? (<any> date).getMicrotime()
-    : date.getUTCMilliseconds();
+    ? leftPad(String((<any> date).getMicrotime()), 6, "0")
+    : leftPad(String(date.getUTCMilliseconds()), 3, "0");
 
   return "\"" + leftPad(String(date.getUTCFullYear()), 2, "0")
      + "-" + leftPad(String(date.getUTCMonth()), 2, "0")

@@ -15,9 +15,10 @@ describe("grammar", () => {
   });
 
   it("formats dates correctly", () => {
-    const d = new Date(1475121809184);
-    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.184\"");
-    (<any>d).getMicrotime = () => 1841234567;
-    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.1841234567\"");
+    let d = new Date(1475121809084);
+    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.084\"");
+    d = new Date(1475121809000);
+    (<any>d).getMicrotime = () => 1;
+    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.000001\"");
   });
 });
