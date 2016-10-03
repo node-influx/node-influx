@@ -1,6 +1,6 @@
 # node-influx
 
-An [InfluxDB](http://influxdb.org/) Node.js Client
+An [InfluxDB](http://influxdb.org/) JavaScript client for Node.js and the browser.
 
 [![npm](http://img.shields.io/npm/v/influx.svg?style=flat-square)](https://www.npmjs.org/package/influx)
 [![build](http://img.shields.io/travis/node-influx/node-influx/master.svg?style=flat-square)](https://travis-ci.org/node-influx/node-influx)
@@ -23,6 +23,8 @@ Interested in becoming a maintainer? Please help out with issues and pull-reques
     $ npm install influx
 
 ## Compatibility
+
+Version 4.3.x requires Promise support. Make sure to install a [polyfill](https://promisesaplus.com/implementations) if your environment does not support promises.
 
 Version 4.x.x is compatible with InfluxDB 0.9.x
 
