@@ -78,7 +78,7 @@ function groupsMethod(): { tags: Tags, rows: Row[] }[] {
  * makes it impossible to preserve groups as would be necessary if it's
  * subclassed.
  */
-function parseInner(series: ResponseSeries[] = []): Results {
+function parseInner(series: ResponseSeries[] = []): Results<any> {
   const results = <any> new Array<Row>();
   const tags = results.groupsTagsKeys = series[0].tags ? Object.keys(series[0].tags) : [];
   let nextGroup = new Array<Row>();
@@ -120,7 +120,7 @@ function parseInner(series: ResponseSeries[] = []): Results {
 /**
  * ResultsParser is a user-friendly results tables from raw Influx responses.
  */
-export interface Results extends Array<Row> {
+export interface Results<T> extends Array<T> {
   /**
    * group returns a subset of rows which either:
    *  - have a tag value matching the string
@@ -128,13 +128,13 @@ export interface Results extends Array<Row> {
    * It will throw an error if a single match string is provided
    * for a query that was grouped by multiple tags.
    */
-  group(matcher: Tags): Row[];
+  group(matcher: Tags): T[];
 
   /**
    * Returns the data grouped into nested arrays
    * like how it was returned from Influx.
    */
-  groups(): { tags: Tags, rows: Row[] }[];
+  groups(): { tags: Tags, rows: T[] }[];
 }
 
 /**
@@ -145,7 +145,7 @@ export interface Results extends Array<Row> {
  *     which groups by series *tags*, grouping by times is case (1)
  *  3. Multiple queries of types 1 and 2
  */
-export function parse(res: Response): Results[] | Results {
+export function parse<T>(res: Response): Results<T>[] | Results<T> {
   if (res.results.length === 1) { // normalize case 3
     return parseInner(res.results[0].series);
   } else {
@@ -158,7 +158,7 @@ export function parse(res: Response): Results[] | Results {
  * and returns that result.
  * @throws {Error} if the number of results is not exactly one
  */
-export function parseSingle(res: Response): Results {
+export function parseSingle<T>(res: Response): Results<T> {
   if (res.results.length !== 1) {
     throw new Error("node-influx expected the results length to equal 1, but " +
       `it was ${0}. Please report this here: https://git.io/influx-err`);

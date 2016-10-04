@@ -231,7 +231,7 @@ export class InfluxDB {
    */
   public getDatabaseNames (): Promise<string[]> {
     return this.pool.json(this.getQueryOpts({ q: "show databases" }))
-      .then(res => parseSingle(res).map(r => r.name));
+      .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
 
   /**
@@ -242,7 +242,7 @@ export class InfluxDB {
    */
   public getMeasurements (): Promise<string[]> {
     return this.pool.json(this.getQueryOpts({ q: "show measurements" }))
-      .then(res => parseSingle(res).map(r => r.name));
+      .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
 
   /**
@@ -262,7 +262,7 @@ export class InfluxDB {
     }
 
     return this.pool.json(this.getQueryOpts({ q: query }))
-      .then(res => parseSingle(res).map(r => r.key));
+      .then(res => parseSingle<{ key: string }>(res).map(r => r.key));
   }
 
   /**
@@ -329,27 +329,151 @@ export class InfluxDB {
     return this.pool.json(this.getQueryOpts({ q: "show users" })).then(parseSingle);
   }
 
-  public createUser(username: string, password: string, isAdmin: boolean, callback?: any);
-  public createUser(username: string, password: string, callback?: any);
+  public createUser(username: string, password: string,
+                    isAdmin: boolean, callback?: any): Promise<void>;
+  public createUser(username: string, password: string, callback?: any): Promise<void>;
 
   /**
    * Creates a new InfluxDB user.
    *
    * @example
-   * createUser('connor', 'pa55w0rd', true); // make 'connor' an admin
+   * influx.createUser('connor', 'pa55w0rd', true) // make 'connor' an admin
    *
    * // make non-admins:
-   * createUser('not_admin', 'pa55w0rd');
+   * influx.createUser('not_admin', 'pa55w0rd')
    */
   public createUser(
     username: string, password: string,
     admin: boolean = false,
-  ) {
+  ): Promise<void> {
     return this.pool.discard(this.getQueryOpts({
       q: `create user ${grammar.quoteEscaper.escape(username)} with password `
         + grammar.stringLitEscaper.escape(password)
         + (admin ? " with all privileges" : ""),
     }, "POST"));
+  }
+
+  /**
+   * Sets a password for an Influx user.
+   *
+   * @example
+   * influx.setPassword('connor', 'pa55w0rd')
+   */
+  public setPassword(username: string, password: string): Promise<void> {
+    return this.pool.discard(this.getQueryOpts({
+      q: `set password for ${grammar.quoteEscaper.escape(username)} = `
+        + grammar.stringLitEscaper.escape(password),
+    }, "POST"));
+  }
+
+  /**
+   * Grants a privilege to a specified user.
+   *
+   * @example
+   * influx.grantPrivilege('connor', 'READ', 'my_db') // grants read access on my_db to connor
+   */
+  public grantPrivilege(username: string, privilege: "READ" | "WRITE",
+                        database: string = this.defaultDB()): Promise<void> {
+
+    return this.pool.discard(this.getQueryOpts({
+      q: `grant ${privilege} to ${grammar.quoteEscaper.escape(username)} on `
+        + grammar.quoteEscaper.escape(database),
+    }, "POST"));
+  }
+
+  /**
+   * Removes a privilege from a specified user.
+   *
+   * @example
+   * influx.setPassword('connor', 'READ', 'my_db') // removes read access on my_db from connor
+   */
+  public revokePrivilege(username: string, privilege: "READ" | "WRITE",
+                         database: string = this.defaultDB()): Promise<void> {
+
+    return this.pool.discard(this.getQueryOpts({
+      q: `revoke ${privilege} from ${grammar.quoteEscaper.escape(username)} on `
+        + grammar.quoteEscaper.escape(database),
+    }, "POST"));
+  }
+
+  /**
+   * Grants admin privileges to a specified user.
+   *
+   * @example
+   * influx.grantAdminPrivilege('connor', 'READ', 'my_db')
+   */
+  public grantAdminPrivilege(username: string): Promise<void> {
+    return this.pool.discard(this.getQueryOpts({
+      q: `grant all to ${grammar.quoteEscaper.escape(username)}`,
+    }, "POST"));
+  }
+
+  /**
+   * Removes a admin privilege from a specified user.
+   *
+   * @example
+   * influx.revokeAdminPrivilege('connor')
+   */
+  public revokeAdminPrivilege(username: string): Promise<void> {
+    return this.pool.discard(this.getQueryOpts({
+      q: `revoke all from ${grammar.quoteEscaper.escape(username)}`,
+    }, "POST"));
+  }
+
+  /**
+   * Removes a user from the database.
+   *
+   * @example
+   * influx.dropUser('connor')
+   */
+  public dropUser(username: string): Promise<void> {
+    return this.pool.discard(this.getQueryOpts({
+      q: `drop user ${grammar.quoteEscaper.escape(username)}`,
+    }, "POST"));
+  }
+
+  /**
+   * Creates a continuous query in a database
+   *
+   * @example
+   * influx.createContinuousQuery('downsample_cpu_1h', `
+   *   SELECT MEAN(cpu) INTO "7d"."perf"
+   *   FROM "1d"."perf" GROUP BY time(1m)
+   * `)
+   */
+  public createContinuousQuery(name: string, query: string,
+                               database: string = this.defaultDB()): Promise<void> {
+
+    return this.pool.discard(this.getQueryOpts({
+      q: `create continuous query ${grammar.quoteEscaper.escape(name)}`
+        + ` on ${grammar.quoteEscaper.escape(database)} begin ${query} end`,
+    }, "POST"));
+  }
+
+  /**
+   * Creates a continuous query in a database
+   *
+   * @example
+   * influx.dropContinuousQuery('downsample_cpu_1h')
+   */
+  public dropContinuousQuery(name: string, database: string = this.defaultDB()): Promise<void> {
+    return this.pool.discard(this.getQueryOpts({
+      q: `drop continuous query ${grammar.quoteEscaper.escape(name)}`
+        + ` on ${grammar.quoteEscaper.escape(database)}`,
+    }, "POST"));
+  }
+
+  /**
+   * Returns the default database that queries operates on. It throws if called
+   * when a default database isn't set.
+   */
+  private defaultDB(): string {
+    if (!this.options.database) {
+      throw new Error("Attempted to run an influx query without a default"
+        + " database specified or an explicit interface provided.");
+    }
+
+    return this.options.database;
   }
 
   /**

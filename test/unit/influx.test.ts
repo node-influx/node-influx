@@ -81,6 +81,10 @@ describe('influxdb', () => {
       }
     });
 
+    const setDefaultDB = (db: string) => {
+      (<any> influx).options.database = db;
+    };
+
     const expectQuery = (
         method: string,
         options: string | any,
@@ -238,6 +242,81 @@ describe('influxdb', () => {
       it('works with admin unspecified', () => {
         expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
         return influx.createUser('con"nor', 'pa55\'word');
+      });
+    });
+
+    describe('.grantPrivilege()', () => {
+      it('queries correctly', () => {
+        expectQuery('discard', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.grantPrivilege('con"nor', 'READ')).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_\\"_db');
+        expectQuery('discard', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
+      });
+    });
+
+    describe('.revokePrivilege()', () => {
+      it('queries correctly', () => {
+        expectQuery('discard', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.revokePrivilege('con"nor', 'READ')).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_\\"_db');
+        expectQuery('discard', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
+      });
+    });
+
+    it('.grantAdminPrivilege()', () => {
+        expectQuery('discard', 'grant all to "con\\"nor"');
+        return influx.grantAdminPrivilege('con"nor');
+    });
+
+    it('.revokeAdminPrivilege()', () => {
+        expectQuery('discard', 'revoke all from "con\\"nor"');
+        return influx.revokeAdminPrivilege('con"nor');
+    });
+
+    it('.dropUser()', () => {
+        expectQuery('discard', 'drop user "con\\"nor"');
+        return influx.dropUser('con"nor');
+    });
+
+    describe('.createContinuousQuery()', () => {
+      it('queries correctly', () => {
+        expectQuery('discard', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+        return influx.createContinuousQuery('my_"q', 'foo', 'my_"_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.createContinuousQuery('my_"q', 'foo')).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_"_db');
+        expectQuery('discard', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+        return influx.createContinuousQuery('my_"q', 'foo');
+      });
+    });
+
+    describe('.dropContinuousQuery()', () => {
+      it('queries correctly', () => {
+        expectQuery('discard', 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        return influx.dropContinuousQuery('my_"q', 'my_"_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.dropContinuousQuery('my_"q')).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_"_db');
+        expectQuery('discard', 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        return influx.dropContinuousQuery('my_"q');
       });
     });
   });
