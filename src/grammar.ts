@@ -113,3 +113,13 @@ export function formatDate(date: Date) {
      + ":" + leftPad(String(date.getUTCSeconds()), 2, "0")
      + "." + decimal + "\"";
 }
+
+/**
+ * FieldType is an enumeration of InfluxDB field data types.
+ */
+export enum FieldType {
+  FLOAT,
+  INTEGER,
+  STRING,
+  BOOLEAN
+};
