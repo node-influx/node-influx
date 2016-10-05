@@ -257,7 +257,7 @@ client.dropUser(userName, function (err, response) { })
 Writes a point to a series - requires database user privileges
 
 ```js
-client.writePoint(seriesName, values, tags, [options], function (err) { })
+client.writePoint(measurementName, values, tags, [options], function (err) { })
 ```
 
 `values` can be either an object or a single value. In the latter case, the field key is set to `value`.
@@ -274,16 +274,16 @@ The parameter `options` is an optional and can have following fields:
 ###### example
 ```js
 //write a single point with two values and two tags. time is omitted
-client.writePoint(info.series.name, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, done)
+client.writePoint(info.measurement.name, {value: 232, value2: 123}, {foo: 'bar', foobar: 'baz'}, done)
 
 //write a single point with the value "1". The value "1" corresponds to {value: 1}
-client.writePoint(info.series.name, 1, {foo: 'bar', foobar: 'baz'}, done)
+client.writePoint(info.measurement.name, 1, {foo: 'bar', foobar: 'baz'}, done)
 
 //write a single point, providing an integer timestamp and time precision 's' for seconds
-client.writePoint(info.series.name, {time: 1234567890, value: 232}, null, {precision: 's'}, done)
+client.writePoint(info.measurement.name, {time: 1234567890, value: 232}, null, {precision: 's'}, done)
 
 //write a single point, providing a Date object. Precision is set to default 'ms' for milliseconds.
-client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
+client.writePoint(info.measurement.name, {time: new Date(), value: 232}, null,  done)
 
 
 ```
@@ -292,7 +292,7 @@ client.writePoint(info.series.name, {time: new Date(), value: 232}, null,  done)
 Writes multiple points to a series - requires database user privileges
 
 ```js
- client.writePoints(seriesName, points, [options], function (err) { })
+ client.writePoints(measurementName, points, [options], function (err) { })
  ```
 
 `Points` is an array of points. Each point is an array of two objects - the [field set](https://docs.influxdata.com/influxdb/v1.0/write_protocols/line_protocol_tutorial/#field-set), and the [tag set](https://docs.influxdata.com/influxdb/v1.0/write_protocols/line_protocol_tutorial/#tag-set). If you want to add a timestamp, add a `time` key in the first object. (We're looking for input on this API - see [#182](https://github.com/node-influx/node-influx/issues/182).)
@@ -307,7 +307,7 @@ var points = [
   // Timestamp, one field, no tags
   [{value: 122, time: new Date()}]
 ];
-client.writePoints(seriesName, points, [options], callback)
+client.writePoints(measurementName, points, [options], callback)
 ```
 
 The parameter `options` is an optional and can have following fields:
@@ -316,7 +316,7 @@ The parameter `options` is an optional and can have following fields:
 - `rp`: Retention policy
 
 ##### writeSeries
-Writes multiple point to multiple series - requires database user privileges
+Writes multiple points to multiple series - requires database user privileges
 
 ```js
 var points1 = [
