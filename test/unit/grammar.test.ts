@@ -15,10 +15,33 @@ describe("grammar", () => {
   });
 
   it("formats dates correctly", () => {
-    let d = new Date(1475121809084);
-    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.084\"");
-    d = new Date(1475121809000);
-    (<any>d).getMicrotime = () => 1;
-    expect(grammar.formatDate(d)).to.equal("\"2016-08-04 04:03:29.000001\"");
+    expect(grammar.formatDate(new Date(1475121809084)))
+      .to.equal("\"2016-08-04 04:03:29.084\"");
+  });
+
+  it("date precision calculation", () => {
+    const d = new Date(1475121809084);
+    expect(grammar.dateToPrecision(d, "n")).to.equal(1475121809084000000);
+    expect(grammar.dateToPrecision(d, "u")).to.equal(1475121809084000);
+    expect(grammar.dateToPrecision(d, "ms")).to.equal(1475121809084);
+    expect(grammar.dateToPrecision(d, "s")).to.equal(1475121809);
+    expect(grammar.dateToPrecision(d, "m")).to.equal(24585363);
+    expect(grammar.dateToPrecision(d, "h")).to.equal(409756);
+  });
+
+  it("casts timestamps correctly", () => {
+    const d = new Date(1475121809084);
+    expect(grammar.castTimestamp(d, "s")).to.equal("1475121809");
+    expect(grammar.castTimestamp(d, "ms")).to.equal("1475121809084");
+
+    expect(grammar.castTimestamp("1475121809", "s")).to.equal("1475121809");
+    expect(grammar.castTimestamp("1475121809084", "ms")).to.equal("1475121809084");
+
+    expect(grammar.castTimestamp(1475121809, "s")).to.equal("1475121809");
+    expect(grammar.castTimestamp(1475121809084, "ms")).to.equal("1475121809084");
+  });
+
+  it("errors if an invalid timestamp value is provided", () => {
+    expect(() => grammar.castTimestamp("sushi", "ms")).to.throw(/numeric value/);
   });
 });

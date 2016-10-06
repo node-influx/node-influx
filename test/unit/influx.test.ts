@@ -12,6 +12,7 @@ describe('influxdb', () => {
         password: 'root',
         database: null,
         pool: undefined,
+        schema: [],
         hosts: [{
           host: '127.0.0.1',
           port: 8086,
@@ -26,6 +27,7 @@ describe('influxdb', () => {
         password: 'password',
         database: 'foo',
         pool: undefined,
+        schema: [],
         hosts: [{
           host: '192.168.0.1',
           port: 1337,
@@ -40,6 +42,7 @@ describe('influxdb', () => {
         password: 'root',
         database: 'foo',
         pool: undefined,
+        schema: [],
         hosts: [{
           host: '192.168.0.1',
           port: 8086,
@@ -53,6 +56,7 @@ describe('influxdb', () => {
         username: 'root',
         password: 'root',
         database: 'foo',
+        schema: [],
         hosts: [{
           host: '192.168.0.1',
           port: 8086,

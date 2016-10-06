@@ -1,4 +1,4 @@
-import { FieldType, quoteEscaper } from "./grammar";
+import { FieldType, isNumeric, quoteEscaper } from "./grammar";
 
 export interface SchemaOptions {
   /**
@@ -7,9 +7,10 @@ export interface SchemaOptions {
   measurement: string;
 
   /**
-   * The database the measurement lives under.
+   * The database the measurement lives under. Uses the default database
+   * if one is provided.
    */
-  database: string;
+  database?: string;
 
   /**
    * Columns is the map of column type definitions on the database.
@@ -22,7 +23,7 @@ export interface SchemaOptions {
   tags: string[];
 }
 
-export type FieldMap = { [name: string]: number | string | boolean };
+export type FieldMap = { [name: string]: FieldType };
 
 /**
  * The Schema provides information and utilities for an InfluxDB measurement.
@@ -33,17 +34,20 @@ export class Schema {
   private tagHash: { [tag: string]: true } = {};
 
   constructor(private options: SchemaOptions) {
-    this.fieldNames = Object.keys(options.fields);
+    // fieldNames are sorted for performance: when coerceFields is run the
+    // fields will be added to the output in order.
+    this.fieldNames = Object.keys(options.fields).sort();
     options.tags.forEach(tag => { this.tagHash[tag] = true; });
   }
 
   /**
-   * coerceFields converts a map of field values to a map of strings which
+   * coerceFields converts a map of field values to a strings which
    * can be injected into the line protocol without further escaping.
+   * The output is given in [key, value] pairs.
    */
-  public coerceFields(fields: FieldMap): { [name: string]: string } {
+  public coerceFields(fields: FieldMap): [string, string][] {
     let consumed = 0;
-    const output = {};
+    const output: [string, string][] = [];
 
     this.fieldNames.forEach(field => {
       if (!fields.hasOwnProperty(field)) {
@@ -57,30 +61,31 @@ export class Schema {
         return;
       }
 
+      let coerced: string;
       switch (this.options.fields[field]) {
       case FieldType.STRING:
-        output[field] = quoteEscaper.escape(String(value));
+        coerced = quoteEscaper.escape(String(value));
         break;
 
       case FieldType.INTEGER:
-        if (typ !== "number" && !(/^[0-9]+$/).test(String(value))) {
+        if (typ !== "number" && !isNumeric(String(value))) {
           throw new Error(`Expected numeric value for ${this.ref(field)}, but got "${value}"!`);
         }
-        output[field] = String(Math.floor(<number> value)) + "i";
+        coerced = String(Math.floor(<number> value)) + "i";
         break;
 
       case FieldType.FLOAT:
-        if (typ !== "number" && !(/^[0-9]+$/).test(String(value))) {
+        if (typ !== "number" && !isNumeric(String(value))) {
           throw new Error(`Expected numeric value for ${this.ref(field)}, but got "${value}"!`);
         }
-        output[field] = String(value);
+        coerced = String(value);
         break;
 
       case FieldType.BOOLEAN:
         if (typ !== "boolean") {
           throw new Error(`Expected boolean value for ${this.ref(field)}, but got a ${typ}!`);
         }
-        output[field] = value ? "T" : "F";
+        coerced = value ? "T" : "F";
         break;
 
       default:
@@ -89,6 +94,8 @@ export class Schema {
           `${this.ref()}. Please ensure that your configuration is correct.`
         );
       }
+
+      output.push([field, coerced]);
     });
 
     const keys = Object.keys(fields);
@@ -106,16 +113,19 @@ export class Schema {
 
   /**
    * Throws an error if the tags include values other than
-   * what was specified in the schema.
+   * what was specified in the schema. It returns a list of tag names.
    */
-  public assertTags(tags: { [tag: string]: string }) {
-    const extraneous = Object.keys(tags).filter(tag => !this.tagHash[tag]);
+  public checkTags(tags: { [tag: string]: string }): string[] {
+    const names = Object.keys(tags);
+    const extraneous = names.filter(tag => !this.tagHash[tag]);
     if (extraneous.length > 0) {
       throw new Error(
         `Extraneous tags detected for writing InfluxDB point in` +
         `${this.ref()}: \`${extraneous.join("`, `")}\`.`
       );
     }
+
+    return names;
   }
 
   /**
@@ -134,16 +144,13 @@ export class Schema {
  * Coerces the field map to a set of writable values, a la coerceFields,
  * using native guesses based on the field datatypes.
  */
-export function coerceBadly (fields: FieldMap): { [name: string]: string } {
-  const output = {};
-  Object.keys(fields).forEach(field => {
+export function coerceBadly (fields: FieldMap): [string, string][] {
+  return Object.keys(fields).sort().map(field => {
     const value = fields[field];
     if (typeof value === "string") {
-      output[field] = quoteEscaper.escape(value);
+      return <[string, string]> [field, quoteEscaper.escape(value)];
     } else {
-      output[field] = String(value);
+      return <[string, string]> [field, String(value)];
     }
   });
-
-  return output;
 };

@@ -1,5 +1,6 @@
 import { Pool, PoolOptions } from "./pool";
 import { parseSingle } from "./results";
+import { Schema, SchemaOptions, coerceBadly } from "./schema";
 
 import * as b from "./builder";
 import * as grammar from "./grammar";
@@ -15,15 +16,9 @@ const defaultOptions: ClusterConfig = Object.freeze({
   database: null,
   hosts: [],
   password: "root",
+  schema: [],
   username: "root",
 });
-
-/**
- * @typedef {Object} HostConfig
- * @property {String} [host=127.0.0.1] Influx host to connect to
- * @property {String} [port=8086] port to connect to on the host
- * @property {String} [protocol=http] protocol to connect with
- */
 
 export interface HostConfig {
 
@@ -65,6 +60,10 @@ export interface SingleHostConfig extends HostConfig {
    */
   pool?: PoolOptions;
 
+  /**
+   * A list of schema for measurements in the database.
+   */
+  schema?: SchemaOptions[];
 }
 
 export interface ClusterConfig {
@@ -94,6 +93,57 @@ export interface ClusterConfig {
    * Settings for the connection pool.
    */
   pool?: PoolOptions;
+
+  /**
+   * A list of schema for measurements in the database.
+   */
+  schema?: SchemaOptions[];
+}
+
+/**
+ * Point is passed to the client's write methods to store a point in InfluxDB.
+ */
+export interface Point {
+  /**
+   * Measurement is the Influx measurement name.
+   */
+  measurement?: string;
+
+  /**
+   * Tags is the list of tag values to insert.
+   */
+  tags?: { [name: string]: string };
+
+  /**
+   * Fields is the list of field values to insert.
+   */
+  fields?: { [name: string]: grammar.FieldType };
+
+  /**
+   * Timestamp tags this measurement with a date. This can be a Date object,
+   * in which case we'll adjust it to the desired precision, or a numeric
+   * string or number, in which case it gets passed directly to Influx.
+   */
+  timestamp: Date | string | number;
+}
+
+export interface WriteOptions {
+  /**
+   * Precision at which the points are written, defaults to milliseconds "ms".
+   */
+  precision?: grammar.PrecisionIdent;
+
+  /**
+   * Retention policy to write the points under, defaults to the DEFAULT
+   * database policy.
+   */
+  retentionPolicy?: string;
+
+  /**
+   * Database under which to write the points. This is required if a default
+   * database is not provided in Influx.
+   */
+  database?: string;
 }
 
 /**
@@ -144,6 +194,11 @@ export class InfluxDB {
   private options: ClusterConfig;
 
   /**
+   * Map of Schema instances defining measurements in Influx.
+   */
+  private schema: { [db: string]: { [measurement: string]: Schema } } = Object.create(null);
+
+  /**
    * Connect to a single InfluxDB instance by specifying
    * a set of connection options.
    */
@@ -180,6 +235,7 @@ export class InfluxDB {
         hosts: [options],
         password: options.password,
         pool: options.pool,
+        schema: options.schema,
         username: options.username,
       };
     }
@@ -198,6 +254,21 @@ export class InfluxDB {
 
     resolved.hosts.forEach(host => {
       this.pool.addHost(`${host.protocol}://${host.host}:${host.port}`);
+    });
+
+    this.options.schema.forEach(schema => {
+      const db = schema.database || this.options.database;
+      if (!db) {
+        throw new Error(
+          `Schema ${schema.measurement} doesn't have a database specified, and` +
+          "no default database is provided!"
+        );
+      }
+      if (!this.schema[db]) {
+        this.schema[db] = {};
+      }
+
+      this.schema[db][schema.measurement] = new Schema(schema);
     });
   }
 
@@ -461,6 +532,58 @@ export class InfluxDB {
       q: `drop continuous query ${grammar.quoteEscaper.escape(name)}`
         + ` on ${grammar.quoteEscaper.escape(database)}`,
     }, "POST"));
+  }
+
+  public writePoints(points: Point[], options: WriteOptions = {}): Promise<void> {
+    const {
+      database = this.defaultDB(),
+      precision = <grammar.PrecisionIdent> "ms",
+      retentionPolicy = "DEFAULT",
+    } = options;
+
+    let payload = "";
+    points.forEach(point => {
+      const {
+        fields = {},
+        tags = {},
+        measurement,
+        timestamp,
+      } = point;
+
+      const schema = this.schema[database] && this.schema[database][measurement];
+      const fieldsPairs = schema ? schema.coerceFields(point.fields) : coerceBadly(fields);
+      const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
+
+      payload += `\n${measurement}`;
+      for (let i = 0; i < tagsNames.length; i++) {
+        payload += grammar.tagEscaper.escape(tagsNames[i])
+          + "=" + grammar.tagEscaper.escape(tags[tagsNames[i]]);
+      }
+
+      for (let i = 0; i < fieldsPairs.length; i++) {
+        if (i === 0) {
+          payload += " ";
+        }
+        payload += grammar.tagEscaper.escape(fieldsPairs[i][0]) + "=" + fieldsPairs[i][1];
+      }
+
+      if (timestamp !== undefined) {
+        payload += " " + grammar.castTimestamp(timestamp, precision);
+      }
+    });
+
+    return this.pool.discard({
+      body: payload,
+      method: "POST",
+      path: "/write",
+      query: Object.assign({
+        db: database,
+        p: this.options.password,
+        precision,
+        rp: retentionPolicy,
+        u: this.options.username,
+      }),
+    });
   }
 
   /**

@@ -22,14 +22,14 @@ describe("schema", () => {
   describe("coerceBadly", () => {
     it("apparently works", () => {
       expect(coerceBadly({
-        a: true,
         b: 42,
+        a: true,
         c: "hello\"world",
-      })).to.deep.equal({
-        a: "true",
-        b: "42",
-        c: "\"hello\\\"world\"",
-      });
+      })).to.deep.equal([
+        ["a", "true"],
+        ["b", "42"],
+        ["c", "\"hello\\\"world\""],
+      ]);
     });
   });
 
@@ -40,28 +40,28 @@ describe("schema", () => {
         float: 43,
         string: "hello\"world",
         bool: true,
-      })).to.deep.equal({
-        int: "42i",
-        float: "43",
-        string: "\"hello\\\"world\"",
-        bool: "T",
-      });
+      })).to.deep.equal([
+        ["bool", "T"],
+        ["float", "43"],
+        ["int", "42i"],
+        ["string", "\"hello\\\"world\""],
+      ]);
     });
 
     it("accepts partial data", () => {
       expect(schema.coerceFields({
         int: 42
-      })).to.deep.equal({
-        int: "42i"
-      });
+      })).to.deep.equal([
+        ["int", "42i"],
+      ]);
     });
 
     it("coerces numeric string data", () => {
       expect(schema.coerceFields({
         int: "42"
-      })).to.deep.equal({
-        int: "42i"
-      });
+      })).to.deep.equal([
+        ["int", "42i"],
+      ]);
     });
 
     it("strips null and undefined values", () => {
@@ -69,9 +69,9 @@ describe("schema", () => {
         int: 42,
         float: undefined,
         bool: null,
-      })).to.deep.equal({
-        int: "42i"
-      });
+      })).to.deep.equal([
+        ["int", "42i"],
+      ]);
     });
 
     it("throws if wrong data type provided (bool)", () => {
@@ -90,12 +90,12 @@ describe("schema", () => {
     });
 
     it("allows valid tags", () => {
-      schema.assertTags({ "my_tag": "value" });
-      schema.assertTags({});
+      expect(schema.checkTags({ "my_tag": "value" })).to.deep.equal(["my_tag"]);
+      expect(schema.checkTags({})).to.deep.equal([]);
     });
 
     it("throws if invalid tags are provided", () => {
-      expect(() => schema.assertTags({ "whatever": "value" })).to.throw(/extraneous tags/i);
+      expect(() => schema.checkTags({ "whatever": "value" })).to.throw(/extraneous tags/i);
     });
 
     it("throws if invalid fields are provided", () => {

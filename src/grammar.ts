@@ -99,19 +99,13 @@ function leftPad(str: string, length: number, pad: string) {
  * formatDate converts the Date instance to Influx's date query format.
  */
 export function formatDate(date: Date) {
-  // In our Results we add a getMicrotime function to store more precise
-  // values, when possible. Pull that here if we're able.
-  const decimal = typeof (<any> date).getMicrotime === "function"
-    ? leftPad(String((<any> date).getMicrotime()), 6, "0")
-    : leftPad(String(date.getUTCMilliseconds()), 3, "0");
-
   return "\"" + leftPad(String(date.getUTCFullYear()), 2, "0")
      + "-" + leftPad(String(date.getUTCMonth()), 2, "0")
      + "-" + leftPad(String(date.getUTCDay()), 2, "0")
      + " " + leftPad(String(date.getUTCHours()), 2, "0")
      + ":" + leftPad(String(date.getUTCMinutes()), 2, "0")
      + ":" + leftPad(String(date.getUTCSeconds()), 2, "0")
-     + "." + decimal + "\"";
+     + "." + leftPad(String(date.getUTCMilliseconds()), 3, "0") + "\"";
 }
 
 /**
@@ -122,4 +116,73 @@ export enum FieldType {
   INTEGER,
   STRING,
   BOOLEAN
+};
+
+export type PrecisionIdent = "n" | "u" | "ms" | "s" | "m" | "h";
+
+/**
+ * Precision is a map of available Influx time precisions.
+ */
+export type Precision = {
+  Hours: "h",
+  Minutes: "m",
+  Seconds: "ms",
+  Milliseconds: "ms",
+  Microseconds: "u",
+  Nanoseconds: "u",
+};
+
+/**
+ * Converts a Date instance to a timestamp with the specified time precision.
+ * Note that for microsecond and nanosecond precisions, the date is upsampled.
+ */
+export function dateToPrecision(date: Date, precision: PrecisionIdent): number {
+  let ms = date.getTime();
+
+  switch (precision) {
+  case "n":
+    ms *= 1000;
+  case "u":
+    ms *= 1000;
+  case "ms":
+    return ms;
+
+  case "h":
+    ms /= 60;
+  case "m":
+    ms /= 60;
+  case "s":
+    ms /= 1000;
+    return Math.floor(ms);
+
+  default:
+    throw new Error(`Unknown precision "${precision}"!`);
+  }
+};
+
+const numericRe = /^[0-9]+$/;
+export function isNumeric(value: string) {
+  return numericRe.test(value);
+}
+
+/**
+ * Converts a timestamp to a string with the correct precision. Assumes
+ * that raw number and string instances are already in the correct precision.
+ */
+export function castTimestamp(timestamp: string | number | Date,
+                              precision: PrecisionIdent): string {
+  if (typeof timestamp === "string") {
+    if (!isNumeric(timestamp)) {
+      throw new Error(
+        `Expected numeric value for, timestamp, but got "${timestamp}"!`
+      );
+    }
+    return timestamp;
+  }
+
+  if (typeof timestamp === "number") {
+    return String(timestamp);
+  }
+
+  return String(dateToPrecision(timestamp, precision));
 };
