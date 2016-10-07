@@ -1,5 +1,15 @@
 # node-influx Changelog
 
+## 2016-10-06, Version 4.2.3
+
+* bug: globalAgent ignored during HTTPS communication (#207)
+* bug: fix methods using deprecated GET which should be using POST (#191 and #188)
+* improvement: Support writing RFC3339 timestamps (#203)
+* improvement: Added a non-failing error message when the body is empty (#160)
+* docs: fix confusing terminology with series versus measurement (#205)
+* docs: update links in CONTRIBUTING.md (#199)
+* docs: fix "deprecated" typo in docs (#184)
+
 ## 2016-09-15, Version 4.2.2
 
 Shoutout to @dandv for lots of awesome PRs this release!
