@@ -1,0 +1,10 @@
+/coverage
+/examples
+/lib/test
+/src
+/test
+/.editorconfig
+/.gitignore
+/.travis.yml
+/tsconfig.json
+/tslint.json

@@ -23,7 +23,7 @@ export interface SchemaOptions {
   tags: string[];
 }
 
-export type FieldMap = { [name: string]: FieldType };
+export type FieldMap = { [name: string]: string | number | boolean };
 
 /**
  * The Schema provides information and utilities for an InfluxDB measurement.

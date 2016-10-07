@@ -20,6 +20,8 @@ const defaultOptions: ClusterConfig = Object.freeze({
   username: "root",
 });
 
+export const FieldType = grammar.FieldType;
+
 export interface HostConfig {
 
   /**
@@ -260,12 +262,12 @@ export class InfluxDB {
       const db = schema.database || this.options.database;
       if (!db) {
         throw new Error(
-          `Schema ${schema.measurement} doesn't have a database specified, and` +
-          "no default database is provided!"
+          `Schema ${schema.measurement} doesn't have a database specified,` +
+          "and no default database is provided!"
         );
       }
       if (!this.schema[db]) {
-        this.schema[db] = {};
+        this.schema[db] = Object.create(null);
       }
 
       this.schema[db][schema.measurement] = new Schema(schema);
@@ -534,6 +536,62 @@ export class InfluxDB {
     }, "POST"));
   }
 
+  /**
+   * writePoints sends a list of points together in a batch to InfluxDB. In
+   * each point you must specify the measurement name to write into as well
+   * as a list of tag and field values. Optionally, you can specify the
+   * time to tag that point at, defaulting to the current time.
+   *
+   * If you defined a schema for the measurement in the options you passed
+   * to `new Influx(options)`, we'll use that to make sure that types get
+   * cast correctly and that there are no extraneous fields or columns.
+   *
+   * In the options, you can include the database name to write to (we use
+   * the `database` specified in options you passed to `new Influx(option)`
+   * if it's not provided) and the retention policy and time
+   * precision to write the points with.
+   *
+   * A note when using manually-specified times and precisions: by default
+   * we write using the `ms` precision since that's what JavaScript gives us.
+   * You can adjust this. However, there is some special behaviour if you
+   * manually specify a timestamp in your points:
+   *  - if you specify the timestamp as a Date object, we'll convert it to
+   *    milliseconds and multiple or divide as needed to get the right time
+   *  - if you provide a string or number as the timestamp, we'll pass it
+   *    straight into Influx.
+   *
+   * Please see the Point and WriteOptions type for a
+   * full list of possible options.
+   *
+   * For best performance, it's recommended that you batch your data into
+   * sets of a couple thousand records before writing it. In the future we'll
+   * have some utilities within node-influx to make this easier.
+   *
+   * @example
+   * // write a point into the default database with
+   * // the default retention policy.
+   * influx.writePoints([
+   *   {
+   *     measurement: 'perf',
+   *     fields: { host: 'box1.example.com' },
+   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *   }
+   * ])
+   *
+   * // you can manually specify the database,
+   * // retention policy, and time precision:
+   * influx.writePoints([
+   *   {
+   *     measurement: 'perf',
+   *     fields: { host: 'box1.example.com' },
+   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *   }
+   * ], {
+   *   database: 'my_db',
+   *   retentionPolicy: '1d',
+   *   precision: 's'
+   * })
+   */
   public writePoints(points: Point[], options: WriteOptions = {}): Promise<void> {
     const {
       database = this.defaultDB(),
@@ -551,20 +609,22 @@ export class InfluxDB {
       } = point;
 
       const schema = this.schema[database] && this.schema[database][measurement];
-      const fieldsPairs = schema ? schema.coerceFields(point.fields) : coerceBadly(fields);
+      const fieldsPairs = schema ? schema.coerceFields(fields) : coerceBadly(fields);
       const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
 
-      payload += `\n${measurement}`;
+      payload += (payload.length > 0 ? "\n" : "") + measurement;
       for (let i = 0; i < tagsNames.length; i++) {
-        payload += grammar.tagEscaper.escape(tagsNames[i])
-          + "=" + grammar.tagEscaper.escape(tags[tagsNames[i]]);
+        payload += ","
+          + grammar.tagEscaper.escape(tagsNames[i])
+          + "="
+          + grammar.tagEscaper.escape(tags[tagsNames[i]]);
       }
 
       for (let i = 0; i < fieldsPairs.length; i++) {
-        if (i === 0) {
-          payload += " ";
-        }
-        payload += grammar.tagEscaper.escape(fieldsPairs[i][0]) + "=" + fieldsPairs[i][1];
+        payload += (i === 0 ? " " : ",")
+          + grammar.tagEscaper.escape(fieldsPairs[i][0])
+          + "="
+          + fieldsPairs[i][1];
       }
 
       if (timestamp !== undefined) {
@@ -584,6 +644,24 @@ export class InfluxDB {
         u: this.options.username,
       }),
     });
+  }
+
+  /**
+   * writeMeasurement functions similarly to .writePoints(), but it
+   * automatically fills in the `measurement` value for all points for you.
+   *
+   * @example
+   * influx.writeMeasurement('perf', [
+   *   {
+   *     fields: { host: 'box1.example.com' },
+   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *   }
+   * ])
+   */
+  public writeMeasurement(measurement: string, points: Point[],
+                          options: WriteOptions = {}): Promise<void> {
+    points = points.map(p => Object.assign({ measurement }, p));
+    return this.writePoints(points, options);
   }
 
   /**
@@ -607,7 +685,7 @@ export class InfluxDB {
       method,
       path: "/query",
       query: Object.assign({
-        epoch: "u",
+        epoch: "ms",
         p: this.options.password,
         u: this.options.username,
       }, params),

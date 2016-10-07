@@ -1,8 +1,9 @@
 'use strict'
 
-import { InfluxDB } from "../../src";
+import { InfluxDB, FieldType } from '../../src';
 import { expect, dbFixture } from "./helpers";
-const sinon = require('sinon')
+
+const sinon = require('sinon');
 
 describe('influxdb', () => {
   describe('constructor', () => {
@@ -64,6 +65,43 @@ describe('influxdb', () => {
         }]
       });
     });
+
+    it('parses parses schema', () => {
+      let client = (<any> new InfluxDB({
+        schema: [{
+          database: "my_db",
+          measurement: "my_measurement",
+          fields: {},
+          tags: ["my_tag"],
+        }],
+        hosts: [{ host: '192.168.0.1' }],
+      }));
+
+      expect(client.schema.my_db.my_measurement).to.be.defined;
+
+      client = (<any> new InfluxDB({
+        schema: [{
+          measurement: "my_measurement",
+          fields: {},
+          tags: ["my_tag"],
+        }],
+        database: "my_db",
+        hosts: [{ host: '192.168.0.1' }],
+      }));
+
+      expect(client.schema.my_db.my_measurement).to.be.defined;
+
+      expect(() => {
+        new InfluxDB({
+          schema: [{
+            measurement: "my_measurement",
+            fields: {},
+            tags: ["my_tag"],
+          }],
+          hosts: [{ host: '192.168.0.1' }],
+        });
+      }).to.throw(/no default database is provided/);
+    });
   });
 
   describe('methods', () => {
@@ -71,7 +109,22 @@ describe('influxdb', () => {
     let pool
     let expectations = []
     beforeEach(() => {
-      influx = new InfluxDB();
+      influx = new InfluxDB({
+        hosts: [],
+        schema: [
+          {
+            database: "my_db",
+            measurement: "my_schemed_measure",
+            tags: ["my_tag"],
+            fields: {
+              int: FieldType.INTEGER,
+              float: FieldType.FLOAT,
+              string: FieldType.STRING,
+              bool: FieldType.BOOLEAN,
+            },
+          },
+        ],
+      });
       pool = influx.pool;
 
       sinon.stub(pool, 'discard');
@@ -105,7 +158,26 @@ describe('influxdb', () => {
           method: httpMethod,
           path: '/query',
           query: Object.assign({
-            epoch: 'u',
+            epoch: 'ms',
+            u: 'root',
+            p: 'root'
+          }, options)
+        });
+      });
+    };
+
+    const expectWrite = (body: string, options: any) => {
+      if (typeof options === 'string') {
+        options = { q: options }
+      }
+
+      pool.discard.returns(Promise.resolve());
+      expectations.push(() => {
+        expect(pool.discard).to.have.been.calledWith({
+          method: 'POST',
+          path: '/write',
+          body,
+          query: Object.assign({
             u: 'root',
             p: 'root'
           }, options)
@@ -321,6 +393,161 @@ describe('influxdb', () => {
         setDefaultDB('my_"_db');
         expectQuery('discard', 'drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q');
+      });
+    });
+
+    describe('.writePoints()', () => {
+      it('writes with all options specified without a schema', () => {
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075', {
+          precision: 's',
+          rp: '1day',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'mymeas',
+            tags: { my_tag: '1' },
+            fields: { myfield: 90 },
+            timestamp: new Date(1463683075000),
+          },
+        ], {
+          database: 'my_db',
+          precision: 's',
+          retentionPolicy: '1day',
+        });
+      });
+
+      it('writes using default options without a schema', () => {
+        setDefaultDB('my_db');
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'mymeas',
+            tags: { my_tag: '1' },
+            fields: { myfield: 90 },
+            timestamp: new Date(1463683075000),
+          },
+        ]);
+      });
+
+      it('uses a schema to coerce', () => {
+        setDefaultDB('my_db');
+        expectWrite('my_schemed_measure,my_tag=1 bool=T,float=43,int=42i', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'my_schemed_measure',
+            tags: { my_tag: '1' },
+            fields: {
+              int: 42,
+              float: 43,
+              bool: true,
+            }
+          },
+        ]);
+      });
+
+      it('throws on schema violations', () => {
+        setDefaultDB('my_db');
+
+        expect(() => {
+          influx.writePoints([
+            {
+              measurement: 'my_schemed_measure',
+              tags: { not_a_tag: '1' },
+            },
+          ]);
+        }).to.throw(/extraneous tags/i);
+
+        expect(() => {
+          influx.writePoints([
+            {
+              measurement: 'my_schemed_measure',
+              fields: { not_a_field: '1' },
+            },
+          ]);
+        }).to.throw(/extraneous fields/i);
+
+        expect(() => {
+          influx.writePoints([
+            {
+              measurement: 'my_schemed_measure',
+              fields: { bool: 'lol, not a bool' },
+            },
+          ]);
+        }).to.throw(/expected bool/i);
+      });
+
+      it('handles lack of tags', () => {
+        expectWrite('mymeas myfield=90', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'mymeas',
+            fields: { myfield: 90 },
+          },
+        ], { database: 'my_db' });
+      });
+
+      it('handles lack of fields', () => {
+        expectWrite('mymeas,my_tag=90', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'mymeas',
+            tags: { my_tag: 90 },
+          },
+        ], { database: 'my_db' });
+      });
+
+      it('handles multiple tags', () => {
+        expectWrite('mymeas,my_tag1=90,my_tag2=45', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writePoints([
+          {
+            measurement: 'mymeas',
+            tags: { my_tag1: 90, my_tag2: 45 },
+          },
+        ], { database: 'my_db' });
+      });
+
+      it('writes with the .writeMeasurement method', () => {
+        setDefaultDB('my_db');
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writeMeasurement('mymeas', [
+          {
+            tags: { my_tag: '1' },
+            fields: { myfield: 90 },
+            timestamp: new Date(1463683075000),
+          },
+        ]);
       });
     });
   });
