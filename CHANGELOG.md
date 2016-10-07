@@ -1,5 +1,9 @@
 # node-influx Changelog
 
+## 2016-10-02, Version 4.3.0
+
+* improvement: switch from `request` to `isomorphic-fetch`, enabling browser support (#177)
+
 ## 2016-09-15, Version 4.2.2
 
 Shoutout to @dandv for lots of awesome PRs this release!

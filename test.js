@@ -1,19 +1,20 @@
 /* eslint-env mocha */
 var influx = require('./')
 var assert = require('assert')
-var request = require('request')
+var fetch = require('isomorphic-fetch')
 
 before(function (done) {
   // Before doing anything validate that InfluxDB is a recent version and running
-  request('http://localhost:8086/ping', function (err, response, body) {
-    if (err) return done(err)
-    var version = response.headers['x-influxdb-version']
+  fetch('http://localhost:8086/ping').then(function (response) {
+    var version = response.headers.get('x-influxdb-version')
     var major = version.split('.')[0]
     var minor = version.split('.')[1]
 
     assert.equal(major, 0)
     assert(minor >= 13)
     done()
+  }).catch(function (error) {
+    return done(error)
   })
 })
 
@@ -755,7 +756,7 @@ describe('InfluxDB', function () {
 
     describe('#queryFailover', function () {
       it('should read a point from the database after the failed servers have been removed', function (done) {
-        // FIXME: This is a bit of a hack, but there's currently no API to dynamically change this
+        // FIXME: This is a bit of a hack, but there's currently no API to dynamically change maxRetries
         failoverClient.request.options.maxRetries = 5
         failoverClient.setRequestTimeout(1000)
         // Should succeed on 5th server it tries (4s of timeouts)

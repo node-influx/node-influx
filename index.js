@@ -109,16 +109,22 @@ InfluxDB.prototype._parseResults = function (response, callback) {
   return callback(null, results)
 }
 
+/**
+ * Return a function that calls the callback with either the error or the results
+ * @param callback
+ * @returns {Function}
+ * @private
+ */
 InfluxDB.prototype._parseCallback = function (callback) {
   return function (err, res, body) {
     if (typeof callback === 'undefined') return
     if (err) {
       return callback(err)
     }
-    if (res.statusCode < 200 || res.statusCode >= 300) {
+    if (res.status < 200 || res.status >= 300) {
       var errorMessage
       if (!body) {
-        errorMessage = 'No body received with status code ' + res.statusCode + ' from Influx.'
+        errorMessage = 'No body received with status code ' + res.status + ' from Influx.'
       } else if (body.error) {
         errorMessage = body.error
       } else if (typeof body === 'object') {
@@ -184,8 +190,7 @@ InfluxDB.prototype.queryDB = function (query, options, callback) {
   var args = resolveOptCallback(options, callback)
 
   this.request.get({
-    url: this.url('query', args.options, {q: query}),
-    json: true
+    url: this.url('query', args.options, {q: query})
   }, this._parseCallback(args.callback))
 }
 
@@ -200,8 +205,7 @@ InfluxDB.prototype.updateDB = function (query, options, callback) {
   var args = resolveOptCallback(options, callback)
 
   this.request.post({
-    url: this.url('query', args.options, {q: query}),
-    json: true
+    url: this.url('query', args.options, {q: query})
   }, this._parseCallback(args.callback))
 }
 
