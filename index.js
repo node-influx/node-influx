@@ -398,8 +398,10 @@ InfluxDB.prototype._prepareValues = function (series) {
         if (timestamp) {
           if (timestamp instanceof Date) {
             line += ' ' + timestamp.getTime()
+          } else if (/^[0-9]+$/.test(timestamp)) {
+            line += ' ' + timestamp  // UNIX timestamp
           } else {
-            line += ' ' + timestamp
+            line += ' ' + new Date(timestamp).getTime()  // hopefully an RFC3339 string
           }
         }
       } else {
