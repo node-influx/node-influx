@@ -430,7 +430,7 @@ InfluxDB.prototype.writeSeries = function (series, options, callback) {
 
   this.request.post({
     url: this.url('write', args.options),
-    pool: typeof args.options.pool !== 'undefined' ? args.options.pool : {},
+    pool: typeof args.options.pool !== 'undefined' ? args.options.pool : undefined,
     body: this._prepareValues(series)
   }, this._parseCallback(args.callback))
 }
