@@ -556,7 +556,7 @@ export class InfluxDB {
    * You can adjust this. However, there is some special behaviour if you
    * manually specify a timestamp in your points:
    *  - if you specify the timestamp as a Date object, we'll convert it to
-   *    milliseconds and multiple or divide as needed to get the right time
+   *    milliseconds and multiply or divide as needed to get the right time
    *  - if you provide a string or number as the timestamp, we'll pass it
    *    straight into Influx.
    *
