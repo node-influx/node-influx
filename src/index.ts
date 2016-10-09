@@ -20,8 +20,10 @@ const defaultOptions: ClusterConfig = Object.freeze({
   username: "root",
 });
 
-export * from "./grammar";
+export * from "./builder";
+export { FieldType, Precision, TimePrecision, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
+export { PoolOptions } from "./pool";
 
 export interface HostConfig {
 

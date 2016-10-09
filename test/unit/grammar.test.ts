@@ -86,7 +86,7 @@ describe("grammar", () => {
   });
 
   describe("timestamp casting", () => {
-    it("casts normal timestamps", () => {
+    it("casts dates into timestamps", () => {
       const d = new Date(1475121809084);
       expect(grammar.castTimestamp(d, "n")).to.equal('1475121809084000000');
       expect(grammar.castTimestamp(d, "u")).to.equal('1475121809084000');
@@ -95,21 +95,15 @@ describe("grammar", () => {
       expect(grammar.castTimestamp(d, "m")).to.equal('24585363');
       expect(grammar.castTimestamp(d, "h")).to.equal('409756');
     });
-  });
 
-  it("casts timestamps correctly", () => {
-    const d = new Date(1475121809084);
-    expect(grammar.castTimestamp(d, "s")).to.equal("1475121809");
-    expect(grammar.castTimestamp(d, "ms")).to.equal("1475121809084");
-
-    expect(grammar.castTimestamp("1475121809", "s")).to.equal("1475121809");
-    expect(grammar.castTimestamp("1475121809084", "ms")).to.equal("1475121809084");
-
-    expect(grammar.castTimestamp(1475121809, "s")).to.equal("1475121809");
-    expect(grammar.castTimestamp(1475121809084, "ms")).to.equal("1475121809084");
-  });
-
-  it("errors if an invalid timestamp value is provided", () => {
-    expect(() => grammar.castTimestamp("sushi", "ms")).to.throw(/numeric value/);
+    it("casts nanodates into timestamps", () => {
+      const d = grammar.toNanoDate('1475985480231035600');
+      expect(grammar.castTimestamp(d, "n")).to.equal('1475985480231035600');
+      expect(grammar.castTimestamp(d, "u")).to.equal('1475985480231035');
+      expect(grammar.castTimestamp(d, "ms")).to.equal('1475985480231');
+      expect(grammar.castTimestamp(d, "s")).to.equal('1475985480');
+      expect(grammar.castTimestamp(d, "m")).to.equal('24599758');
+      expect(grammar.castTimestamp(d, "h")).to.equal('409995');
+    });
   });
 });

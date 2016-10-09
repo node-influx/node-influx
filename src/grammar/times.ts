@@ -87,13 +87,13 @@ export type TimePrecision = "n" | "u" | "ms" | "s" | "m" | "h";
 /**
  * Precision is a map of available Influx time precisions.
  */
-export type Precision = {
+export const Precision = {
   Hours: "h",
-  Minutes: "m",
-  Seconds: "s",
-  Milliseconds: "ms",
   Microseconds: "u",
+  Milliseconds: "ms",
+  Minutes: "m",
   Nanoseconds: "n",
+  Seconds: "s",
 };
 
 /**
@@ -243,7 +243,7 @@ class NanosecondsDateManipulator implements IDateManipulator<NanoDate> {
 
     switch (precision) {
     case "u":
-      return date.getNanoTime().slice(0, -6);
+      return date.getNanoTime().slice(0, -3);
     case "n":
       return date.getNanoTime();
 

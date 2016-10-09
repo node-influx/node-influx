@@ -114,7 +114,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
   }
 
   public exp(fn: (e: Expression) => Expression): this {
-    this.query.push(fn(new Expression()).toString());
+    this.query.push("(" + fn(new Expression()).toString() + ")");
     return this;
   }
 
@@ -149,7 +149,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
           return this;
         }
 
-        throw new Error(`node-influx doesn't know how to encode [${value}] into a ` +
+        throw new Error(`node-influx doesn't know how to encode the provided value into a ` +
           "query. If you think this is a bug, open an issue here: https://git.io/influx-err");
     }
   }
@@ -258,6 +258,10 @@ export class Measurement {
   }
 
   public toString(): string {
+    if (!this.parts[2]) {
+      throw new Error(`You must specify a measurement name to query! Got \`${this.parts[2]}\``);
+    }
+
     return this.parts.filter(p => !!p)
       .map(p => escape.quoted(p))
       .join(".");

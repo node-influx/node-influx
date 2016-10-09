@@ -2,17 +2,13 @@
 
 An [InfluxDB](http://influxdb.org/) Node.js Client
 
-[![npm](http://img.shields.io/npm/v/influx.svg?style=flat-square)](https://www.npmjs.org/package/influx)
-[![build](http://img.shields.io/travis/node-influx/node-influx/master.svg?style=flat-square)](https://travis-ci.org/node-influx/node-influx)
-[![coverage](http://img.shields.io/coveralls/node-influx/node-influx/master.svg?style=flat-square)](https://coveralls.io/r/node-influx/node-influx?branch=master)
-[![code climate](http://img.shields.io/codeclimate/github/node-influx/node-influx.svg?style=flat-square)](https://codeclimate.com/github/node-influx/node-influx)
-[![Dependency Status](https://img.shields.io/david/node-influx/node-influx.svg?style=flat-square)](https://david-dm.org/node-influx/node-influx)
-[![Github Releases](https://img.shields.io/npm/dm/influx.svg?style=flat-square)](https://github.com/node-influx/node-influx)
-[![Gitter](https://img.shields.io/gitter/room/node-influx/node-influx.js.svg?maxAge=2592000&style=flat-square)](https://gitter.im/node-influx/node-influx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
+[![build](http://img.shields.io/travis/node-influx/node-influx/master.svg)](https://travis-ci.org/node-influx/node-influx)
+[![coverage](http://img.shields.io/coveralls/node-influx/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
+[![bitHound Overall Score](https://www.bithound.io/github/node-influx/node-influx/badges/score.svg)](https://www.bithound.io/github/node-influx/node-influx)
+[![bitHound Code](https://www.bithound.io/github/node-influx/node-influx/badges/code.svg)](https://www.bithound.io/github/node-influx/node-influx)
+[![bitHound Dependencies](https://www.bithound.io/github/node-influx/node-influx/badges/dependencies.svg)](https://www.bithound.io/github/node-influx/node-influx/master/dependencies/npm)
 
-
-
-[![Bountysource](https://img.shields.io/bountysource/team/node-influx/activity.svg?style=flat-square)](https://www.bountysource.com/teams/node-influx) - Reward the contributors for their efforts on upcoming tasks.
 
 ## Installation
 

@@ -127,7 +127,7 @@ describe('pool', () => {
         .catch(done);
     };
 
-    return pool.discard({ method: 'GET', path: '/' });
+    pool.discard({ method: 'GET', path: '/' });
   });
 
   it('times out requests', () => {
