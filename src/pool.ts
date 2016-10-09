@@ -88,8 +88,19 @@ export class ServiceNotAvailableError extends Error {}
  */
 export class RequestError extends Error {
 
-  constructor(public req: http.ClientRequest, public res: http.IncomingMessage) {
-    super(`A ${res.statusCode} ${res.statusMessage} erro occurred`);
+  public static from(
+    req: http.ClientRequest,
+    res: http.IncomingMessage,
+    callback: (e: RequestError) => void
+  ) {
+      let body = "";
+      res.setEncoding("utf8");
+      res.on("data", str => body = body + str);
+      res.on("end", () => callback(new RequestError(req, res, body)));
+  }
+
+  constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
+    super(`A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`);
   }
 
 }
@@ -260,7 +271,7 @@ export class Pool {
       }
 
       if (res.statusCode >= 300) {
-        return callback(new RequestError(req, res), res);
+        return RequestError.from(req, res, err => callback(err, res));
       }
 
       host.success();

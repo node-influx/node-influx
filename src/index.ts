@@ -21,6 +21,7 @@ const defaultOptions: ClusterConfig = Object.freeze({
 });
 
 export * from "./grammar";
+export { SchemaOptions } from "./schema";
 
 export interface HostConfig {
 
@@ -623,7 +624,7 @@ export class InfluxDB {
     const {
       database = this.defaultDB(),
       precision = <grammar.TimePrecision> "ms",
-      retentionPolicy = "DEFAULT",
+      retentionPolicy,
     } = options;
 
     let payload = "";
@@ -727,7 +728,7 @@ export class InfluxDB {
     const {
       database = this.defaultDB(),
       epoch,
-      retentionPolicy = "DEFAULT",
+      retentionPolicy,
     } = options;
 
     return this.pool.json(this.getQueryOpts({
@@ -759,7 +760,6 @@ export class InfluxDB {
       method,
       path: "/query",
       query: Object.assign({
-        epoch: "ms",
         p: this.options.password,
         u: this.options.username,
       }, params),

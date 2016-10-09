@@ -37,6 +37,7 @@ const queries = [
   fixture('showMeasurements', 'show measurements', { db }),
   fixture('showSeries', 'show series', { db }),
   fixture('showSeriesFromOne', 'show series from series_1', { db }),
+  fixture('selectFromEmpty', 'select * from not_a_series', { db }),
   fixture('selectFromOne', 'select * from series_0 where my_tag = \'1\' order by time desc', { db }),
   fixture('selectFromGroup', 'select top(my_value, 1) from series_0 group by my_tag order by time desc', { db }),
   fixture('error', 'this is not a valid query!'),
@@ -108,7 +109,7 @@ function update (query, params = {}) {
 function fixture (fixtureName, body, params = {}) {
   return () => query(body, params)().then(res => {
     const name = path.join(fixtureDir, `${fixtureName}.json`)
-    fs.writeFileSync(name, JSON.stringify(res, null, 2))
+    fs.writeFileSync(name, JSON.stringify(res, null, 2) + '\n')
     console.log(`Created ${name}`)
   })
 }

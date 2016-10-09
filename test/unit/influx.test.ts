@@ -158,7 +158,6 @@ describe('influxdb', () => {
           method: httpMethod,
           path: '/query',
           query: Object.assign({
-            epoch: 'ms',
             u: 'root',
             p: 'root'
           }, options)
@@ -422,7 +421,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
         expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -440,7 +439,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
         expectWrite('my_schemed_measure,my_tag=1 bool=T,float=43,int=42i', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -491,7 +490,7 @@ describe('influxdb', () => {
       it('handles lack of tags', () => {
         expectWrite('mymeas myfield=90', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -506,7 +505,7 @@ describe('influxdb', () => {
       it('handles lack of fields', () => {
         expectWrite('mymeas,my_tag=90', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -521,7 +520,7 @@ describe('influxdb', () => {
       it('handles multiple tags', () => {
         expectWrite('mymeas,my_tag1=90,my_tag2=45', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -537,7 +536,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
         expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -554,7 +553,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
         expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
           precision: 'ms',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -571,7 +570,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
         expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
           precision: 'n',
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         });
 
@@ -592,7 +591,7 @@ describe('influxdb', () => {
         expectQuery('json', {
           q: 'select * from series_0',
           epoch: undefined,
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         }, 'GET', dbFixture('selectFromOne'));
 
@@ -605,7 +604,7 @@ describe('influxdb', () => {
         expectQuery('json', {
           q: 'select * from series_0',
           epoch: undefined,
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         }, 'GET', dbFixture('selectFromOne'));
 
@@ -621,7 +620,7 @@ describe('influxdb', () => {
         expectQuery('json', {
           q: 'select * from series_0;select * from series_1',
           epoch: undefined,
-          rp: 'DEFAULT',
+          rp: undefined,
           db: 'my_db',
         }, 'GET', dbFixture('selectFromOne'));
 

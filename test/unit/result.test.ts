@@ -141,4 +141,12 @@ describe('results', () => {
 
     expect(r.group({ tag: 'c' })).to.deep.equal([]);
   });
+
+  it('parses empty series', () => {
+    const r1 = results.parseSingle({
+      results: [{}]
+    }, 'ms');
+
+    expect(r1.slice()).to.deep.equal([]);
+  });
 });

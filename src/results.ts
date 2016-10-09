@@ -66,7 +66,10 @@ function groupsMethod(): { tags: Tags, rows: Row[] }[] {
  */
 function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): Results<any> {
   const results = <any> new Array<Row>();
-  const tags = results.groupsTagsKeys = series[0].tags ? Object.keys(series[0].tags) : [];
+  const tags
+    = results.groupsTagsKeys
+    = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
+
   let nextGroup = new Array<Row>();
   results.groupRows = new Array(series.length);
 
