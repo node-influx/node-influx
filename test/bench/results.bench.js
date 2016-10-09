@@ -1,6 +1,6 @@
 'use strict'
 
-const results = require('../../lib/results')
+const results = require('../../lib/src/results')
 const _ = require('lodash')
 const count = 1000
 

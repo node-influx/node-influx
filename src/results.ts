@@ -1,3 +1,5 @@
+import { TimePrecision, isoOrTimeToDate } from "./grammar";
+
 /**
  * InfluxResults describes the result structure received from InfluxDB.
  *
@@ -11,29 +13,13 @@ export interface Response {
 
 export type Tags = { [name: string]: string };
 
-export type Row = any; // :/
+export type Row = any;
 
 export interface ResponseSeries {
   name: string;
   columns: string[];
   tags?: Tags;
   values: Row[];
-}
-
-function getMicrotime() {
-  return this._microtime;
-}
-
-/**
- * Returns a date object decorated with an accessor for its microtime
- * epoch. "Correctly" we would subclass Date here, but parsing is a
- * very hot loop and super() calls are expensive.
- */
-function dateFromMicrotime(microtime: number): Date {
-  const d = <any> new Date(microtime / 1000);
-  d._microtime = microtime;
-  d.getMicrotime = getMicrotime;
-  return d;
 }
 
 function groupMethod(matcher: Tags): Row[] {
@@ -78,7 +64,7 @@ function groupsMethod(): { tags: Tags, rows: Row[] }[] {
  * makes it impossible to preserve groups as would be necessary if it's
  * subclassed.
  */
-function parseInner(series: ResponseSeries[] = []): Results<any> {
+function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): Results<any> {
   const results = <any> new Array<Row>();
   const tags = results.groupsTagsKeys = series[0].tags ? Object.keys(series[0].tags) : [];
   let nextGroup = new Array<Row>();
@@ -92,7 +78,7 @@ function parseInner(series: ResponseSeries[] = []): Results<any> {
       const obj: Row = {};
       for (let j = 0; j < columns.length; j++) {
         if (columns[j] === "time") {
-          obj.time = dateFromMicrotime(<number> values[k][j]);
+          obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
         } else {
           obj[columns[j]] = values[k][j];
         }
@@ -145,11 +131,11 @@ export interface Results<T> extends Array<T> {
  *     which groups by series *tags*, grouping by times is case (1)
  *  3. Multiple queries of types 1 and 2
  */
-export function parse<T>(res: Response): Results<T>[] | Results<T> {
+export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[] | Results<T> {
   if (res.results.length === 1) { // normalize case 3
-    return parseInner(res.results[0].series);
+    return parseInner(res.results[0].series, precision);
   } else {
-    return res.results.map(result => parseInner(result.series));
+    return res.results.map(result => parseInner(result.series, precision));
   }
 }
 
@@ -158,11 +144,11 @@ export function parse<T>(res: Response): Results<T>[] | Results<T> {
  * and returns that result.
  * @throws {Error} if the number of results is not exactly one
  */
-export function parseSingle<T>(res: Response): Results<T> {
+export function parseSingle<T>(res: Response, precision?: TimePrecision): Results<T> {
   if (res.results.length !== 1) {
     throw new Error("node-influx expected the results length to equal 1, but " +
       `it was ${0}. Please report this here: https://git.io/influx-err`);
   }
 
-  return parseInner(res.results[0].series);
+  return parseInner(res.results[0].series, precision);
 }

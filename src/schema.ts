@@ -1,4 +1,4 @@
-import { FieldType, isNumeric, quoteEscaper } from "./grammar";
+import { FieldType, escape, isNumeric } from "./grammar";
 
 export interface SchemaOptions {
   /**
@@ -64,7 +64,7 @@ export class Schema {
       let coerced: string;
       switch (this.options.fields[field]) {
       case FieldType.STRING:
-        coerced = quoteEscaper.escape(String(value));
+        coerced = escape.quoted(String(value));
         break;
 
       case FieldType.INTEGER:
@@ -148,7 +148,7 @@ export function coerceBadly (fields: FieldMap): [string, string][] {
   return Object.keys(fields).sort().map(field => {
     const value = fields[field];
     if (typeof value === "string") {
-      return <[string, string]> [field, quoteEscaper.escape(value)];
+      return <[string, string]> [field, escape.quoted(value)];
     } else {
       return <[string, string]> [field, String(value)];
     }

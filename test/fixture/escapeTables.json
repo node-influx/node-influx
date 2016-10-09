@@ -1,5 +1,5 @@
 {
-  "tagEscaper": [
+  "tag": [
     ["ab", "ab"],
     ["a,", "a\\,"],
     ["a,b", "a\\,b"],
@@ -7,14 +7,14 @@
     ["a b", "a\\ b"],
     ["a b=c", "a\\ b\\=c"]
   ],
-  "measurementEscaper": [
+  "measurement": [
     ["ab", "ab"],
     ["a,", "a\\,"],
     ["a,b", "a\\,b"],
     ["a b", "a\\ b"],
     ["a b,c", "a\\ b\\,c"]
   ],
-  "quoteEscaper": [
+  "quoted": [
     ["ab", "\"ab\""],
     ["a\"", "\"a\\\"\""],
     ["a\"b", "\"a\\\"b\""],

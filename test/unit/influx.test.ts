@@ -1,6 +1,6 @@
 'use strict'
 
-import { InfluxDB, FieldType } from '../../src';
+import { InfluxDB, FieldType, toNanoDate } from '../../src';
 import { expect, dbFixture } from "./helpers";
 
 const sinon = require('sinon');
@@ -548,6 +548,84 @@ describe('influxdb', () => {
             timestamp: new Date(1463683075000),
           },
         ]);
+      });
+
+      it('accepts nanoseconds (as ms)', () => {
+        setDefaultDB('my_db');
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writeMeasurement('mymeas', [
+          {
+            tags: { my_tag: '1' },
+            fields: { myfield: 90 },
+            timestamp: toNanoDate('1463683075000000000'),
+          },
+        ]);
+      });
+
+      it('accepts nanoseconds (as ns)', () => {
+        setDefaultDB('my_db');
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
+          rp: 'DEFAULT',
+          db: 'my_db',
+        });
+
+        return influx.writeMeasurement('mymeas', [
+          {
+            tags: { my_tag: '1' },
+            fields: { myfield: 90 },
+            timestamp: toNanoDate('1463683075000000000'),
+          },
+        ], { precision: 'n' });
+      });
+    });
+
+    describe('.write methods', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
+      it('runs raw queries', () => {
+        expectQuery('json', {
+          q: 'select * from series_0',
+          epoch: undefined,
+          rp: 'DEFAULT',
+          db: 'my_db',
+        }, 'GET', dbFixture('selectFromOne'));
+
+        return influx.queryRaw('select * from series_0').then(res => {
+          expect(res).to.deep.equal(dbFixture('selectFromOne'));
+        });
+      });
+
+      it('parses query output', () => {
+        expectQuery('json', {
+          q: 'select * from series_0',
+          epoch: undefined,
+          rp: 'DEFAULT',
+          db: 'my_db',
+        }, 'GET', dbFixture('selectFromOne'));
+
+        return influx.query('select * from series_0').then(res => {
+          expect(res.slice()).to.deep.equal([
+            { time: new Date('2016-09-29T02:19:09.38Z'), my_tag: '1', my_value: 67 },
+            { time: new Date('2016-09-29T02:19:09.379Z'), my_tag: '1', my_value: 32 },
+          ]);
+        });
+      });
+
+      it('selects from multiple', () => {
+        expectQuery('json', {
+          q: 'select * from series_0;select * from series_1',
+          epoch: undefined,
+          rp: 'DEFAULT',
+          db: 'my_db',
+        }, 'GET', dbFixture('selectFromOne'));
+
+        return influx.query(['select * from series_0', 'select * from series_1']);
       });
     });
   });

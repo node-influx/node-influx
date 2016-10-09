@@ -1,4 +1,4 @@
-import { formatDate, quoteEscaper, stringLitEscaper } from "./grammar";
+import { escape, formatDate } from "./grammar";
 
 export interface BaseExpression<T> {
   /**
@@ -109,7 +109,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
   }
 
   public field(name: string): this {
-    this.query.push(quoteEscaper.escape(name));
+    this.query.push(escape.quoted(name));
     return this;
   }
 
@@ -124,7 +124,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
         this.query.push(value);
         return this;
       case "string":
-        this.query.push(stringLitEscaper.escape(value));
+        this.query.push(escape.stringLit(value));
         return this;
       case "boolean":
         this.query.push(value ? "TRUE" : "FALSE");
@@ -259,7 +259,7 @@ export class Measurement {
 
   public toString(): string {
     return this.parts.filter(p => !!p)
-      .map(p => quoteEscaper.escape(p))
+      .map(p => escape.quoted(p))
       .join(".");
   }
 }

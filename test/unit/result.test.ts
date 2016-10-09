@@ -27,8 +27,8 @@ describe('results', () => {
             'mean'
           ],
           values: [
-            [1474819971787272, 42],
-            [1474821271999944, 44]
+            ['2016-09-25T16:12:51.787Z', 42],
+            ['2016-09-25T16:34:31.999Z', 44]
           ]
         }]
       }]
@@ -44,6 +44,50 @@ describe('results', () => {
     ]);
 
     expect(r.group({ tag: 'a' })).to.deep.equal([]);
+  });
+
+  it('parses alternate epochs', () => {
+    const r1 = results.parseSingle({
+      results: [{
+        series: [{
+          name: 'test_series',
+          columns: [
+            'time',
+            'mean'
+          ],
+          values: [
+            [1474819971787, 42],
+            [1474821271999, 44]
+          ]
+        }]
+      }]
+    }, 'ms');
+
+    expect(r1.slice()).to.deep.equal([
+      { time: new Date(1474819971787), mean: 42 },
+      { time: new Date(1474821271999), mean: 44 }
+    ]);
+
+    const r2 = results.parseSingle({
+      results: [{
+        series: [{
+          name: 'test_series',
+          columns: [
+            'time',
+            'mean'
+          ],
+          values: [
+            [1474819971787000, 42],
+            [1474821271999000, 44]
+          ]
+        }]
+      }]
+    }, 'u');
+
+    expect(r2.slice()).to.deep.equal([
+      { time: new Date(1474819971787), mean: 42 },
+      { time: new Date(1474821271999), mean: 44 }
+    ]);
   });
 
   it('parses grouped results', () => {
