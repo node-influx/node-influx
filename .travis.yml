@@ -1,18 +1,6 @@
 language: node_js
 node_js:
-  - "6"
-  - "5"
-  - "4"
-  - "0.12"
-env:
-  - INFLUX=0.13.0
-before_script:
-  - curl -O "https://dl.influxdata.com/influxdb/releases/influxdb_$(echo $INFLUX)_amd64.deb"
-  - sudo dpkg -i "influxdb_$(echo $INFLUX)_amd64.deb"
-  - sudo openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj '/C=US/ST=NewYork/L=NYC/O=Influx/CN=*' -keyout /server.pem -out /server.pem >/dev/null 2>&1
-
-  - sudo service influxdb start
-  - sleep 5
+  - 6
 script: npm run travis-test
 after_script:
   - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls && rm -rf ./coverage

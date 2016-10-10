@@ -1,5 +1,9 @@
 # node-influx Changelog
 
+## TBA, Version 5.0.0
+
+To be announced
+
 ## 2016-10-06, Version 4.2.3
 
 * bug: globalAgent ignored during HTTPS communication (#207)

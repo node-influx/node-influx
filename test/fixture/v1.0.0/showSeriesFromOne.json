@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "series": [
+        {
+          "columns": [
+            "key"
+          ],
+          "values": [
+            [
+              "series_1,my_tag=0"
+            ],
+            [
+              "series_1,my_tag=2"
+            ],
+            [
+              "series_1,my_tag=4"
+            ],
+            [
+              "series_1,my_tag=5"
+            ],
+            [
+              "series_1,my_tag=6"
+            ],
+            [
+              "series_1,my_tag=7"
+            ],
+            [
+              "series_1,my_tag=8"
+            ],
+            [
+              "series_1,my_tag=9"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

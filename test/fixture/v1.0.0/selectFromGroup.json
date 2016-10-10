@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "series": [
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "0"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.375Z",
+              85
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "1"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.38Z",
+              67
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "5"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.374Z",
+              93
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "6"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.378Z",
+              98
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "7"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.379Z",
+              28
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "8"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.377Z",
+              75
+            ]
+          ]
+        },
+        {
+          "name": "series_0",
+          "tags": {
+            "my_tag": "9"
+          },
+          "columns": [
+            "time",
+            "top"
+          ],
+          "values": [
+            [
+              "2016-09-29T02:19:09.376Z",
+              44
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

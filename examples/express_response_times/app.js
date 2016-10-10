@@ -1,67 +1,94 @@
-var express = require('express')
-var http = require('http')
-var influx = require('../../')
+/**
+ * In this example we'll create a server which has an index page that prints
+ * out "hello world", and a page `http://localhost:3000/times` which prints
+ * out the last ten response times that InfluxDB gave us.
+ *
+ * Get started by importing everything we need!
+ */
+const Influx = require('../../')
+const express = require('express')
+const http = require('http')
+const os = require('os')
 
-var app = express()
-var serverInflux = influx()
-var dbInflux = influx({host: 'localhost', username: 'example_response_dbuser', password: 'P85sw0rD', database: 'example_response'})
-
-app.use(express.logger('dev'))
+const app = express()
 
 /**
- * LOOKING FOR JUST THE MIDDLEWARE?
- *
- *    THEN COPY THIS PART
- *
- *  WARNING: CHANGE THE ERROR THROW
+ * Create a new Influx client. We tell it to use the
+ * `express_response_db` database by default, and give
+ * it some information about the schema we're writing.
  */
+const influx = new Influx.InfluxDB({
+  host: 'localhost',
+  database: 'express_response_db',
+  schema: [
+    {
+      measurement: 'response_times',
+      fields: {
+        path: Influx.FieldType.STRING,
+        duration: Influx.FieldType.INTEGER
+      },
+      tags: [
+        'host'
+      ]
+    }
+  ]
+})
 
-// TODO: Wait and then send multiple points within suitable timeframe.
+/**
+ * Next we define our middleware and hook into the response stream. When it
+ * ends we'll write how long the response took to Influx!
+ */
+app.use((req, res, next) => {
+  const start = Date.now()
 
-app.use(function (req, res, next) {
-  var startTime = new Date()
-  function logRequest () {
-    res.removeListener('finish', logRequest)
-    res.removeListener('close', logRequest)
-    dbInflux.writePoint('response_times', { time: startTime, value: (new Date()) - startTime }, function (err) {
-      if (err) throw err
+  res.on('finish', () => {
+    const duration = Date.now() - start
+    console.log(`Request to ${req.path} took ${duration}ms`);
+
+    influx.writePoints([
+      {
+        measurement: 'response_times',
+        tags: { host: os.hostname() },
+        fields: { duration, path: req.path },
+      }
+    ]).catch(err => {
+      console.error(`Error saving data to InfluxDB! ${err.stack}`)
     })
-  }
-  res.on('finish', logRequest)
-  res.on('close', logRequest)
+  })
   return next()
 })
 
-/**
- *      AND STOP HERE
- */
-
 app.get('/', function (req, res) {
-  setTimeout(function () {
-    res.send('Good Day.')
-  }, Math.random() * 500)
+  setTimeout(() => res.end('Hello world!'), Math.random() * 500)
 })
 
-function startApp () {
-  http.createServer(app).listen(3000, function () {
-    console.log('Listening on port 3000')
+app.get('/times', function (req, res) {
+  influx.query(`
+    select * from response_times
+    where host = ${Influx.escape.stringLit(os.hostname())}
+    order by time desc
+    limit 10
+  `).then(result => {
+    res.json(result)
+  }).catch(err => {
+    res.status(500).send(err.stack)
   })
-}
-
-console.log('Checking DB Exists')
-serverInflux.getDatabaseNames(function (err, dbs) {
-  if (err) throw err
-  if (dbs.indexOf('example_response') === -1) {
-    console.log('Creating Database')
-    serverInflux.createDatabase('example_response', function (err) {
-      if (err) throw err
-      console.log('Creating User')
-      serverInflux.createUser('example_response', 'example_response_dbuser', 'P85sw0rD', function (err) {
-        if (err) throw err
-        startApp()
-      })
-    })
-  } else {
-    startApp()
-  }
 })
+
+/**
+ * Now, we'll make sure the database exists and boot the app.
+ */
+influx.getDatabaseNames()
+  .then(names => {
+    if (names.indexOf('express_response_db')) {
+      return influx.createDatabase('express_response_db');
+    }
+  })
+  .then(() => {
+    http.createServer(app).listen(3000, function () {
+      console.log('Listening on port 3000')
+    })
+  })
+  .catch(err => {
+    console.error(`Error creating Influx database!`);
+  })
