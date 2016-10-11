@@ -8,3 +8,4 @@
 /.travis.yml
 /tsconfig.json
 /tslint.json
+/doc

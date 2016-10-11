@@ -21,12 +21,6 @@ const resubmitErrorCodes = [
 export interface PoolOptions {
 
   /**
-   * The length of time a host should be removed for upon a connection error,
-   * given in milliseconds. Defaults to 60000ms.
-   */
-  failoverTimeout?: number;
-
-  /**
    * Number of times we should retry running a query
    * before calling back with an error.
    */

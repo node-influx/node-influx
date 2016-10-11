@@ -5,12 +5,14 @@
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index",
   "scripts": {
-    "build": "rm -rf lib && tsc && cp -R test/fixture lib/test",
-    "lint": "tslint 'src/**/*.ts'",
-    "test": "mocha --compilers ts:ts-node/register  test/unit/*.test.ts && npm run lint",
-    "integrate": "mocha test/integration/*.test.js",
-    "cover": "npm run build && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
-    "travis-test": "npm run build && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js && npm run lint"
+    "test": "npm-run-all test:lint test:unit",
+    "test:lint": "tslint 'src/**/*.ts'",
+    "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
+    "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
+    "test:travis": "npm-run-all test:lint build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
+    "build:dist": "rm -rf lib && tsc && cp -R test/fixture lib/test",
+    "build:doc": "rm -rf lib && tsc -m es2015 --moduleResolution node && esdoc -c esdoc.json",
+    "prepublish": "npm run build:dist"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,7 @@
     "@types/sinon": "^1.16.31",
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
+    "esdoc": "^0.4.8",
     "istanbul": "^0.4.3",
     "lodash": "^4.16.2",
     "mocha": "^3.1.0",

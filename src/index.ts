@@ -51,7 +51,6 @@ export interface SingleHostConfig extends HostConfig {
 
   /**
    * Password for connecting to the database. Defaults to "root".
-   * @type {[type]}
    */
   password?: string;
 
@@ -80,7 +79,6 @@ export interface ClusterConfig {
 
   /**
    * Password for connecting to the database. Defaults to "root".
-   * @type {[type]}
    */
   password?: string;
 
@@ -105,9 +103,6 @@ export interface ClusterConfig {
   schema?: SchemaOptions[];
 }
 
-/**
- * Point is passed to the client's write methods to store a point in InfluxDB.
- */
 export interface Point {
   /**
    * Measurement is the Influx measurement name.
@@ -216,23 +211,30 @@ function defaults<T>(target: T, ...srcs: T[]): T {
 }
 
 /**
- * InfluxDB is the primary means of querying the database.
- * @public
+ * InfluxDB is the public interface to run queries against the your database.
+ * This is a "driver-level" module, not a a full-fleged ORM or ODM; you run
+ * queries directly by calling methods on this class.
  */
 export class InfluxDB {
 
+  /**
+   * Connect pool for making requests.
+   * @private
+   */
   private pool: Pool;
+
+  /**
+   * Config options for Influx.
+   * @private
+   */
   private options: ClusterConfig;
 
   /**
    * Map of Schema instances defining measurements in Influx.
+   * @private
    */
   private schema: { [db: string]: { [measurement: string]: Schema } } = Object.create(null);
 
-  /**
-   * Connect to a single InfluxDB instance by specifying
-   * a set of connection options.
-   */
   constructor(options: SingleHostConfig);
 
   /**
@@ -253,6 +255,63 @@ export class InfluxDB {
    */
   constructor();
 
+  /**
+   * Connect to a single InfluxDB instance by specifying
+   * a set of connection options.
+   * @param {ClusterConfig|SingleHostConfig|string} options
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Connect to a single host with a DSN:
+   * const client = new InfluxDB('http://user:password@host:8086/database')
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Connect to a single host with a full set of config details and
+   * a custom schema
+   * const client = new InfluxDB({
+   *   database: 'my_db',
+   *   host: 'localhost',
+   *   port: 8086,
+   *   username: 'connor',
+   *   password: 'pa$$w0rd',
+   *   schema: [{
+   *     measurement: 'perf',
+   *     tags: ['hostname'],
+   *     fields: {
+   *       memory_usage: FieldType.INTEGER,
+   *       cpu_usage: FieldType.FLOAT,
+   *       is_online: FieldType.BOOLEAN,
+   *     }
+   *   }]
+   * })
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Use a pool of several host connections and balance queries across them:
+   * const client = new InfluxDB({
+   *   database: 'my_db',
+   *   username: 'connor',
+   *   password: 'pa$$w0rd',
+   *   hosts: [
+   *     { host: 'db1.example.com' },
+   *     { host: 'db2.example.com' },
+   *   ]
+   *   schema: [{
+   *     measurement: 'perf',
+   *     tags: ['hostname'],
+   *     fields: {
+   *       memory_usage: FieldType.INTEGER,
+   *       cpu_usage: FieldType.FLOAT,
+   *       is_online: FieldType.BOOLEAN,
+   *     }
+   *   }]
+   * })
+   *
+   */
   constructor (options?: any) {
     // Figure out how to parse whatever we were passed in into a ClusterConfig.
     if (typeof options === "string") { // plain URI => SingleHostConfig
@@ -305,6 +364,8 @@ export class InfluxDB {
 
   /**
    * Creates a new database with the provided name.
+   * @param {string} databaseName
+   * @return {Promise.<void>}
    * @example
    * return influx.createDatabase('mydb')
    */
@@ -316,6 +377,8 @@ export class InfluxDB {
 
   /**
    * Deletes a database with the provided name.
+   * @param {string} databaseName
+   * @return {Promise.<void>}
    * @example
    * return influx.createDatabase('mydb')
    */
@@ -327,6 +390,7 @@ export class InfluxDB {
 
   /**
    * Returns array of database names. Requires cluster admin privileges.
+   * @returns {Promise<String[]>} a list of database names
    * @example
    * return influx.getMeasurements().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
@@ -338,6 +402,7 @@ export class InfluxDB {
 
   /**
    * Returns array of measurements.
+   * @returns {Promise<String[]>} a list of measurement names
    * @example
    * return influx.getMeasurements().then(names =>
    *   console.log('My measurement names are: ' + names.join(', ')));
@@ -350,6 +415,9 @@ export class InfluxDB {
   /**
    * Returns a list of all series within the target measurement, or from the
    * entire database if a measurement isn't provided.
+   * @param {String} [measurement] if provided, we'll only get series from
+   *     within that measurement.
+   * @returns {Promise<String[]>} a list of series names
    * @example
    * influx.getSeries().then(names =>
    *   console.log('My series names are: ' + names.join(', ')));
@@ -369,6 +437,8 @@ export class InfluxDB {
 
   /**
    * Removes a measurement from the database.
+   * @param {string} measurementName
+   * @return {Promise.<void>}
    * @example
    * dropMeasurement('my_measurement', err => done(err))
    * // => DROP MEASUREMENT "my_measurement"
@@ -415,7 +485,7 @@ export class InfluxDB {
 
   /**
    * Returns a list of users on the Influx database.
-   *
+   * @return {Promise<Array<{ user: String, admin: Boolean }>>}
    * @example
    * influx.getUsers().then(users => {
    *   users.forEach(user => {
@@ -431,13 +501,13 @@ export class InfluxDB {
     return this.pool.json(this.getQueryOpts({ q: "show users" })).then(parseSingle);
   }
 
-  public createUser(username: string, password: string,
-                    isAdmin: boolean, callback?: any): Promise<void>;
-  public createUser(username: string, password: string, callback?: any): Promise<void>;
-
   /**
    * Creates a new InfluxDB user.
-   *
+   * @param {String} username
+   * @param {String} password
+   * @param {String} [admin=false] If true, the user will be given all
+   *     privileges on all databases.
+   * @returns {Promise<void>}
    * @example
    * influx.createUser('connor', 'pa55w0rd', true) // make 'connor' an admin
    *
@@ -457,7 +527,9 @@ export class InfluxDB {
 
   /**
    * Sets a password for an Influx user.
-   *
+   * @param {String} username
+   * @param {String} password
+   * @returns {Promise<void>}
    * @example
    * influx.setPassword('connor', 'pa55w0rd')
    */
@@ -470,7 +542,10 @@ export class InfluxDB {
 
   /**
    * Grants a privilege to a specified user.
-   *
+   * @param {String} username
+   * @param {String} privilege Should be one of "READ" or "WRITE"
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.grantPrivilege('connor', 'READ', 'my_db') // grants read access on my_db to connor
    */
@@ -485,9 +560,12 @@ export class InfluxDB {
 
   /**
    * Removes a privilege from a specified user.
-   *
+   * @param {String} username
+   * @param {String} privilege Should be one of "READ" or "WRITE"
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
-   * influx.setPassword('connor', 'READ', 'my_db') // removes read access on my_db from connor
+   * influx.revokePrivilege('connor', 'READ', 'my_db') // removes read access on my_db from connor
    */
   public revokePrivilege(username: string, privilege: "READ" | "WRITE",
                          database: string = this.defaultDB()): Promise<void> {
@@ -500,7 +578,8 @@ export class InfluxDB {
 
   /**
    * Grants admin privileges to a specified user.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
    * influx.grantAdminPrivilege('connor', 'READ', 'my_db')
    */
@@ -512,7 +591,8 @@ export class InfluxDB {
 
   /**
    * Removes a admin privilege from a specified user.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
    * influx.revokeAdminPrivilege('connor')
    */
@@ -524,7 +604,8 @@ export class InfluxDB {
 
   /**
    * Removes a user from the database.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
    * influx.dropUser('connor')
    */
@@ -536,7 +617,10 @@ export class InfluxDB {
 
   /**
    * Creates a continuous query in a database
-   *
+   * @param {String} name The query name, for later reference
+   * @param {String} query The body of the query to run
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
@@ -554,7 +638,9 @@ export class InfluxDB {
 
   /**
    * Creates a continuous query in a database
-   *
+   * @param {String} name The query name
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
@@ -575,27 +661,30 @@ export class InfluxDB {
    * to `new Influx(options)`, we'll use that to make sure that types get
    * cast correctly and that there are no extraneous fields or columns.
    *
-   * In the options, you can include the database name to write to (we use
-   * the `database` specified in options you passed to `new Influx(option)`
-   * if it's not provided) and the retention policy and time
-   * precision to write the points with.
+   * For best performance, it's recommended that you batch your data into
+   * sets of a couple thousand records before writing it. In the future we'll
+   * have some utilities within node-influx to make this easier.
+   *
+   * ---
    *
    * A note when using manually-specified times and precisions: by default
    * we write using the `ms` precision since that's what JavaScript gives us.
    * You can adjust this. However, there is some special behaviour if you
    * manually specify a timestamp in your points:
    *  - if you specify the timestamp as a Date object, we'll convert it to
-   *    milliseconds and multiply or divide as needed to get the right time
+   *    milliseconds and manipulate it as needed to get the right precision
+   *  - if provide a NanoDate as returned from {@link toNanoTime} or the
+   *    results from an Influx query, we'll be able to pull the precise
+   *    nanosecond timestamp and manipulate it to get the right precision
    *  - if you provide a string or number as the timestamp, we'll pass it
    *    straight into Influx.
    *
    * Please see the Point and WriteOptions type for a
    * full list of possible options.
    *
-   * For best performance, it's recommended that you batch your data into
-   * sets of a couple thousand records before writing it. In the future we'll
-   * have some utilities within node-influx to make this easier.
-   *
+   * @param {Point[]} points
+   * @param {WriteOptions} [options]
+   * @return {Promise<void>}
    * @example
    * // write a point into the default database with
    * // the default retention policy.
@@ -677,9 +766,12 @@ export class InfluxDB {
   }
 
   /**
-   * writeMeasurement functions similarly to .writePoints(), but it
-   * automatically fills in the `measurement` value for all points for you.
+   * writeMeasurement functions similarly to {@link InfluxDB#writePoints}, but
+   * it automatically fills in the `measurement` value for all points for you.
    *
+   * @param {Point[]} points
+   * @param {WriteOptions} [options]
+   * @return {Promise<void>}
    * @example
    * influx.writeMeasurement('perf', [
    *   {

@@ -1,0 +1,11 @@
+{
+  "source": "./lib/src",
+  "destination": "./doc",
+  "test": {
+    "type": "mocha",
+    "source": "./lib/test/unit",
+    "includes": ["\\.test\\.js$"]
+  },
+  "undocumentIdentifier": false,
+  "title": "node-influx"
+}
