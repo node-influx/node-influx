@@ -27,6 +27,7 @@ export type FieldMap = { [name: string]: string | number | boolean };
 
 /**
  * The Schema provides information and utilities for an InfluxDB measurement.
+ * @private
  */
 export class Schema {
 
@@ -143,6 +144,7 @@ export class Schema {
 /**
  * Coerces the field map to a set of writable values, a la coerceFields,
  * using native guesses based on the field datatypes.
+ * @private
  */
 export function coerceBadly (fields: FieldMap): [string, string][] {
   return Object.keys(fields).sort().map(field => {

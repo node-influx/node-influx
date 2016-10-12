@@ -64,6 +64,19 @@ export interface NanoDate extends Date {
 /**
  * Covers a nanoseconds unix timestamp to a NanoDate for node-influx. The
  * timestamp is provided as a string to prevent precision loss.
+ *
+ * @param {String} timestamp
+ * @returns {NanoDate}
+ * @example
+ * const date = toNanoDate('1475985480231035600')
+ *
+ * // You can use the returned Date as a normal date:
+ * expect(date.getTime()).to.equal(1475985480231);
+ *
+ * // We decorate it with two additional methods to read
+ * // nanosecond-precision results:
+ * expect(date.getNanoTime()).to.equal('1475985480231035600');
+ * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
  */
 export function toNanoDate(timestamp: string): NanoDate {
   const date = <any> new Date(Math.floor(Number(timestamp) / nsPer.ms));
@@ -86,15 +99,23 @@ export type TimePrecision = "n" | "u" | "ms" | "s" | "m" | "h";
 
 /**
  * Precision is a map of available Influx time precisions.
+ * @type {Object.<String, String>}
+ * @example
+ * console.log(Precision.Hours); // => "h"
+ * console.log(Precision.Minutes); // => "m"
+ * console.log(Precision.Seconds); // => "s"
+ * console.log(Precision.Milliseconds); // => "ms"
+ * console.log(Precision.Microseconds); // => "u"
+ * console.log(Precision.Nanoseconds); // => "ns"
  */
-export const Precision = {
+export const Precision = Object.freeze({
   Hours: "h",
   Microseconds: "u",
   Milliseconds: "ms",
   Minutes: "m",
   Nanoseconds: "n",
   Seconds: "s",
-};
+});
 
 /**
  * DateManipulator describes a type which allows various kinds of parsing
@@ -295,6 +316,7 @@ const nanoManipulator = new NanosecondsDateManipulator();
 
 /**
  * formatDate converts the Date instance to Influx's date query format.
+ * @private
  */
 export function formatDate(date: Date): string {
   const nano = asNanoDate(date);
@@ -307,6 +329,7 @@ export function formatDate(date: Date): string {
 
 /**
  * Converts a Date instance to a timestamp with the specified time precision.
+ * @private
  */
 export function dateToTime(date: Date | NanoDate, precision: TimePrecision): string {
   const nano = asNanoDate(date);
@@ -320,6 +343,7 @@ export function dateToTime(date: Date | NanoDate, precision: TimePrecision): str
 /**
  * Converts an ISO-formatted data or unix timestamp to a Date instance. If
  * the precision is finer than "ms" the returned value will be a NanoDate.
+ * @private
  */
 export function isoOrTimeToDate(
   stamp: string | number,
@@ -340,6 +364,7 @@ export function isoOrTimeToDate(
 /**
  * Converts a timestamp to a string with the correct precision. Assumes
  * that raw number and string instances are already in the correct precision.
+ * @private
  */
 export function castTimestamp(timestamp: string | number | Date,
                               precision: TimePrecision): string {

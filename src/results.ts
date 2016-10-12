@@ -133,6 +133,7 @@ export interface Results<T> extends Array<T> {
  *  2. A single query with groups, generated with a `group by` statement
  *     which groups by series *tags*, grouping by times is case (1)
  *  3. Multiple queries of types 1 and 2
+ * @private
  */
 export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[] | Results<T> {
   if (res.results.length === 1) { // normalize case 3
@@ -146,6 +147,7 @@ export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[]
  * parseSingle asserts that the response contains a single result,
  * and returns that result.
  * @throws {Error} if the number of results is not exactly one
+ * @private
  */
 export function parseSingle<T>(res: Response, precision?: TimePrecision): Results<T> {
   if (res.results.length !== 1) {

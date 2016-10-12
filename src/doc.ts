@@ -155,3 +155,62 @@
  * @property {String} [database] The database to insert the points in, uses the
  *     adapter's default database if not provided.
  */
+
+/**
+ * The QueryOptions allow you to configure how queries are run against Influx.
+ *
+ * --
+ *
+ * Warning: if the epoch is set to nanoseconds `ns`, timestamps will be unable
+ * to correctly be represented in JavaScript due to precision limitations. If
+ * you wish to read nanosecond-precision timstamps, simply leave it unset; this
+ * will cause Influx to return ISO formatted dates which we can parse. See the
+ * {@link Results} type for more information about how to access them.
+ *
+ * @typedef {Object} QueryOptions
+ * @property {TimePrecision} [epoch] Epoch defining the precision at which
+ *     to query points.
+ * @property {String} [retentionPolicy] Retention policy to query from,
+ *     defaults to the DEFAULT retention policy.
+ * @property {String} [database]  Database under which to query the points.
+ *     This is required if a database is not provided in Influx client.
+ */
+
+/**
+ * The BackoffStrategy dictates behaviour to use when hosts in the connection
+ * pool start failing. We remove them from the pool for a duration of time
+ * specified by the backoff strategy.
+ *
+ * The strategy itself is immutable, and each method call should return a new
+ * strategy without modifying the original one.
+ *
+ * @interface
+ * @example
+ * let backoff = new MyBackoffStrategy();
+ * console.log(backoff.getDelay()); // => 10
+ * backoff = backoff.next();
+ * console.log(backoff.getDelay()); // => 20
+ * backoff = backoff.reset();
+ * console.log(backoff.getDelay()); // => 10
+ */
+export class BackoffStrategy {
+
+  /**
+   * getDelay returns the amount of delay of the current backoff.
+   * @return {Number}
+   */
+  public getDelay(): number { return 0; }
+
+  /**
+   * Next is called when a failure occurs on a host to
+   * return the next backoff amount.
+   * @return {BackoffStrategy}
+   */
+  public next(): BackoffStrategy { return this; }
+
+  /**
+   * Returns a strategy with a reset backoff counter.
+   * @return {BackoffStrategy}
+   */
+  public reset(): BackoffStrategy { return this; }
+}

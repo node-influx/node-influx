@@ -452,6 +452,7 @@ export class InfluxDB {
   /**
    * Removes a one or more series from InfluxDB.
    *
+   * @returns {Promise<void>}
    * @example
    * // The following pairs of queries are equivalent: you can chose either to
    * // use our builder or pass in string directly. The builder takes care
@@ -769,6 +770,7 @@ export class InfluxDB {
    * writeMeasurement functions similarly to {@link InfluxDB#writePoints}, but
    * it automatically fills in the `measurement` value for all points for you.
    *
+   * @param {String} measurement
    * @param {Point[]} points
    * @param {WriteOptions} [options]
    * @return {Promise<void>}
@@ -791,8 +793,13 @@ export class InfluxDB {
 
   /**
    * .query() run a query (or list of queries), runs them, and returns the
-   * results in a friendly format.
+   * results in a friendly format. If you run multiple queries, multiple
+   * sets of results will be returned, otherwise a single result will
+   * be returned.
    *
+   * @param {String|String[]} query
+   * @param {QueryOptions} [options]
+   * @return {Promise<Results|Results[]>} query
    * @example
    * influx.query('select * from perf').then(results => {
    *   console.log(results)
@@ -810,9 +817,13 @@ export class InfluxDB {
   }
 
   /**
-   * queryRaw functions similarly to .query() but it does no fancy parsing on
-   * the JSON object that InfluxDB returns.
+   * queryRaw functions similarly to .query() but it does no fancy
+   * transformations on the returned data; it calls `JSON.parse` and returns
+   * those results verbatim.
    *
+   * @param {String|String[]} query
+   * @param {QueryOptions} [options]
+   * @return {Promise<*>}
    * @example
    * influx.queryRaw('select * from perf').then(rawData => {
    *   console.log(rawData)
@@ -836,6 +847,7 @@ export class InfluxDB {
   /**
    * Returns the default database that queries operates on. It throws if called
    * when a default database isn't set.
+   * @private
    */
   private defaultDB(): string {
     if (!this.options.database) {
@@ -848,6 +860,7 @@ export class InfluxDB {
 
   /**
    * Creates options to be passed into the pool to query databases.
+   * @private
    */
   private getQueryOpts (params: any, method: string = "GET"): any {
     return {

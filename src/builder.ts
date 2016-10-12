@@ -97,27 +97,83 @@ export interface BinaryOp {
 
 /**
  * Expression is used to build filtering expressions, like those used in WHERE
- * clauses.
+ * clauses. It can be used for fluent and safe building of queries using
+ * untrusted input.
+ *
+ * @example
+ * e => e
+ *   .field('host').equals.value('ares.peet.io')
+ *   .or
+ *   .field('host').matches(/example\.com$/)
+ *   .or
+ *   .expr(e => e
+ *     .field('country').equals.value('US')
+ *     .and
+ *     .field('state').equals.value('WA'));
+ *
+ * // Generates:
+ * // "host" = 'ares.peet.io' OR "host" ~= /example\.com$/ OR \
+ * //   ("county" = 'US' AND "state" = 'WA')
  */
 export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
 
   private query = new Array<string>();
 
+  /**
+   * Inserts a tag reference into the expression; the name will be
+   * automatically escaped.
+   * @param  {String} name
+   * @return {Expression}
+   */
   public tag(name: string): this {
     this.field(name);
     return this;
   }
 
+  /**
+   * Inserts a field reference into the expression; the name will be
+   * automatically escaped.
+   * @param  {String} name
+   * @return {Expression}
+   */
   public field(name: string): this {
     this.query.push(escape.quoted(name));
     return this;
   }
 
+  /**
+   * Inserts a subexpression; invokes the function with a new expression
+   * that can be chained on.
+   * @param  {function(e: Expression): Expression}  fn
+   * @return {Expression}
+   * @example
+   * e.field('a').equals.value('b')
+   *   .or.expr(e =>
+   *     e.field('b').equals.value('b')
+   *     .and.field('a').equals.value('c'))
+   *   .toString()
+   * // "a" = 'b' OR ("b" = 'b' AND 'a' = "c")
+   */
   public exp(fn: (e: Expression) => Expression): this {
     this.query.push("(" + fn(new Expression()).toString() + ")");
     return this;
   }
 
+  /**
+   * Value chains on a value to the expression.
+   *
+   *  - Numbers will be inserted verbatim
+   *  - Strings will be escaped and inserted
+   *  - Booleans will be inserted correctly
+   *  - Dates will be formatted and inserted correctly, including NanoDates.
+   *  - Regular expressions will be inserted correctly, however an error will
+   *    be thrown if they contain flags, as regex flags do not work in Influx
+   *  - Otherwise we'll try to call `.toString()` on the value, throwing
+   *    if we cannot do so.
+   *
+   * @param  {*}  value
+   * @return {Expression}
+   */
   public value(value: any): this {
     switch (typeof value) {
       case "number":
@@ -153,77 +209,136 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
           "query. If you think this is a bug, open an issue here: https://git.io/influx-err");
     }
   }
-
+  /**
+   * Chains on an AND clause to the expression.
+   * @type {Expression}
+   */
   get and(): this {
     this.query.push("AND");
     return this;
   }
 
+  /**
+   * Chains on an OR clause to the expression.
+   * @type {Expression}
+   */
   get or(): this {
     this.query.push("OR");
     return this;
   }
 
+  /**
+   * Chains on a `+` operator to the expression.
+   * @type {Expression}
+   */
   get plus(): this {
     this.query.push("+");
     return this;
   }
 
+  /**
+   * Chains on a `*` operator to the expression.
+   * @type {Expression}
+   */
   get times(): this {
     this.query.push("*");
     return this;
   }
 
+  /**
+   * Chains on a `-` operator to the expression.
+   * @type {Expression}
+   */
   get minus(): this {
     this.query.push("-");
     return this;
   }
 
+  /**
+   * Chains on a `/` operator to the expression.
+   * @type {Expression}
+   */
   get div(): this {
     this.query.push("/");
     return this;
   }
 
+  /**
+   * Chains on a `=` conditional to the expression.
+   * @type {Expression}
+   */
   get equals(): this {
     this.query.push("=");
     return this;
   }
 
+  /**
+   * Chains on a `=~` conditional to the expression to match regexes.
+   * @type {Expression}
+   */
   get matches(): this {
     this.query.push("=~");
     return this;
   }
 
+  /**
+   * Chains on a `!`` conditional to the expression to match regexes.
+   * @type {Expression}
+   */
   get doesntMatch(): this {
     this.query.push("!~");
     return this;
   }
 
+  /**
+   * Chains on a `!=` conditional to the expression.
+   * @type {Expression}
+   */
   get notEqual(): this {
     this.query.push("!=");
     return this;
   }
 
+  /**
+   * Chains on a `>` conditional to the expression.
+   * @type {Expression}
+   */
   get gt(): this {
     this.query.push(">");
     return this;
   }
 
+  /**
+   * Chains on a `>=` conditional to the expression.
+   * @type {Expression}
+   */
   get gte(): this {
     this.query.push(">=");
     return this;
   }
 
+  /**
+   * Chains on a `<` conditional to the expression.
+   * @type {Expression}
+   */
   get lt(): this {
     this.query.push("<");
     return this;
   }
 
+  /**
+   * Chains on a `<=` conditional to the expression.
+   * @type {Expression}
+   */
   get lte(): this {
     this.query.push("<=");
     return this;
   }
 
+  /**
+   * Converts the expression into its InfluxQL representation.
+   * @return {String}
+   */
   public toString(): string {
     return this.query.join(" ");
   }
@@ -242,21 +357,41 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
 export class Measurement {
   private parts = new Array<string>(3);
 
+  /**
+   * Sets the measurement name.
+   * @param  {String} name
+   * @return {Measurement}
+   */
   public name(name: string): this {
     this.parts[2] = name;
     return this;
   }
 
+  /**
+   * Sets the retention policy name.
+   * @param  {String} retentionPolicy
+   * @return {Measurement}
+   */
   public policy(retentionPolicy: string): this {
     this.parts[1] = retentionPolicy;
     return this;
   }
 
+  /**
+   * Sets the database name.
+   * @param  {String} db
+   * @return {Measurement}
+   */
   public db(db: string): this {
     this.parts[0] = db;
     return this;
   }
 
+  /**
+   * Converts the measurement into its InfluxQL representation.
+   * @return {String}
+   * @throws {Error} if a measurement name is not provided
+   */
   public toString(): string {
     if (!this.parts[2]) {
       throw new Error(`You must specify a measurement name to query! Got \`${this.parts[2]}\``);
