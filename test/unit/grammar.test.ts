@@ -14,6 +14,10 @@ describe("grammar", () => {
     });
   });
 
+  it('does not escape raw values', () => {
+    expect(grammar.escape.quoted(<any> new grammar.Raw('don"t escape'))).to.equal('don"t escape');
+  });
+
   let nanoDate: grammar.NanoDate;
   let milliDate: Date;
 
@@ -27,7 +31,7 @@ describe("grammar", () => {
     expect(date.getTime()).to.equal(1475985480231);
     expect(date.getNanoTime()).to.equal('1475985480231035600'); // precision is lost
     expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
-  })
+  });
 
   describe('formatting', () => {
     it("formats nanosecond dates", () => {

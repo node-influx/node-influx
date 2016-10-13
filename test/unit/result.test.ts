@@ -145,8 +145,28 @@ describe('results', () => {
   it('parses empty series', () => {
     const r1 = results.parseSingle({
       results: [{}]
-    }, 'ms');
+    });
 
     expect(r1.slice()).to.deep.equal([]);
+  });
+
+  it('parses empty values', () => {
+    const r1 = results.parseSingle({
+      results: [{
+        series: [
+          { columns: [ 'user', 'admin' ] },
+        ],
+     }],
+   });
+
+    expect(r1.slice()).to.deep.equal([]);
+  });
+
+  it('throws error on an errorful series', () => {
+    expect(() => results.parseSingle({
+      "results": [
+        { error: "user already exists" }
+      ]
+    })).to.throw(/already exists/);
   });
 });

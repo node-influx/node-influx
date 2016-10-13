@@ -25,3 +25,29 @@ const numericRe = /^[0-9]+$/;
 export function isNumeric(value: string) {
   return numericRe.test(value);
 }
+
+/**
+ * You can provide Raw values to Influx methods to prevent it from escaping
+ * your provided string.
+ * @class
+ * @example
+ * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
+ */
+export class Raw {
+
+  /**
+   * Wraps a string so that it is not escaped in Influx queries.
+   * @param {String} value
+   * @example
+   * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
+   */
+  constructor(private value: string) {}
+
+  /**
+   * Returns the wrapped string.
+   * @return {String}
+   */
+  public getValue(): string {
+    return this.value;
+  }
+}

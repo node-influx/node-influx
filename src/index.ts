@@ -1,5 +1,5 @@
 import { Pool, PoolOptions } from "./pool";
-import { Results, parse, parseSingle } from "./results";
+import { Results, assertNoErrors, parse, parseSingle } from "./results";
 import { Schema, SchemaOptions, coerceBadly } from "./schema";
 
 import * as b from "./builder";
@@ -21,9 +21,10 @@ const defaultOptions: ClusterConfig = Object.freeze({
 });
 
 export * from "./builder";
-export { FieldType, Precision, TimePrecision, toNanoDate } from "./grammar";
+export { FieldType, Precision, Raw, TimePrecision, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
 export { PoolOptions } from "./pool";
+export { ResultError } from "./results";
 
 export interface HostConfig {
 
@@ -214,6 +215,44 @@ function defaults<T>(target: T, ...srcs: T[]): T {
  * InfluxDB is the public interface to run queries against the your database.
  * This is a "driver-level" module, not a a full-fleged ORM or ODM; you run
  * queries directly by calling methods on this class.
+ *
+ * Please check out some out [the tutorials](https://node-influx.github.io/manual/tutorial.html)
+ * if you want help getting started!
+ *
+ * @example
+ * const influx = new Influx.InfluxDB({
+ *  host: 'localhost',
+ *  database: 'express_response_db',
+ *  schema: [
+ *    {
+ *      measurement: 'response_times',
+ *      fields: {
+ *        path: Influx.FieldType.STRING,
+ *        duration: Influx.FieldType.INTEGER
+ *      },
+ *      tags: [
+ *        'host'
+ *      ]
+ *    }
+ *  ]
+ * })
+ *
+ * influx.writePoints([
+ *   {
+ *     measurement: 'response_times',
+ *     tags: { host: os.hostname() },
+ *     fields: { duration, path: req.path },
+ *   }
+ * ]).then(() => {
+ *   return influx.query(`
+ *     select * from response_times
+ *     where host = ${Influx.escape.stringLit(os.hostname())}
+ *     order by time desc
+ *     limit 10
+ *   `)
+ * }).then(rows => {
+ *   rows.forEach(row => console.log(`A request to ${row.path} took ${row.duration}ms`))
+ * })
  */
 export class InfluxDB {
 
@@ -370,9 +409,9 @@ export class InfluxDB {
    * return influx.createDatabase('mydb')
    */
   public createDatabase (databaseName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create database ${grammar.escape.quoted(databaseName)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -383,9 +422,9 @@ export class InfluxDB {
    * return influx.createDatabase('mydb')
    */
   public dropDatabase (databaseName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop database ${grammar.escape.quoted(databaseName)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -444,9 +483,9 @@ export class InfluxDB {
    * // => DROP MEASUREMENT "my_measurement"
    */
   public dropMeasurement(measurementName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop measurement ${grammar.escape.quoted(measurementName)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -481,7 +520,7 @@ export class InfluxDB {
       q += " where " + b.parseWhere(<b.where> options);
     }
 
-    return this.pool.discard(this.getQueryOpts({ q }, "POST"));
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -506,7 +545,7 @@ export class InfluxDB {
    * Creates a new InfluxDB user.
    * @param {String} username
    * @param {String} password
-   * @param {String} [admin=false] If true, the user will be given all
+   * @param {Boolean} [admin=false] If true, the user will be given all
    *     privileges on all databases.
    * @returns {Promise<void>}
    * @example
@@ -519,11 +558,11 @@ export class InfluxDB {
     username: string, password: string,
     admin: boolean = false,
   ): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create user ${grammar.escape.quoted(username)} with password `
         + grammar.escape.stringLit(password)
         + (admin ? " with all privileges" : ""),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -535,10 +574,10 @@ export class InfluxDB {
    * influx.setPassword('connor', 'pa55w0rd')
    */
   public setPassword(username: string, password: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `set password for ${grammar.escape.quoted(username)} = `
         + grammar.escape.stringLit(password),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -553,10 +592,10 @@ export class InfluxDB {
   public grantPrivilege(username: string, privilege: "READ" | "WRITE",
                         database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `grant ${privilege} to ${grammar.escape.quoted(username)} on `
         + grammar.escape.quoted(database),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -571,10 +610,10 @@ export class InfluxDB {
   public revokePrivilege(username: string, privilege: "READ" | "WRITE",
                          database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `revoke ${privilege} from ${grammar.escape.quoted(username)} on `
         + grammar.escape.quoted(database),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -585,9 +624,9 @@ export class InfluxDB {
    * influx.grantAdminPrivilege('connor', 'READ', 'my_db')
    */
   public grantAdminPrivilege(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `grant all to ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -598,9 +637,9 @@ export class InfluxDB {
    * influx.revokeAdminPrivilege('connor')
    */
   public revokeAdminPrivilege(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `revoke all from ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -611,9 +650,9 @@ export class InfluxDB {
    * influx.dropUser('connor')
    */
   public dropUser(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop user ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -631,10 +670,10 @@ export class InfluxDB {
   public createContinuousQuery(name: string, query: string,
                                database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)} begin ${query} end`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -646,10 +685,10 @@ export class InfluxDB {
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
   public dropContinuousQuery(name: string, database: string = this.defaultDB()): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -852,7 +891,7 @@ export class InfluxDB {
   private defaultDB(): string {
     if (!this.options.database) {
       throw new Error("Attempted to run an influx query without a default"
-        + " database specified or an explicit interface provided.");
+        + " database specified or an explicit database provided.");
     }
 
     return this.options.database;

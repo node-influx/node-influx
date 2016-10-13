@@ -1,3 +1,5 @@
+import { Raw } from "./ds";
+
 const reEscape = /[-|\\{()[\]^$+*?.]/g;
 
 /**
@@ -45,6 +47,10 @@ class Escaper {
    * string with the necessary escape codes.
    */
   public escape(val: string): string {
+    if ((<any> val) instanceof Raw) {
+      return (<any> val).getValue();
+    }
+
     let chunkIndex = this.re.lastIndex = 0;
     let escapedVal = "";
     let match = this.re.exec(val);

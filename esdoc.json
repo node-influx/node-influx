@@ -6,6 +6,20 @@
     "source": "./lib/test/unit",
     "includes": ["\\.test\\.js$"]
   },
+  "plugins": [
+    {
+      "name": "esdoc-importpath-plugin",
+      "option": {
+        "replaces": [{"from": "^.+", "to": ""}]
+      }
+    }
+  ],
   "undocumentIdentifier": false,
-  "title": "node-influx"
+  "title": "node-influx",
+  "manual": {
+    "tutorial": [
+      "./examples/express_response_times/readme.md"
+    ],
+    "changelog": ["./CHANGELOG.md"]
+  }
 }

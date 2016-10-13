@@ -1,6 +1,15 @@
 import { TimePrecision, isoOrTimeToDate } from "./grammar";
 
 /**
+ * A ResultError is thrown when a query generates errorful results from Influx.
+ */
+export class ResultError extends Error {
+  constructor(message: string) {
+    super(`Error from InfluxDB: ${message}`);
+  }
+}
+
+/**
  * InfluxResults describes the result structure received from InfluxDB.
  *
  * NOTE: if you're poking around in Influx, use curl, not the `json` formatter
@@ -8,7 +17,12 @@ import { TimePrecision, isoOrTimeToDate } from "./grammar";
  * and it will confuse you, as it did me ;)
  */
 export interface Response {
-  results: Array<{series?: ResponseSeries[]}>;
+  results: ResultEntry[];
+}
+
+export interface ResultEntry {
+  series?: ResponseSeries[];
+  error?: string;
 }
 
 export type Tags = { [name: string]: string };
@@ -16,10 +30,10 @@ export type Tags = { [name: string]: string };
 export type Row = any;
 
 export interface ResponseSeries {
-  name: string;
+  name?: string;
   columns: string[];
   tags?: Tags;
-  values: Row[];
+  values?: Row[];
 }
 
 function groupMethod(matcher: Tags): Row[] {
@@ -64,6 +78,7 @@ function groupsMethod(): { tags: Tags, rows: Row[] }[] {
  * makes it impossible to preserve groups as would be necessary if it's
  * subclassed.
  */
+
 function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): Results<any> {
   const results = <any> new Array<Row>();
   const tags
@@ -74,10 +89,12 @@ function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): R
   results.groupRows = new Array(series.length);
 
   for (let i = 0, lastEnd = 0; i < series.length; i++, lastEnd = results.length) {
-    const columns = series[i].columns;
-    const values = series[i].values;
+    const {
+      columns = [],
+      values = [],
+    } = series[i];
 
-    for (let k = 0; k < series[i].values.length; k++) {
+    for (let k = 0; k < values.length; k++) {
       const obj: Row = {};
       for (let j = 0; j < columns.length; j++) {
         if (columns[j] === "time") {
@@ -127,6 +144,22 @@ export interface Results<T> extends Array<T> {
 }
 
 /**
+ * Checks if there are any errors in the Response and, if so, it throws them.
+ * @private
+ * @throws {ResultError}
+ */
+export function assertNoErrors(res: Response) {
+  for (let i = 0; i < res.results.length; i++) {
+    const { error } = res.results[i];
+    if (error) {
+      throw new ResultError(error);
+    }
+  }
+
+  return res;
+}
+
+/**
  * From parses out a response to a result or list of responses.
  * There are three situations we cover here:
  *  1. A single query without groups, like `select * from myseries`
@@ -136,6 +169,8 @@ export interface Results<T> extends Array<T> {
  * @private
  */
 export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[] | Results<T> {
+  assertNoErrors(res);
+
   if (res.results.length === 1) { // normalize case 3
     return parseInner(res.results[0].series, precision);
   } else {
@@ -150,6 +185,8 @@ export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[]
  * @private
  */
 export function parseSingle<T>(res: Response, precision?: TimePrecision): Results<T> {
+  assertNoErrors(res);
+
   if (res.results.length !== 1) {
     throw new Error("node-influx expected the results length to equal 1, but " +
       `it was ${0}. Please report this here: https://git.io/influx-err`);
