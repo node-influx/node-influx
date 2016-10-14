@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start
-    console.log(`Request to ${req.path} took ${duration}ms`);
+    console.log(`Request to ${req.path} took ${duration}ms`)
 
     influx.writePoints([
       {
@@ -81,7 +81,7 @@ app.get('/times', function (req, res) {
 influx.getDatabaseNames()
   .then(names => {
     if (!names.includes('express_response_db')) {
-      return influx.createDatabase('express_response_db');
+      return influx.createDatabase('express_response_db')
     }
   })
   .then(() => {
@@ -90,5 +90,5 @@ influx.getDatabaseNames()
     })
   })
   .catch(err => {
-    console.error(`Error creating Influx database!`);
+    console.error(`Error creating Influx database!`)
   })

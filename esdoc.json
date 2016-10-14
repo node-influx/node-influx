@@ -7,18 +7,16 @@
     "includes": ["\\.test\\.js$"]
   },
   "plugins": [
-    {
-      "name": "esdoc-importpath-plugin",
-      "option": {
-        "replaces": [{"from": "^.+", "to": ""}]
-      }
-    }
+    { "name": "./examples/esdoc-plugin.js" }
   ],
   "undocumentIdentifier": false,
   "title": "node-influx",
   "manual": {
     "tutorial": [
       "./examples/express_response_times/readme.md"
+    ],
+    "usage": [
+      "./examples/times.md"
     ],
     "changelog": ["./CHANGELOG.md"]
   }

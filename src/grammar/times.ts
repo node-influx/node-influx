@@ -65,6 +65,9 @@ export interface NanoDate extends Date {
  * Covers a nanoseconds unix timestamp to a NanoDate for node-influx. The
  * timestamp is provided as a string to prevent precision loss.
  *
+ * Please see [A Moment for Times](https://node-influx.github.io/manual/usage.html#a-moment-for-times)
+ * for a more complete and eloquent explanation of time handling in this module.
+ *
  * @param {String} timestamp
  * @returns {NanoDate}
  * @example

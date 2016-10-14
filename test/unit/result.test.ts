@@ -40,7 +40,7 @@ describe('results', () => {
     ]);
 
     expect(r.groups()).to.deep.equal([
-      { tags: {}, rows: r.slice() }
+      { name: 'test_series', tags: {}, rows: r.slice() }
     ]);
 
     expect(r.group({ tag: 'a' })).to.deep.equal([]);
@@ -125,8 +125,8 @@ describe('results', () => {
     ]);
 
     expect(r.groups()).to.deep.equal([
-      { tags: { tag: 'a' }, rows: [{ tag: 'a', mean: 1 }, { tag: 'a', mean: 2 }] },
-      { tags: { tag: 'b' }, rows: [{ tag: 'b', mean: 3 }, { tag: 'b', mean: 4 }] }
+      { name: 'test_series', tags: { tag: 'a' }, rows: [{ tag: 'a', mean: 1 }, { tag: 'a', mean: 2 }] },
+      { name: 'test_series', tags: { tag: 'b' }, rows: [{ tag: 'b', mean: 3 }, { tag: 'b', mean: 4 }] }
     ]);
 
     expect(r.group({ tag: 'a' })).to.deep.equal([

@@ -1,3 +1,5 @@
+import { Tags } from "./results";
+
 /**
  * Pool options can be passed into the database to configure the behaviour
  * of the connection pool.
@@ -33,7 +35,7 @@
  * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
  *
  * // Connect to a single host with a full set of config details and
- * a custom schema
+ * // a custom schema
  * const client = new InfluxDB({
  *   database: 'my_db',
  *   host: 'localhost',
@@ -74,7 +76,7 @@
  * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
  *
  * // Connect to a single host with a full set of config details and
- * a custom schema
+ * // a custom schema
  * const client = new InfluxDB({
  *   database: 'my_db',
  *   username: 'connor',
@@ -107,14 +109,14 @@
  * or you enter the wrong datatype for one of your schema fields.
  *
  * @typedef {Object} SchemaOptions
- * @param {String} [database] The database where the measurement lives. This is
- *     required if you don't provide a default database in Influx.
- * @param {String} measurement The measurement name in Influx this refers to
- * @param {Object.<String, FieldType>} fields A mapping of fields names to
+ * @property {String} [database] The database where the measurement lives. This
+ *     is required if you don't provide a default database in Influx.
+ * @property {String} measurement The measurement name in Influx this refers to
+ * @property {Object.<String, FieldType>} fields A mapping of fields names to
  *     their data types. It's assumed that this is a comprehensive mapping of
  *     every field you might write.
- * @param {String[]} tags A list of tag names in this measurement. It's assumed
- *     that this is a comprehensive list of every tag you might write.
+ * @property {String[]} tags A list of tag names in this measurement. It's
+ *     assumed that this is a comprehensive list of every tag you might write.
  *
  * @example
  * {
@@ -127,6 +129,82 @@
  *   }
  * }
  */
+
+/**
+ * Results are returned from the .query method. It marshals the raw Influx
+ * results into a more palatable, JavaScript-y structure. All query results
+ * are marshalled into a single, flat arrays, and methods are provided to
+ * example grouped results as necessary.
+ *
+ * @class Result<T>
+ * @example
+ * influx.query('select host, cpu, mem from perf').then(results => {
+ *   expect(results).to.deep.equal([
+ *     { host: 'ares.peet.io', cpu: 0.12, mem: 2435 },
+ *     { host: 'ares.peet.io', cpu: 0.10, mem: 2451 },
+ *     // ...
+ *   ])
+ * })
+ */
+export class Results<T> extends Array { // for doc only, implementation in src/results.ts
+
+  /**
+   * Group looks for and returns the first group in the results
+   * that matches the provided tags.
+   *
+   * If you've used lodash or underscore, we do something quite similar to
+   * their object matching: for every row in the results, if it contains tag
+   * values matching the requested object, we return it.
+   *
+   * @param  {Object.<String, String>} matcher
+   * @return {T[]}
+   * @example
+   * // Matching tags sets in queries:
+   * influx.query('select * from perf group by host').then(results => {
+   *   expect(results.group({ host: 'ares.peet.io'})).to.deep.equal([
+   *     { host: 'ares.peet.io', cpu: 0.12, mem: 2435 },
+   *     { host: 'ares.peet.io', cpu: 0.10, mem: 2451 },
+   *     // ...
+   *   ])
+   *
+   *   expect(results.group({ host: 'box1.example.com'})).to.deep.equal([
+   *     { host: 'box1.example.com', cpu: 0.54, mem: 8420 },
+   *     // ...
+   *   ])
+   * })
+   */
+  public group(matcher: Tags): T[] { return null; }
+
+  /**
+   * Returns the data grouped into nested arrays, similarly to how it was
+   * returned from Influx originally.
+   *
+   * @returns {Array<{ name: String, tags: Object.<String, String>, rows: T[] }>}
+   * @example
+   * influx.query('select * from perf group by host').then(results => {
+   *   expect(results.groups()).to.deep.equal([
+   *     {
+   *       name: 'perf',
+   *       tags: { host: 'ares.peet.io' },
+   *       rows: [
+   *         { host: 'ares.peet.io', cpu: 0.12, mem: 2435 },
+   *         { host: 'ares.peet.io', cpu: 0.10, mem: 2451 },
+   *         // ...
+   *       ]
+   *     }
+   *     {
+   *       name: 'perf',
+   *       tags: { host: 'box1.example.com' },
+   *       rows: [
+   *         { host: 'box1.example.com', cpu: 0.54, mem: 8420 },
+   *         // ...
+   *       ]
+   *     }
+   *   ])
+   * })
+   */
+  public groups(): { name: string, tags: Tags, rows: T[] }[] { return null; }
+}
 
 /**
  * Point is passed to the client's write methods to store a point in InfluxDB.
@@ -167,6 +245,9 @@
  * will cause Influx to return ISO formatted dates which we can parse. See the
  * {@link Results} type for more information about how to access them.
  *
+ * Please see [A Moment for Times](https://node-influx.github.io/manual/usage.html#a-moment-for-times)
+ * for a more complete and eloquent explanation of time handling in this module.
+ *
  * @typedef {Object} QueryOptions
  * @property {TimePrecision} [epoch] Epoch defining the precision at which
  *     to query points.
@@ -193,7 +274,7 @@
  * backoff = backoff.reset();
  * console.log(backoff.getDelay()); // => 10
  */
-export class BackoffStrategy {
+export class BackoffStrategy { // for doc only, implementation in src/pool/backoff.ts
 
   /**
    * getDelay returns the amount of delay of the current backoff.

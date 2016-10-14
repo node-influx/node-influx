@@ -40,7 +40,6 @@
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
     "esdoc": "^0.4.8",
-    "esdoc-importpath-plugin": "0.0.1",
     "istanbul": "^0.4.3",
     "lodash": "^4.16.2",
     "mocha": "^3.1.0",

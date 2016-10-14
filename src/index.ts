@@ -131,7 +131,7 @@ export interface Point {
 export interface WriteOptions {
 
   /**
-   * Precision at which the points are written, defaults to milliseconds "ms".
+   * Precision at which the points are written, defaults to nanoseconds "n".
    */
   precision?: grammar.TimePrecision;
 
@@ -309,7 +309,7 @@ export class InfluxDB {
    * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
    *
    * // Connect to a single host with a full set of config details and
-   * a custom schema
+   * // a custom schema
    * const client = new InfluxDB({
    *   database: 'my_db',
    *   host: 'localhost',
@@ -406,7 +406,7 @@ export class InfluxDB {
    * @param {string} databaseName
    * @return {Promise.<void>}
    * @example
-   * return influx.createDatabase('mydb')
+   * influx.createDatabase('mydb')
    */
   public createDatabase (databaseName: string): Promise<void> {
     return this.pool.json(this.getQueryOpts({
@@ -419,7 +419,7 @@ export class InfluxDB {
    * @param {string} databaseName
    * @return {Promise.<void>}
    * @example
-   * return influx.createDatabase('mydb')
+   * influx.createDatabase('mydb')
    */
   public dropDatabase (databaseName: string): Promise<void> {
     return this.pool.json(this.getQueryOpts({
@@ -431,7 +431,7 @@ export class InfluxDB {
    * Returns array of database names. Requires cluster admin privileges.
    * @returns {Promise<String[]>} a list of database names
    * @example
-   * return influx.getMeasurements().then(names =>
+   * influx.getMeasurements().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
    */
   public getDatabaseNames (): Promise<string[]> {
@@ -443,7 +443,7 @@ export class InfluxDB {
    * Returns array of measurements.
    * @returns {Promise<String[]>} a list of measurement names
    * @example
-   * return influx.getMeasurements().then(names =>
+   * influx.getMeasurements().then(names =>
    *   console.log('My measurement names are: ' + names.join(', ')));
    */
   public getMeasurements (): Promise<string[]> {
@@ -621,7 +621,7 @@ export class InfluxDB {
    * @param {String} username
    * @returns {Promise<void>}
    * @example
-   * influx.grantAdminPrivilege('connor', 'READ', 'my_db')
+   * influx.grantAdminPrivilege('connor')
    */
   public grantAdminPrivilege(username: string): Promise<void> {
     return this.pool.json(this.getQueryOpts({
@@ -754,7 +754,7 @@ export class InfluxDB {
   public writePoints(points: Point[], options: WriteOptions = {}): Promise<void> {
     const {
       database = this.defaultDB(),
-      precision = <grammar.TimePrecision> "ms",
+      precision = <grammar.TimePrecision> "n",
       retentionPolicy,
     } = options;
 
