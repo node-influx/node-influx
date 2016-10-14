@@ -1,4 +1,4 @@
-import { Pool, PoolOptions } from "./pool";
+import { PingStats, Pool, PoolOptions } from "./pool";
 import { Results, assertNoErrors, parse, parseSingle } from "./results";
 import { Schema, SchemaOptions, coerceBadly } from "./schema";
 
@@ -23,7 +23,7 @@ const defaultOptions: ClusterConfig = Object.freeze({
 export * from "./builder";
 export { FieldType, Precision, Raw, TimePrecision, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
-export { PoolOptions } from "./pool";
+export { PingStats, PoolOptions } from "./pool";
 export { ResultError } from "./results";
 
 export interface HostConfig {
@@ -881,6 +881,25 @@ export class InfluxDB {
       q: query,
       rp: retentionPolicy,
     }));
+  }
+
+  /**
+   * Pings all available hosts, collecting online status and version info.
+   * @param  {Number}               timeout Given in milliseconds
+   * @return {Promise<PingStats[]>}
+   * @example
+   * influx.ping(5000).then(hosts => {
+   *   hosts.forEach(host => {
+   *     if (host.online) {
+   *       console.log(`${host.url.host} responded in ${host.rtt}ms running ${host.version})`)
+   *     } else {
+   *       console.log(`${host.url.host} is offline :(`)
+   *     }
+   *   })
+   * })
+   */
+  public ping(timeout: number): Promise<PingStats[]> {
+    return this.pool.ping(timeout);
   }
 
   /**

@@ -4,6 +4,7 @@ import Host from "./host";
 
 import * as http from "http";
 import * as querystring from "querystring";
+import * as urlModule from "url";
 
 /**
  * Status codes that will cause a host to be marked as "failed" if we get
@@ -96,7 +97,14 @@ export class RequestError extends Error {
   constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
     super(`A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`);
   }
+}
 
+export interface PingStats {
+  url: urlModule.Url;
+  res: http.ServerResponse;
+  online: boolean;
+  rtt: number;
+  version: string;
 }
 
 /**
@@ -211,6 +219,54 @@ export class Pool {
         res.on("end", () => resolve());
       });
     });
+  }
+
+  /**
+   * Ping sends out a request to all available Influx servers, reporting on
+   * their response time and version number.
+   */
+  public ping(timeout: number): Promise<PingStats[]> {
+    let todo: Promise<number>[] = [];
+
+    this.hostsAvailable.forEach(host => {
+      const start = Date.now();
+      const url = host.url;
+
+      return todo.push(new Promise(resolve => {
+        const req = http.request({
+          hostname: url.hostname,
+          method: "GET",
+          path: "/ping",
+          port: Number(url.port),
+          protocol: url.protocol,
+        }, res => {
+          resolve({
+            url,
+            res,
+            online: res.statusCode < 300,
+            rtt: Date.now() - start,
+            version: res.headers["x-influxdb-version"],
+          });
+        });
+
+        const fail = () => {
+          resolve({
+            online: false,
+            res: null,
+            rtt: Infinity,
+            url,
+            version: null,
+          });
+        };
+
+        req.setTimeout(timeout, fail);
+        req.on("error", fail);
+
+        req.end();
+      }));
+    });
+
+    return Promise.all(todo);
   }
 
   /**

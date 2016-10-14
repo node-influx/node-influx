@@ -419,8 +419,8 @@ describe('influxdb', () => {
 
       it('writes using default options without a schema', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -438,7 +438,7 @@ describe('influxdb', () => {
       it('uses a schema to coerce', () => {
         setDefaultDB('my_db');
         expectWrite('my_schemed_measure,my_tag=1 bool=T,float=43,int=42i', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -489,7 +489,7 @@ describe('influxdb', () => {
 
       it('handles lack of tags', () => {
         expectWrite('mymeas myfield=90', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -504,7 +504,7 @@ describe('influxdb', () => {
 
       it('handles lack of fields', () => {
         expectWrite('mymeas,my_tag=90', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -519,7 +519,7 @@ describe('influxdb', () => {
 
       it('handles multiple tags', () => {
         expectWrite('mymeas,my_tag1=90,my_tag2=45', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -534,8 +534,8 @@ describe('influxdb', () => {
 
       it('writes with the .writeMeasurement method', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -551,8 +551,8 @@ describe('influxdb', () => {
 
       it('accepts nanoseconds (as ms)', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -566,10 +566,10 @@ describe('influxdb', () => {
         ]);
       });
 
-      it('accepts nanoseconds (as ns)', () => {
+      it('accepts timestamp overriding', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
-          precision: 'n',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
           rp: undefined,
           db: 'my_db',
         });
@@ -580,7 +580,7 @@ describe('influxdb', () => {
             fields: { myfield: 90 },
             timestamp: toNanoDate('1463683075000000000'),
           },
-        ], { precision: 'n' });
+        ], { precision: 'ms' });
       });
     });
 

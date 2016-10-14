@@ -245,8 +245,9 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  * will cause Influx to return ISO formatted dates which we can parse. See the
  * {@link Results} type for more information about how to access them.
  *
- * Please see [A Moment for Times](https://node-influx.github.io/manual/usage.html#a-moment-for-times)
- * for a more complete and eloquent explanation of time handling in this module.
+ * Please see [A Moment for Times](https://node-influx.github.io/manual/
+ * usage.html#a-moment-for-times) for a more complete and eloquent explanation
+ * of time handling in this module.
  *
  * @typedef {Object} QueryOptions
  * @property {TimePrecision} [epoch] Epoch defining the precision at which
@@ -255,6 +256,18 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  *     defaults to the DEFAULT retention policy.
  * @property {String} [database]  Database under which to query the points.
  *     This is required if a database is not provided in Influx client.
+ */
+
+/**
+ * PingStats is returned from {@link InfluxDB#ping}.
+ *
+ * @typedef {Object} PingStats
+ * @property {Url} url URL is the host's URL
+ * @property {Boolean} online Whether the request was completed successfully.
+ * @property {http.ServerResponse} res The raw response from the server, may be
+ *     null on a timeout or HTTP error.
+ * @property {Number} rtt Total time the server took to respond, in milliseconds
+ * @property {String} version Version number the server reports to run
  */
 
 /**
