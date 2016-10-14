@@ -1,6 +1,6 @@
 # A Moment for Times
 
-InfluxDB is a timer series database, so it would make sense that the concepts of times is moderately important when dealing with it.
+InfluxDB is a time series database, so it would make sense that the concept of time is moderately important when dealing with it.
 
 By default, Influx will store all data you give to it as a nanosecond precision timestamp, whereas in JavaScript, most of the time we're dealing with millisecond precision timestamps, which we get from `Date.now()` or `myDate.getTime()`. This presents a bit of a problem for us JavaScripters, since nanosecond-precision timestamps are stored as 64 bit unsigned integers that JavaScript simply cannot represent accurately.
 
@@ -18,7 +18,7 @@ There are three places that dates can get passed around:
 - Dates being interpolated _into_ Influx queries
 - Dates being used when writing points on the line protocol, via `.writePoints()` or `.writeMeasurement()`
 
-To deal with this, we introduce a new type called **NanoDate**. These behave just like the normal `Date` type, but have two additional methods: `getNanoTime()` and `getNanoISOString()`. The behave just like the normal `.getTime()` and `getISOString` methods, but they both return nanosecond-precision strings instead of millisecond-precision numbers and timestamps.
+To deal with this, we introduce a new type called **NanoDate**. These behave just like the normal `Date` type, but have two additional methods: `.getNanoTime()` and `.getNanoISOString()`. The behave just like the normal `.getTime()` and `getISOString` methods, but they both return nanosecond-precision strings instead of millisecond-precision numbers and timestamps.
 
 ```js
 expect(myNanoDate.getTime()).to.equal(1475985480231);
@@ -35,7 +35,7 @@ influx.query('select * from perf').then(results => {
 })
 ```
 
-The exception is if you manually ask for a precision of `ms` or coarser in the `options` parameter of [query method](https://node-influx.github.io/class/src/index.js~InfluxDB.html#instance-method-query). Then, we parse your times into normal Dates.
+The exception is if you manually ask for a precision of `ms` or coarser in the `options` parameter of [`Influx#query` method](https://node-influx.github.io/class/src/index.js~InfluxDB.html#instance-method-query). Then, we parse your times into normal Dates.
 
 When writing data to Influx, **all write methods accept NanoDates in all situations**. This means if you select data from Influx and want to update a data point, you can pass that time right back into the `write` method. (Remember, data within series are unique by their time!) If you have a nanosecond timestamp from some external source, you can convert it to a NanoDate using [`toNanoDate`](https://node-influx.github.io/function/index.html#static-function-toNanoDate).
 

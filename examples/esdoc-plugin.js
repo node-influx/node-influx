@@ -25,6 +25,25 @@ function rewriteFonts() {
       padding: 0.75em 1em;
       line-height: 1.5em;
     }
+
+    ul, ol {
+      margin-bottom: 15px;
+    }
+
+    hr {
+      border: 0;
+      height: 2px;
+      background: #f5f5f5;
+      margin: 15px 0;
+    }
+
+    blockquote {
+      border-left: 3px solid #eee;
+      padding-left: 0.75em;
+      margin-bottom: 15px;
+      color: #999;
+      font-size: 0.9em;
+    }
   `);
 }
 
