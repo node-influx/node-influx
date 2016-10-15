@@ -16,7 +16,8 @@
       "./examples/express_response_times/readme.md"
     ],
     "usage": [
-      "./examples/times.md"
+      "./examples/times.md",
+      "./CONTRIBUTING.md"
     ],
     "changelog": ["./CHANGELOG.md"]
   }

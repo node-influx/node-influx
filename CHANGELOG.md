@@ -2,7 +2,16 @@
 
 ## Version 5.0.0 (Ongoing)
 
-5.0.0 is a port/rewrite of node-influx to TypeScript, aiming to provide a stronger foundation while fixing many of the pain points and bugs which currently exist. These include issues with escaping data passed to node-influx, date handling difficulties, quirks in the connection, and the lack of complete unit tests. We also take the opportunity to build a more modern, promise-based API.
+5.0.0 is a port/rewrite of node-influx to TypeScript, aiming to provide a stronger foundation while fixing many of the pain points and bugs which currently exist. These include issues with escaping data passed to node-influx, date handling difficulties, quirks in the connection, and the lack of complete unit tests. We also take the opportunity to build a more modern, promise-based API. Concretely, here's what we've got for you:
+
+ - A modern promise based API;
+ - Order-of-magnitude performance increases (varying per situation);
+ - A more consistent API with predictable and consistent escaping;
+ - The ability to correctly and accurately [deal with times](https://node-influx.github.io/manual/usage.html#a-moment-for-times);
+ - Fix some methods plain not working;
+ - Isomorphism, allowing the adapter to work in both Node and the browser;
+ - Less weird connection pool failures;
+ - Much better and more complete [documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html);
 
 Please see the documentation linked in the readme for more information. The following is a list of breaking changes:
 

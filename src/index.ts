@@ -435,7 +435,7 @@ export class InfluxDB {
    * @example
    * influx.createDatabase('mydb')
    */
-  public dropDatabase (databaseName: string): Promise<void> {
+  public dropDatabase(databaseName: string): Promise<void> {
     return this.pool.json(this.getQueryOpts({
       q: `drop database ${grammar.escape.quoted(databaseName)}`,
     }, "POST")).then(assertNoErrors);
@@ -448,7 +448,7 @@ export class InfluxDB {
    * influx.getMeasurements().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
    */
-  public getDatabaseNames (): Promise<string[]> {
+  public getDatabaseNames(data): Promise<string[]> {
     return this.pool.json(this.getQueryOpts({ q: "show databases" }))
       .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
@@ -456,49 +456,73 @@ export class InfluxDB {
   /**
    * Returns array of measurements.
    * @returns {Promise<String[]>} a list of measurement names
+   * @param {String} [database] the database the measurement lives in, optional
+   *     if a default database is provided.
    * @example
    * influx.getMeasurements().then(names =>
    *   console.log('My measurement names are: ' + names.join(', ')));
    */
-  public getMeasurements (): Promise<string[]> {
-    return this.pool.json(this.getQueryOpts({ q: "show measurements" }))
-      .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
+  public getMeasurements(database: string = this.defaultDB()): Promise<string[]> {
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: "show measurements",
+    })).then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
 
   /**
    * Returns a list of all series within the target measurement, or from the
    * entire database if a measurement isn't provided.
+   * @param {Object} [options]
    * @param {String} [measurement] if provided, we'll only get series from
    *     within that measurement.
+   * @param {String} [database] the database the series lives in, optional
+   *     if a default database is provided.
    * @returns {Promise<String[]>} a list of series names
    * @example
-   * influx.getSeries().then(names =>
-   *   console.log('My series names are: ' + names.join(', ')));
+   * influx.getSeries().then(names => {
+   *   console.log('My series names in my_measurement are: ' + names.join(', '))
+   * })
    *
-   * influx.getSeries("my_measurement").then(names =>
-   *   console.log('My series names in my_measurement are: ' + names.join(', ')));
+   * influx.getSeries({
+   *   measurement: "my_measurement",
+   *   database: "my_db"
+   * }).then(names => {
+   *   console.log('My series names in my_measurement are: ' + names.join(', '))
+   * })
    */
-  public getSeries (measurement?: string): Promise<string[]> {
+  public getSeries (options: {
+    measurement?: string,
+    database?: string,
+  } = {}): Promise<string[]> {
+    const {
+      database = this.defaultDB(),
+      measurement,
+    } = options;
+
     let query = "show series";
     if (measurement) {
       query += ` from ${grammar.escape.quoted(measurement)}`;
     }
 
-    return this.pool.json(this.getQueryOpts({ q: query }))
-      .then(res => parseSingle<{ key: string }>(res).map(r => r.key));
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: query,
+    })).then(res => parseSingle<{ key: string }>(res).map(r => r.key));
   }
 
   /**
    * Removes a measurement from the database.
-   * @param {string} measurementName
+   * @param {String} measurement
+   * @param {String} [database] the database the measurement lives in, optional
+   *     if a default database is provided.
    * @return {Promise.<void>}
    * @example
-   * dropMeasurement('my_measurement', err => done(err))
-   * // => DROP MEASUREMENT "my_measurement"
+   * influx.dropMeasurement('my_measurement')
    */
-  public dropMeasurement(measurementName: string): Promise<void> {
+  public dropMeasurement(measurement: string, database: string = this.defaultDB()): Promise<void> {
     return this.pool.json(this.getQueryOpts({
-      q: `drop measurement ${grammar.escape.quoted(measurementName)}`,
+      db: database,
+      q: `drop measurement ${grammar.escape.quoted(measurement)}`,
     }, "POST")).then(assertNoErrors);
   }
 
@@ -525,7 +549,7 @@ export class InfluxDB {
    * })
    * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
    */
-  public dropSeries(options: b.measurement | b.where | (b.measurement & b.where)): Promise<void> {
+  public dropSeries(options: b.measurement | b.where): Promise<void> {
     let q = "drop series";
     if ("measurement" in options) {
       q += " from " + b.parseMeasurement(<b.measurement> options);

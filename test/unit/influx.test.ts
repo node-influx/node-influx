@@ -206,14 +206,24 @@ describe('influxdb', () => {
     });
 
     it('.getMeasurements()', () => {
-      expectQuery('json', 'show measurements', 'GET', dbFixture('showMeasurements'));
+      setDefaultDB('mydb');
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show measurements',
+      }, 'GET', dbFixture('showMeasurements'));
+
       return influx.getMeasurements().then(names => {
         expect(names).to.deep.equal(['series_0', 'series_1', 'series_2']);
       });
     });
 
     it('.getSeries() from all', () => {
-      expectQuery('json', 'show series', 'GET', dbFixture('showSeries'));
+      setDefaultDB('mydb');
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show series',
+      }, 'GET', dbFixture('showSeries'));
+
       return influx.getSeries().then(names => {
         expect(names).to.deep.equal([
           'series_0,my_tag=0',
@@ -245,8 +255,14 @@ describe('influxdb', () => {
     });
 
     it('.getSeries() from single', () => {
-      expectQuery('json', 'show series from "series_1"', 'GET', dbFixture('showSeriesFromOne'));
-      return influx.getSeries('series_1').then(names => {
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show series from "measure_1"',
+      }, 'GET', dbFixture('showSeriesFromOne'));
+      return influx.getSeries({
+        database: 'mydb',
+        measurement: 'measure_1',
+      }).then(names => {
         expect(names).to.deep.equal([
           'series_1,my_tag=0',
           'series_1,my_tag=2',
@@ -261,8 +277,11 @@ describe('influxdb', () => {
     });
 
     it('.dropMeasurement()', () => {
-      expectQuery('json', 'drop measurement "series_1"');
-      return influx.dropMeasurement('series_1');
+      expectQuery('json', {
+        db: 'my_db',
+        q: 'drop measurement "series_1"'
+      });
+      return influx.dropMeasurement('series_1', 'my_db');
     });
 
     describe('.dropSeries()', () => {
