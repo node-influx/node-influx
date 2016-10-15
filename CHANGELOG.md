@@ -1,6 +1,6 @@
 # node-influx Changelog
 
-## Version 5.0.0 (Ongoing)
+## 2016-10-15, 5.0.0-alpha.1
 
 5.0.0 is a port/rewrite of node-influx to TypeScript, aiming to provide a stronger foundation while fixing many of the pain points and bugs which currently exist. These include issues with escaping data passed to node-influx, date handling difficulties, quirks in the connection, and the lack of complete unit tests. We also take the opportunity to build a more modern, promise-based API. Concretely, here's what we've got for you:
 
@@ -8,6 +8,7 @@
  - Order-of-magnitude performance increases (varying per situation);
  - A more consistent API with predictable and consistent escaping;
  - The ability to correctly and accurately [deal with times](https://node-influx.github.io/manual/usage.html#a-moment-for-times);
+ - The ability to correctly and accurately [deal with all data types](https://node-influx.github.io/typedef/index.html#static-typedef-SchemaOptions);
  - Fix some methods plain not working;
  - Isomorphism, allowing the adapter to work in both Node and the browser;
  - Less weird connection pool failures;
@@ -21,6 +22,7 @@ Please see the documentation linked in the readme for more information. The foll
  * **breaking:** the point structure for `.write*` methods has changed
  * **breaking:** the `.writePoint` method has been removed
  * **breaking:** `.writeSeries` as been more appropriately renamed `writeMeasurement`
+ * **breaking:** write methods now write in nanosecond precision by default
  * **breaking:** `.getSeriesNames` has been renamed `.getSeries`
  * **breaking:** the old `.getSeries` method has been removed in favor of the behaviour exhibited by `getSeriesNames`
  * **breaking:** the InfluxDB client must now be invoked as `new InfluxDB`

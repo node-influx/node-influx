@@ -228,7 +228,7 @@ export class Pool {
   public ping(timeout: number): Promise<PingStats[]> {
     let todo: Promise<number>[] = [];
 
-    this.hostsAvailable.forEach(host => {
+    [...this.hostsAvailable, ...this.hostsDisabled].forEach(host => {
       const start = Date.now();
       const url = host.url;
 

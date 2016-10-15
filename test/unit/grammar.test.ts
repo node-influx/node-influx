@@ -109,5 +109,14 @@ describe("grammar", () => {
       expect(grammar.castTimestamp(d, "m")).to.equal('24599758');
       expect(grammar.castTimestamp(d, "h")).to.equal('409995');
     });
+
+    it("accepts strings, numbers liternally", () => {
+      expect(grammar.castTimestamp('1475985480231035600', 's')).to.equal('1475985480231035600');
+      expect(grammar.castTimestamp(1475985480231, 's')).to.equal('1475985480231');
+    });
+
+    it("throws on non-numeric strings", () => {
+      expect(() => grammar.castTimestamp('wut', 's')).to.throw(/numeric value/);
+    });
   });
 });

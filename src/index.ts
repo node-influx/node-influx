@@ -972,8 +972,8 @@ export class InfluxDB {
     return this.writePoints(points, options);
   }
 
-  public query<T>(query: string[], options?: QueryOptions): Promise<Results<T>>;
-  public query<T>(query: string, options?: QueryOptions): Promise<Results<T>[]>;
+  public query<T>(query: string[], options?: QueryOptions): Promise<Results<T>[]>;
+  public query<T>(query: string, options?: QueryOptions): Promise<Results<T>>;
 
   /**
    * .query() run a query (or list of queries), runs them, and returns the

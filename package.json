@@ -5,14 +5,15 @@
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index",
   "scripts": {
+    "clean": "rimraf coverage doc lib",
     "test": "npm-run-all --parallel test:lint test:unit",
     "test:lint": "tslint 'src/**/*.ts'",
     "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
     "test:travis": "npm-run-all --parallel test:lint build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
-    "build:dist": "rm -rf lib && tsc && cp -R test/fixture lib/test",
-    "build:doc": "rm -rf lib && tsc -m es2015 --moduleResolution node && esdoc -c esdoc.json",
-    "prepublish": "npm run build:dist"
+    "build:dist": "npm run clean && tsc && cp -R test/fixture lib/test",
+    "build:doc": "npm run clean && tsc -m es2015 --moduleResolution node && esdoc -c esdoc.json",
+    "prepublish": "npm run clean && tsc -d"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "node-fetch": "^1.6.3",
     "npm-run-all": "^3.1.0",
     "opn-cli": "^3.1.0",
+    "rimraf": "^2.5.4",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "ts-node": "^1.3.0",
