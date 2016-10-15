@@ -33,7 +33,10 @@ describe('pool', () => {
   });
 
   afterEach(done => {
-    clock.restore()
+    if (clock) {
+      clock.restore()
+    }
+
     async.each(
       servers,
       (server, done) => server.close(() => done()),
@@ -214,6 +217,43 @@ describe('pool', () => {
     return pool.discard({ method: 'GET', path: '/' }).then(() => {
       expect(pool.getHostsAvailable().map((h) => Number(h.url.port))).to.deep.equal([serverPorts[1]]);
       expect(pool.getHostsDisabled().map((h) => Number(h.url.port))).to.deep.equal([serverPorts[0]]);
+    });
+  });
+
+  it('pings servers', () => {
+    servers[0].onRequest = (req, res: http.ServerResponse) => {
+      res.setHeader('X-Influxdb-Version', 'v1.0.0');
+      res.writeHead(200);
+      res.end();
+    };
+    servers[1].onRequest = (req, res) => {
+      res.writeHead(500);
+      res.end();
+    };
+
+    return pool.ping(50).then(results => {
+      expect(results[0].online).to.be.true;
+      expect(results[0].version).to.equal('v1.0.0');
+      expect(results[1].online).to.be.false;
+    });
+  });
+
+  it('times out in pings', () => {
+    clock.restore();
+    clock = null;
+
+    servers.forEach(server => {
+      server.onRequest = (req, res) => {
+        setTimeout(() => {
+          res.writeHead(200);
+          res.end();
+        }, 2);
+      };
+    });
+
+    return pool.ping(1).then(results => {
+      expect(results[0].online).to.be.false;
+      expect(results[1].online).to.be.false;
     });
   });
 

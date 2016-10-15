@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "series": [
+        {
+          "columns": [
+            "name",
+            "duration",
+            "shardGroupDuration",
+            "replicaN",
+            "default"
+          ],
+          "values": [
+            [
+              "autogen",
+              "0s",
+              "168h0m0s",
+              1,
+              true
+            ],
+            [
+              "7d",
+              "168h0m0s",
+              "24h0m0s",
+              1,
+              false
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

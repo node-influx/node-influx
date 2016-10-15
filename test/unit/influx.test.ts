@@ -146,7 +146,7 @@ describe('influxdb', () => {
         method: string,
         options: string | any,
         httpMethod: string = 'POST',
-        yields: any = null
+        yields: any = { results: [{}] }
     ) => {
       if (typeof options === 'string') {
         options = { q: options }
@@ -185,16 +185,16 @@ describe('influxdb', () => {
     };
 
     it('.createDatabase()', () => {
-      expectQuery('discard', 'create database "foo"');
+      expectQuery('json', 'create database "foo"');
       influx.createDatabase('foo');
-      expectQuery('discard', 'create database "f\\"oo"');
+      expectQuery('json', 'create database "f\\"oo"');
       influx.createDatabase('f"oo');
     });
 
     it('.dropDatabase()', () => {
-      expectQuery('discard', 'drop database "foo"');
+      expectQuery('json', 'drop database "foo"');
       influx.dropDatabase('foo');
-      expectQuery('discard', 'drop database "f\\"oo"');
+      expectQuery('json', 'drop database "f\\"oo"');
       influx.dropDatabase('f"oo');
     });
 
@@ -206,14 +206,24 @@ describe('influxdb', () => {
     });
 
     it('.getMeasurements()', () => {
-      expectQuery('json', 'show measurements', 'GET', dbFixture('showMeasurements'));
+      setDefaultDB('mydb');
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show measurements',
+      }, 'GET', dbFixture('showMeasurements'));
+
       return influx.getMeasurements().then(names => {
         expect(names).to.deep.equal(['series_0', 'series_1', 'series_2']);
       });
     });
 
     it('.getSeries() from all', () => {
-      expectQuery('json', 'show series', 'GET', dbFixture('showSeries'));
+      setDefaultDB('mydb');
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show series',
+      }, 'GET', dbFixture('showSeries'));
+
       return influx.getSeries().then(names => {
         expect(names).to.deep.equal([
           'series_0,my_tag=0',
@@ -245,8 +255,14 @@ describe('influxdb', () => {
     });
 
     it('.getSeries() from single', () => {
-      expectQuery('json', 'show series from "series_1"', 'GET', dbFixture('showSeriesFromOne'));
-      return influx.getSeries('series_1').then(names => {
+      expectQuery('json', {
+        db: 'mydb',
+        q: 'show series from "measure_1"',
+      }, 'GET', dbFixture('showSeriesFromOne'));
+      return influx.getSeries({
+        database: 'mydb',
+        measurement: 'measure_1',
+      }).then(names => {
         expect(names).to.deep.equal([
           'series_1,my_tag=0',
           'series_1,my_tag=2',
@@ -261,33 +277,36 @@ describe('influxdb', () => {
     });
 
     it('.dropMeasurement()', () => {
-      expectQuery('discard', 'drop measurement "series_1"');
-      return influx.dropMeasurement('series_1');
+      expectQuery('json', {
+        db: 'my_db',
+        q: 'drop measurement "series_1"'
+      });
+      return influx.dropMeasurement('series_1', 'my_db');
     });
 
     describe('.dropSeries()', () => {
       it('drops with only from clause by string', () => {
-        expectQuery('discard', 'drop series from "series_0"');
+        expectQuery('json', 'drop series from "series_0"');
         influx.dropSeries({ measurement: '"series_0"' });
       });
 
       it('drops with only from clause by builder', () => {
-        expectQuery('discard', 'drop series from "series_0"');
+        expectQuery('json', 'drop series from "series_0"');
         influx.dropSeries({ measurement: m => m.name('series_0') });
       });
 
       it('drops with only where clause by string', () => {
-        expectQuery('discard', 'drop series where "my_tag" = 1');
+        expectQuery('json', 'drop series where "my_tag" = 1');
         influx.dropSeries({ where: '"my_tag" = 1' });
       });
 
       it('drops with only where clause by builder', () => {
-        expectQuery('discard', 'drop series where "my_tag" = 1');
+        expectQuery('json', 'drop series where "my_tag" = 1');
         influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) });
       });
 
       it('drops with both', () => {
-        expectQuery('discard', 'drop series from "series_0" where "my_tag" = 1');
+        expectQuery('json', 'drop series from "series_0" where "my_tag" = 1');
         influx.dropSeries({
           measurement: m => m.name('series_0'),
           where: e => e.tag('my_tag').equals.value(1)
@@ -307,22 +326,22 @@ describe('influxdb', () => {
 
     describe('.createUser()', () => {
       it('works with admin specified == true', () => {
-        expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\' with all privileges');
+        expectQuery('json', 'create user "con\\"nor" with password \'pa55\\\'word\' with all privileges');
         return influx.createUser('con"nor', 'pa55\'word', true);
       });
       it('works with admin specified == false', () => {
-        expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
+        expectQuery('json', 'create user "con\\"nor" with password \'pa55\\\'word\'');
         return influx.createUser('con"nor', 'pa55\'word', false);
       });
       it('works with admin unspecified', () => {
-        expectQuery('discard', 'create user "con\\"nor" with password \'pa55\\\'word\'');
+        expectQuery('json', 'create user "con\\"nor" with password \'pa55\\\'word\'');
         return influx.createUser('con"nor', 'pa55\'word');
       });
     });
 
     describe('.grantPrivilege()', () => {
       it('queries correctly', () => {
-        expectQuery('discard', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'grant READ to "con\\"nor" on "my_\\"_db"');
         return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -330,14 +349,14 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_\\"_db');
-        expectQuery('discard', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'grant READ to "con\\"nor" on "my_\\"_db"');
         return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
       });
     });
 
     describe('.revokePrivilege()', () => {
       it('queries correctly', () => {
-        expectQuery('discard', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'revoke READ from "con\\"nor" on "my_\\"_db"');
         return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -345,29 +364,29 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_\\"_db');
-        expectQuery('discard', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'revoke READ from "con\\"nor" on "my_\\"_db"');
         return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
       });
     });
 
     it('.grantAdminPrivilege()', () => {
-        expectQuery('discard', 'grant all to "con\\"nor"');
+        expectQuery('json', 'grant all to "con\\"nor"');
         return influx.grantAdminPrivilege('con"nor');
     });
 
     it('.revokeAdminPrivilege()', () => {
-        expectQuery('discard', 'revoke all from "con\\"nor"');
+        expectQuery('json', 'revoke all from "con\\"nor"');
         return influx.revokeAdminPrivilege('con"nor');
     });
 
     it('.dropUser()', () => {
-        expectQuery('discard', 'drop user "con\\"nor"');
+        expectQuery('json', 'drop user "con\\"nor"');
         return influx.dropUser('con"nor');
     });
 
     describe('.createContinuousQuery()', () => {
       it('queries correctly', () => {
-        expectQuery('discard', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
         return influx.createContinuousQuery('my_"q', 'foo', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -375,14 +394,14 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_"_db');
-        expectQuery('discard', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
         return influx.createContinuousQuery('my_"q', 'foo');
       });
     });
 
     describe('.dropContinuousQuery()', () => {
       it('queries correctly', () => {
-        expectQuery('discard', 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        expectQuery('json', 'drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -390,7 +409,7 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_"_db');
-        expectQuery('discard', 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        expectQuery('json', 'drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q');
       });
     });
@@ -419,8 +438,8 @@ describe('influxdb', () => {
 
       it('writes using default options without a schema', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -438,7 +457,7 @@ describe('influxdb', () => {
       it('uses a schema to coerce', () => {
         setDefaultDB('my_db');
         expectWrite('my_schemed_measure,my_tag=1 bool=T,float=43,int=42i', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -489,7 +508,7 @@ describe('influxdb', () => {
 
       it('handles lack of tags', () => {
         expectWrite('mymeas myfield=90', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -504,7 +523,7 @@ describe('influxdb', () => {
 
       it('handles lack of fields', () => {
         expectWrite('mymeas,my_tag=90', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -519,7 +538,7 @@ describe('influxdb', () => {
 
       it('handles multiple tags', () => {
         expectWrite('mymeas,my_tag1=90,my_tag2=45', {
-          precision: 'ms',
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -534,8 +553,8 @@ describe('influxdb', () => {
 
       it('writes with the .writeMeasurement method', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -551,8 +570,8 @@ describe('influxdb', () => {
 
       it('accepts nanoseconds (as ms)', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
-          precision: 'ms',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
+          precision: 'n',
           rp: undefined,
           db: 'my_db',
         });
@@ -566,10 +585,10 @@ describe('influxdb', () => {
         ]);
       });
 
-      it('accepts nanoseconds (as ns)', () => {
+      it('accepts timestamp overriding', () => {
         setDefaultDB('my_db');
-        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000000000', {
-          precision: 'n',
+        expectWrite('mymeas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
           rp: undefined,
           db: 'my_db',
         });
@@ -580,7 +599,7 @@ describe('influxdb', () => {
             fields: { myfield: 90 },
             timestamp: toNanoDate('1463683075000000000'),
           },
-        ], { precision: 'n' });
+        ], { precision: 'ms' });
       });
     });
 
@@ -626,6 +645,85 @@ describe('influxdb', () => {
 
         return influx.query(['select * from series_0', 'select * from series_1']);
       });
+    });
+
+    describe('.createRetentionPolicy', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
+      it('creates non-default policies', () => {
+        expectQuery('json', 'create retention policy "7d\\"" on "test" ' +
+          'duration 7d replication 1');
+
+        return influx.createRetentionPolicy('7d"', {
+          database: 'test',
+          duration: '7d',
+          replication: 1
+        });
+      });
+
+      it('creates default policies', () => {
+        expectQuery('json', 'create retention policy "7d\\"" on "my_db" ' +
+          'duration 7d replication 1 default');
+
+        return influx.createRetentionPolicy('7d"', {
+          duration: '7d',
+          replication: 1,
+          default: true,
+        });
+      });
+    });
+
+    describe('.alterRetentionPolicy', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
+      it('creates non-default policies', () => {
+        expectQuery('json', 'alter retention policy "7d\\"" on "test" ' +
+          'duration 7d replication 1');
+
+        return influx.alterRetentionPolicy('7d"', {
+          database: 'test',
+          duration: '7d',
+          replication: 1
+        });
+      });
+
+      it('creates default policies', () => {
+        expectQuery('json', 'alter retention policy "7d\\"" on "my_db" ' +
+          'duration 7d replication 1 default');
+
+        return influx.alterRetentionPolicy('7d"', {
+          duration: '7d',
+          replication: 1,
+          default: true,
+        });
+      });
+    });
+
+    it('shows retention policies', () => {
+      const data = dbFixture('showRetentionPolicies');
+      expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
+      influx.showRetentionPolicies('my"db');
+      setDefaultDB('my_db')
+      expectQuery('json', 'show retention policies on "my_db"', 'GET', data);
+
+      return influx.showRetentionPolicies().then(res => {
+        expect(res.slice()).to.deep.equal([
+          {
+            name: 'autogen',
+            duration: '0s',
+            shardGroupDuration: '168h0m0s',
+            replicaN: 1,
+            default: true,
+          },
+          {
+            name: '7d',
+            duration: '168h0m0s',
+            shardGroupDuration: '24h0m0s',
+            replicaN: 1,
+            default: false,
+          },
+        ])
+      })
     });
   });
 });

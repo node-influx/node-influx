@@ -1,0 +1,24 @@
+{
+  "source": "./lib/src",
+  "destination": "./doc",
+  "test": {
+    "type": "mocha",
+    "source": "./lib/test/unit",
+    "includes": ["\\.test\\.js$"]
+  },
+  "plugins": [
+    { "name": "./examples/esdoc-plugin.js" }
+  ],
+  "undocumentIdentifier": false,
+  "title": "node-influx",
+  "manual": {
+    "tutorial": [
+      "./examples/express_response_times/readme.md"
+    ],
+    "usage": [
+      "./examples/times.md",
+      "./CONTRIBUTING.md"
+    ],
+    "changelog": ["./CHANGELOG.md"]
+  }
+}

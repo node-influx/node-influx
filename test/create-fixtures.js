@@ -42,6 +42,9 @@ const queries = [
   fixture('selectFromGroup', 'select top(my_value, 1) from series_0 group by my_tag order by time desc', { db }),
   fixture('error', 'this is not a valid query!'),
 
+  update(`create retention policy "7d" on "${db}" duration 7d replication 1`),
+  fixture('showRetentionPolicies', `show retention policies on "${db}"`),
+
   update(`drop user john`),
   update(`drop user steve`),
   update(`drop database "${db}"`),

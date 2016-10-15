@@ -1,5 +1,5 @@
-import { Pool, PoolOptions } from "./pool";
-import { Results, parse, parseSingle } from "./results";
+import { PingStats, Pool, PoolOptions } from "./pool";
+import { Results, assertNoErrors, parse, parseSingle } from "./results";
 import { Schema, SchemaOptions, coerceBadly } from "./schema";
 
 import * as b from "./builder";
@@ -21,9 +21,10 @@ const defaultOptions: ClusterConfig = Object.freeze({
 });
 
 export * from "./builder";
-export { FieldType, Precision, TimePrecision, toNanoDate } from "./grammar";
+export { FieldType, Precision, Raw, TimePrecision, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
-export { PoolOptions } from "./pool";
+export { PingStats, PoolOptions } from "./pool";
+export { ResultError } from "./results";
 
 export interface HostConfig {
 
@@ -51,7 +52,6 @@ export interface SingleHostConfig extends HostConfig {
 
   /**
    * Password for connecting to the database. Defaults to "root".
-   * @type {[type]}
    */
   password?: string;
 
@@ -80,7 +80,6 @@ export interface ClusterConfig {
 
   /**
    * Password for connecting to the database. Defaults to "root".
-   * @type {[type]}
    */
   password?: string;
 
@@ -105,9 +104,6 @@ export interface ClusterConfig {
   schema?: SchemaOptions[];
 }
 
-/**
- * Point is passed to the client's write methods to store a point in InfluxDB.
- */
 export interface Point {
   /**
    * Measurement is the Influx measurement name.
@@ -135,7 +131,7 @@ export interface Point {
 export interface WriteOptions {
 
   /**
-   * Precision at which the points are written, defaults to milliseconds "ms".
+   * Precision at which the points are written, defaults to nanoseconds "n".
    */
   precision?: grammar.TimePrecision;
 
@@ -178,6 +174,20 @@ export interface QueryOptions {
 }
 
 /**
+ * RetentionOptions are passed into passed into the {@link
+ * InfluxDB#createRetentionPolicy} and {@link InfluxDB#alterRetentionPolicy}.
+ * See the [Downsampling and Retention page](https://docs.influxdata.com/
+ * influxdb/v1.0/guides/downsampling_and_retention/) on the Influx docs for
+ * more information.
+ */
+export interface RetentionOptions {
+  database?: string;
+  duration: string;
+  replication: number;
+  default?: boolean;
+}
+
+/**
  * Parses the URL out into into a ClusterConfig object
  */
 function parseOptionsUrl(addr: string): SingleHostConfig {
@@ -216,23 +226,68 @@ function defaults<T>(target: T, ...srcs: T[]): T {
 }
 
 /**
- * InfluxDB is the primary means of querying the database.
- * @public
+ * InfluxDB is the public interface to run queries against the your database.
+ * This is a "driver-level" module, not a a full-fleged ORM or ODM; you run
+ * queries directly by calling methods on this class.
+ *
+ * Please check out some out [the tutorials](https://node-influx.github.io/manual/tutorial.html)
+ * if you want help getting started!
+ *
+ * @example
+ * const influx = new Influx.InfluxDB({
+ *  host: 'localhost',
+ *  database: 'express_response_db',
+ *  schema: [
+ *    {
+ *      measurement: 'response_times',
+ *      fields: {
+ *        path: Influx.FieldType.STRING,
+ *        duration: Influx.FieldType.INTEGER
+ *      },
+ *      tags: [
+ *        'host'
+ *      ]
+ *    }
+ *  ]
+ * })
+ *
+ * influx.writePoints([
+ *   {
+ *     measurement: 'response_times',
+ *     tags: { host: os.hostname() },
+ *     fields: { duration, path: req.path },
+ *   }
+ * ]).then(() => {
+ *   return influx.query(`
+ *     select * from response_times
+ *     where host = ${Influx.escape.stringLit(os.hostname())}
+ *     order by time desc
+ *     limit 10
+ *   `)
+ * }).then(rows => {
+ *   rows.forEach(row => console.log(`A request to ${row.path} took ${row.duration}ms`))
+ * })
  */
 export class InfluxDB {
 
+  /**
+   * Connect pool for making requests.
+   * @private
+   */
   private pool: Pool;
+
+  /**
+   * Config options for Influx.
+   * @private
+   */
   private options: ClusterConfig;
 
   /**
    * Map of Schema instances defining measurements in Influx.
+   * @private
    */
   private schema: { [db: string]: { [measurement: string]: Schema } } = Object.create(null);
 
-  /**
-   * Connect to a single InfluxDB instance by specifying
-   * a set of connection options.
-   */
   constructor(options: SingleHostConfig);
 
   /**
@@ -253,6 +308,63 @@ export class InfluxDB {
    */
   constructor();
 
+  /**
+   * Connect to a single InfluxDB instance by specifying
+   * a set of connection options.
+   * @param {ClusterConfig|SingleHostConfig|string} options
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Connect to a single host with a DSN:
+   * const client = new InfluxDB('http://user:password@host:8086/database')
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Connect to a single host with a full set of config details and
+   * // a custom schema
+   * const client = new InfluxDB({
+   *   database: 'my_db',
+   *   host: 'localhost',
+   *   port: 8086,
+   *   username: 'connor',
+   *   password: 'pa$$w0rd',
+   *   schema: [{
+   *     measurement: 'perf',
+   *     tags: ['hostname'],
+   *     fields: {
+   *       memory_usage: FieldType.INTEGER,
+   *       cpu_usage: FieldType.FLOAT,
+   *       is_online: FieldType.BOOLEAN,
+   *     }
+   *   }]
+   * })
+   *
+   * @example
+   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   *
+   * // Use a pool of several host connections and balance queries across them:
+   * const client = new InfluxDB({
+   *   database: 'my_db',
+   *   username: 'connor',
+   *   password: 'pa$$w0rd',
+   *   hosts: [
+   *     { host: 'db1.example.com' },
+   *     { host: 'db2.example.com' },
+   *   ]
+   *   schema: [{
+   *     measurement: 'perf',
+   *     tags: ['hostname'],
+   *     fields: {
+   *       memory_usage: FieldType.INTEGER,
+   *       cpu_usage: FieldType.FLOAT,
+   *       is_online: FieldType.BOOLEAN,
+   *     }
+   *   }]
+   * })
+   *
+   */
   constructor (options?: any) {
     // Figure out how to parse whatever we were passed in into a ClusterConfig.
     if (typeof options === "string") { // plain URI => SingleHostConfig
@@ -305,83 +417,119 @@ export class InfluxDB {
 
   /**
    * Creates a new database with the provided name.
+   * @param {string} databaseName
+   * @return {Promise.<void>}
    * @example
-   * return influx.createDatabase('mydb')
+   * influx.createDatabase('mydb')
    */
   public createDatabase (databaseName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create database ${grammar.escape.quoted(databaseName)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Deletes a database with the provided name.
+   * @param {string} databaseName
+   * @return {Promise.<void>}
    * @example
-   * return influx.createDatabase('mydb')
+   * influx.createDatabase('mydb')
    */
-  public dropDatabase (databaseName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+  public dropDatabase(databaseName: string): Promise<void> {
+    return this.pool.json(this.getQueryOpts({
       q: `drop database ${grammar.escape.quoted(databaseName)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Returns array of database names. Requires cluster admin privileges.
+   * @returns {Promise<String[]>} a list of database names
    * @example
-   * return influx.getMeasurements().then(names =>
+   * influx.getMeasurements().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
    */
-  public getDatabaseNames (): Promise<string[]> {
+  public getDatabaseNames(data): Promise<string[]> {
     return this.pool.json(this.getQueryOpts({ q: "show databases" }))
       .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
 
   /**
    * Returns array of measurements.
+   * @returns {Promise<String[]>} a list of measurement names
+   * @param {String} [database] the database the measurement lives in, optional
+   *     if a default database is provided.
    * @example
-   * return influx.getMeasurements().then(names =>
+   * influx.getMeasurements().then(names =>
    *   console.log('My measurement names are: ' + names.join(', ')));
    */
-  public getMeasurements (): Promise<string[]> {
-    return this.pool.json(this.getQueryOpts({ q: "show measurements" }))
-      .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
+  public getMeasurements(database: string = this.defaultDB()): Promise<string[]> {
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: "show measurements",
+    })).then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
 
   /**
    * Returns a list of all series within the target measurement, or from the
    * entire database if a measurement isn't provided.
+   * @param {Object} [options]
+   * @param {String} [options.measurement] if provided, we'll only get series
+   *     from within that measurement.
+   * @param {String} [options.database] the database the series lives in,
+   *     optional if a default database is provided.
+   * @returns {Promise<String[]>} a list of series names
    * @example
-   * influx.getSeries().then(names =>
-   *   console.log('My series names are: ' + names.join(', ')));
+   * influx.getSeries().then(names => {
+   *   console.log('My series names in my_measurement are: ' + names.join(', '))
+   * })
    *
-   * influx.getSeries("my_measurement").then(names =>
-   *   console.log('My series names in my_measurement are: ' + names.join(', ')));
+   * influx.getSeries({
+   *   measurement: "my_measurement",
+   *   database: "my_db"
+   * }).then(names => {
+   *   console.log('My series names in my_measurement are: ' + names.join(', '))
+   * })
    */
-  public getSeries (measurement?: string): Promise<string[]> {
+  public getSeries (options: {
+    measurement?: string,
+    database?: string,
+  } = {}): Promise<string[]> {
+    const {
+      database = this.defaultDB(),
+      measurement,
+    } = options;
+
     let query = "show series";
     if (measurement) {
       query += ` from ${grammar.escape.quoted(measurement)}`;
     }
 
-    return this.pool.json(this.getQueryOpts({ q: query }))
-      .then(res => parseSingle<{ key: string }>(res).map(r => r.key));
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: query,
+    })).then(res => parseSingle<{ key: string }>(res).map(r => r.key));
   }
 
   /**
    * Removes a measurement from the database.
+   * @param {String} measurement
+   * @param {String} [database] the database the measurement lives in, optional
+   *     if a default database is provided.
+   * @return {Promise.<void>}
    * @example
-   * dropMeasurement('my_measurement', err => done(err))
-   * // => DROP MEASUREMENT "my_measurement"
+   * influx.dropMeasurement('my_measurement')
    */
-  public dropMeasurement(measurementName: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
-      q: `drop measurement ${grammar.escape.quoted(measurementName)}`,
-    }, "POST"));
+  public dropMeasurement(measurement: string, database: string = this.defaultDB()): Promise<void> {
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: `drop measurement ${grammar.escape.quoted(measurement)}`,
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Removes a one or more series from InfluxDB.
    *
+   * @returns {Promise<void>}
    * @example
    * // The following pairs of queries are equivalent: you can chose either to
    * // use our builder or pass in string directly. The builder takes care
@@ -401,7 +549,7 @@ export class InfluxDB {
    * })
    * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
    */
-  public dropSeries(options: b.measurement | b.where | (b.measurement & b.where)): Promise<void> {
+  public dropSeries(options: b.measurement | b.where): Promise<void> {
     let q = "drop series";
     if ("measurement" in options) {
       q += " from " + b.parseMeasurement(<b.measurement> options);
@@ -410,12 +558,12 @@ export class InfluxDB {
       q += " where " + b.parseWhere(<b.where> options);
     }
 
-    return this.pool.discard(this.getQueryOpts({ q }, "POST"));
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Returns a list of users on the Influx database.
-   *
+   * @return {Promise<Array<{ user: String, admin: Boolean }>>}
    * @example
    * influx.getUsers().then(users => {
    *   users.forEach(user => {
@@ -431,13 +579,13 @@ export class InfluxDB {
     return this.pool.json(this.getQueryOpts({ q: "show users" })).then(parseSingle);
   }
 
-  public createUser(username: string, password: string,
-                    isAdmin: boolean, callback?: any): Promise<void>;
-  public createUser(username: string, password: string, callback?: any): Promise<void>;
-
   /**
    * Creates a new InfluxDB user.
-   *
+   * @param {String} username
+   * @param {String} password
+   * @param {Boolean} [admin=false] If true, the user will be given all
+   *     privileges on all databases.
+   * @returns {Promise<void>}
    * @example
    * influx.createUser('connor', 'pa55w0rd', true) // make 'connor' an admin
    *
@@ -448,95 +596,109 @@ export class InfluxDB {
     username: string, password: string,
     admin: boolean = false,
   ): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create user ${grammar.escape.quoted(username)} with password `
         + grammar.escape.stringLit(password)
         + (admin ? " with all privileges" : ""),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Sets a password for an Influx user.
-   *
+   * @param {String} username
+   * @param {String} password
+   * @returns {Promise<void>}
    * @example
    * influx.setPassword('connor', 'pa55w0rd')
    */
   public setPassword(username: string, password: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `set password for ${grammar.escape.quoted(username)} = `
         + grammar.escape.stringLit(password),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Grants a privilege to a specified user.
-   *
+   * @param {String} username
+   * @param {String} privilege Should be one of "READ" or "WRITE"
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.grantPrivilege('connor', 'READ', 'my_db') // grants read access on my_db to connor
    */
   public grantPrivilege(username: string, privilege: "READ" | "WRITE",
                         database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `grant ${privilege} to ${grammar.escape.quoted(username)} on `
         + grammar.escape.quoted(database),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Removes a privilege from a specified user.
-   *
+   * @param {String} username
+   * @param {String} privilege Should be one of "READ" or "WRITE"
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
-   * influx.setPassword('connor', 'READ', 'my_db') // removes read access on my_db from connor
+   * influx.revokePrivilege('connor', 'READ', 'my_db') // removes read access on my_db from connor
    */
   public revokePrivilege(username: string, privilege: "READ" | "WRITE",
                          database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `revoke ${privilege} from ${grammar.escape.quoted(username)} on `
         + grammar.escape.quoted(database),
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Grants admin privileges to a specified user.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
-   * influx.grantAdminPrivilege('connor', 'READ', 'my_db')
+   * influx.grantAdminPrivilege('connor')
    */
   public grantAdminPrivilege(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `grant all to ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Removes a admin privilege from a specified user.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
    * influx.revokeAdminPrivilege('connor')
    */
   public revokeAdminPrivilege(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `revoke all from ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Removes a user from the database.
-   *
+   * @param {String} username
+   * @returns {Promise<void>}
    * @example
    * influx.dropUser('connor')
    */
   public dropUser(username: string): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop user ${grammar.escape.quoted(username)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Creates a continuous query in a database
-   *
+   * @param {String} name The query name, for later reference
+   * @param {String} query The body of the query to run
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
@@ -546,23 +708,132 @@ export class InfluxDB {
   public createContinuousQuery(name: string, query: string,
                                database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `create continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)} begin ${query} end`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
    * Creates a continuous query in a database
-   *
+   * @param {String} name The query name
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
    * @example
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
   public dropContinuousQuery(name: string, database: string = this.defaultDB()): Promise<void> {
-    return this.pool.discard(this.getQueryOpts({
+    return this.pool.json(this.getQueryOpts({
       q: `drop continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)}`,
-    }, "POST"));
+    }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Creates a new retention policy on a database. You can read more about
+   * [Downsampling and Retention](https://docs.influxdata.com/influxdb/v1.0/
+   * guides/downsampling_and_retention/) on the InfluxDB website.
+   *
+   * @param {String} name The retention policy name
+   * @param {Object} options
+   * @param {String} [options.database] Database to create the policy on,
+   *     uses the default database if not provided.
+   * @param {String} options.duration How long data in the retention policy
+   *     should be stored for, should be in a format like `7d`. See details
+   *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
+   * @param {Number} options.replication How many servers data in the series
+   *     should be replicated to.
+   * @param {Boolean} [options.default] Whether the retention policy should
+   *     be the default policy on the database.
+   * @returns {Promise<void>}
+   * @example
+   * influx.createRetentionPolicy('7d', {
+   *  duration: '7d',
+   *  replication: 1
+   * })
+   */
+  public createRetentionPolicy(name: string, options: RetentionOptions): Promise<void> {
+    const q = `create retention policy ${grammar.escape.quoted(name)} on `
+      + grammar.escape.quoted(options.database || this.defaultDB())
+      + ` duration ${options.duration} replication ${options.replication}`
+      + (options.default ? " default" : "");
+
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Alters an existing retention policy on a database.
+   *
+   * @param {String} name The retention policy name
+   * @param {Object} options
+   * @param {String} [options.database] Database to create the policy on,
+   *     uses the default database if not provided.
+   * @param {String} options.duration How long data in the retention policy
+   *     should be stored for, should be in a format like `7d`. See details
+   *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
+   * @param {Number} options.replication How many servers data in the series
+   *     should be replicated to.
+   * @param {Boolean} [options.default] Whether the retention policy should
+   *     be the default policy on the database.
+   * @returns {Promise<void>}
+   * @example
+   * influx.alterRetentionPolicy('7d', {
+   *  duration: '7d',
+   *  replication: 1,
+   *  default: true
+   * })
+   */
+  public alterRetentionPolicy(name: string, options: RetentionOptions): Promise<void> {
+    const q = `alter retention policy ${grammar.escape.quoted(name)} on `
+      + grammar.escape.quoted(options.database || this.defaultDB())
+      + ` duration ${options.duration} replication ${options.replication}`
+      + (options.default ? " default" : "");
+
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Shows retention policies on the database
+   *
+   * @param {String} [database] The database to list policies on, uses the
+   *     default database if not provided.
+   * @returns {Promise<Array<{
+   *     name: String,
+   *     duration: String,
+   *     shardGroupDuration: String,
+   *     replicaN: Number,
+   *     default: Boolean
+   * }>>}
+   * @example
+   * influx.showRetentionPolicies().then(policies => {
+   *   expect(policies.slice()).to.deep.equal([
+   *     {
+   *       name: 'autogen',
+   *       duration: '0s',
+   *       shardGroupDuration: '168h0m0s',
+   *       replicaN: 1,
+   *       default: true,
+   *     },
+   *     {
+   *       name: '7d',
+   *       duration: '168h0m0s',
+   *       shardGroupDuration: '24h0m0s',
+   *       replicaN: 1,
+   *       default: false,
+   *     },
+   *   ])
+   * })
+   */
+  public showRetentionPolicies(database: string = this.defaultDB()): Promise<{
+    default: boolean,
+    duration: string,
+    name: string,
+    replicaN: number,
+    shardGroupDuration: string,
+  }[]> {
+    return this.pool.json(this.getQueryOpts({
+      q: `show retention policies on ${grammar.escape.quoted(database)}`,
+    }, "GET")).then(parseSingle);
   }
 
   /**
@@ -575,27 +846,30 @@ export class InfluxDB {
    * to `new Influx(options)`, we'll use that to make sure that types get
    * cast correctly and that there are no extraneous fields or columns.
    *
-   * In the options, you can include the database name to write to (we use
-   * the `database` specified in options you passed to `new Influx(option)`
-   * if it's not provided) and the retention policy and time
-   * precision to write the points with.
+   * For best performance, it's recommended that you batch your data into
+   * sets of a couple thousand records before writing it. In the future we'll
+   * have some utilities within node-influx to make this easier.
+   *
+   * ---
    *
    * A note when using manually-specified times and precisions: by default
    * we write using the `ms` precision since that's what JavaScript gives us.
    * You can adjust this. However, there is some special behaviour if you
    * manually specify a timestamp in your points:
    *  - if you specify the timestamp as a Date object, we'll convert it to
-   *    milliseconds and multiply or divide as needed to get the right time
+   *    milliseconds and manipulate it as needed to get the right precision
+   *  - if provide a NanoDate as returned from {@link toNanoTime} or the
+   *    results from an Influx query, we'll be able to pull the precise
+   *    nanosecond timestamp and manipulate it to get the right precision
    *  - if you provide a string or number as the timestamp, we'll pass it
    *    straight into Influx.
    *
    * Please see the Point and WriteOptions type for a
    * full list of possible options.
    *
-   * For best performance, it's recommended that you batch your data into
-   * sets of a couple thousand records before writing it. In the future we'll
-   * have some utilities within node-influx to make this easier.
-   *
+   * @param {Point[]} points
+   * @param {WriteOptions} [options]
+   * @return {Promise<void>}
    * @example
    * // write a point into the default database with
    * // the default retention policy.
@@ -625,7 +899,7 @@ export class InfluxDB {
   public writePoints(points: Point[], options: WriteOptions = {}): Promise<void> {
     const {
       database = this.defaultDB(),
-      precision = <grammar.TimePrecision> "ms",
+      precision = <grammar.TimePrecision> "n",
       retentionPolicy,
     } = options;
 
@@ -677,9 +951,13 @@ export class InfluxDB {
   }
 
   /**
-   * writeMeasurement functions similarly to .writePoints(), but it
-   * automatically fills in the `measurement` value for all points for you.
+   * writeMeasurement functions similarly to {@link InfluxDB#writePoints}, but
+   * it automatically fills in the `measurement` value for all points for you.
    *
+   * @param {String} measurement
+   * @param {Point[]} points
+   * @param {WriteOptions} [options]
+   * @return {Promise<void>}
    * @example
    * influx.writeMeasurement('perf', [
    *   {
@@ -699,8 +977,13 @@ export class InfluxDB {
 
   /**
    * .query() run a query (or list of queries), runs them, and returns the
-   * results in a friendly format.
+   * results in a friendly format. If you run multiple queries, multiple
+   * sets of results will be returned, otherwise a single result will
+   * be returned.
    *
+   * @param {String|String[]} query
+   * @param {QueryOptions} [options]
+   * @return {Promise<Results|Results[]>} query
    * @example
    * influx.query('select * from perf').then(results => {
    *   console.log(results)
@@ -718,9 +1001,13 @@ export class InfluxDB {
   }
 
   /**
-   * queryRaw functions similarly to .query() but it does no fancy parsing on
-   * the JSON object that InfluxDB returns.
+   * queryRaw functions similarly to .query() but it does no fancy
+   * transformations on the returned data; it calls `JSON.parse` and returns
+   * those results verbatim.
    *
+   * @param {String|String[]} query
+   * @param {QueryOptions} [options]
+   * @return {Promise<*>}
    * @example
    * influx.queryRaw('select * from perf').then(rawData => {
    *   console.log(rawData)
@@ -742,13 +1029,33 @@ export class InfluxDB {
   }
 
   /**
+   * Pings all available hosts, collecting online status and version info.
+   * @param  {Number}               timeout Given in milliseconds
+   * @return {Promise<PingStats[]>}
+   * @example
+   * influx.ping(5000).then(hosts => {
+   *   hosts.forEach(host => {
+   *     if (host.online) {
+   *       console.log(`${host.url.host} responded in ${host.rtt}ms running ${host.version})`)
+   *     } else {
+   *       console.log(`${host.url.host} is offline :(`)
+   *     }
+   *   })
+   * })
+   */
+  public ping(timeout: number): Promise<PingStats[]> {
+    return this.pool.ping(timeout);
+  }
+
+  /**
    * Returns the default database that queries operates on. It throws if called
    * when a default database isn't set.
+   * @private
    */
   private defaultDB(): string {
     if (!this.options.database) {
       throw new Error("Attempted to run an influx query without a default"
-        + " database specified or an explicit interface provided.");
+        + " database specified or an explicit database provided.");
     }
 
     return this.options.database;
@@ -756,6 +1063,7 @@ export class InfluxDB {
 
   /**
    * Creates options to be passed into the pool to query databases.
+   * @private
    */
   private getQueryOpts (params: any, method: string = "GET"): any {
     return {

@@ -32,6 +32,6 @@ Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have update
 
 ## Usage
 
-Version 5.0.0 docs have not yet been written, nor has it been published. You're probably looking for the 4.x documentation, you can find it here:
-
-[Documentation](https://github.com/node-influx/node-influx/tree/4.x#usage)
+ * [API Documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html)
+ * [Tutorials & Examples](https://node-influx.github.io/manual/tutorial.html)
+ * [Changelog](https://node-influx.github.io/manual/changelog.html)
