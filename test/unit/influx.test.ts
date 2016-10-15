@@ -627,5 +627,84 @@ describe('influxdb', () => {
         return influx.query(['select * from series_0', 'select * from series_1']);
       });
     });
+
+    describe('.createRetentionPolicy', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
+      it('creates non-default policies', () => {
+        expectQuery('json', 'create retention policy "7d\\"" on "test" ' +
+          'duration 7d replication 1');
+
+        return influx.createRetentionPolicy('7d"', {
+          database: 'test',
+          duration: '7d',
+          replication: 1
+        });
+      });
+
+      it('creates default policies', () => {
+        expectQuery('json', 'create retention policy "7d\\"" on "my_db" ' +
+          'duration 7d replication 1 default');
+
+        return influx.createRetentionPolicy('7d"', {
+          duration: '7d',
+          replication: 1,
+          default: true,
+        });
+      });
+    });
+
+    describe('.alterRetentionPolicy', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
+      it('creates non-default policies', () => {
+        expectQuery('json', 'alter retention policy "7d\\"" on "test" ' +
+          'duration 7d replication 1');
+
+        return influx.alterRetentionPolicy('7d"', {
+          database: 'test',
+          duration: '7d',
+          replication: 1
+        });
+      });
+
+      it('creates default policies', () => {
+        expectQuery('json', 'alter retention policy "7d\\"" on "my_db" ' +
+          'duration 7d replication 1 default');
+
+        return influx.alterRetentionPolicy('7d"', {
+          duration: '7d',
+          replication: 1,
+          default: true,
+        });
+      });
+    });
+
+    it('shows retention policies', () => {
+      const data = dbFixture('showRetentionPolicies');
+      expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
+      influx.showRetentionPolicies('my"db');
+      setDefaultDB('my_db')
+      expectQuery('json', 'show retention policies on "my_db"', 'GET', data);
+
+      return influx.showRetentionPolicies().then(res => {
+        expect(res.slice()).to.deep.equal([
+          {
+            name: 'autogen',
+            duration: '0s',
+            shardGroupDuration: '168h0m0s',
+            replicaN: 1,
+            default: true,
+          },
+          {
+            name: '7d',
+            duration: '168h0m0s',
+            shardGroupDuration: '24h0m0s',
+            replicaN: 1,
+            default: false,
+          },
+        ])
+      })
+    });
   });
 });

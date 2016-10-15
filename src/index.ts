@@ -174,6 +174,20 @@ export interface QueryOptions {
 }
 
 /**
+ * RetentionOptions are passed into passed into the {@link
+ * InfluxDB#createRetentionPolicy} and {@link InfluxDB#alterRetentionPolicy}.
+ * See the [Downsampling and Retention page](https://docs.influxdata.com/
+ * influxdb/v1.0/guides/downsampling_and_retention/) on the Influx docs for
+ * more information.
+ */
+export interface RetentionOptions {
+  database?: string;
+  duration: string;
+  replication: number;
+  default?: boolean;
+}
+
+/**
  * Parses the URL out into into a ClusterConfig object
  */
 function parseOptionsUrl(addr: string): SingleHostConfig {
@@ -689,6 +703,113 @@ export class InfluxDB {
       q: `drop continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)}`,
     }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Creates a new retention policy on a database. You can read more about
+   * [Downsampling and Retention](https://docs.influxdata.com/influxdb/v1.0/
+   * guides/downsampling_and_retention/) on the InfluxDB website.
+   *
+   * @param {String} name The retention policy name
+   * @param {Object} options
+   * @param {String} [options.database] Database to create the policy on,
+   *     uses the default database if not provided.
+   * @param {String} options.duration How long data in the retention policy
+   *     should be stored for, should be in a format like `7d`. See details
+   *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
+   * @param {Number} options.replication How many servers data in the series
+   *     should be replicated to.
+   * @param {Boolean} [options.default] Whether the retention policy should
+   *     be the default policy on the database.
+   * @returns {Promise<void>}
+   * @example
+   * influx.createRetentionPolicy('7d', {
+   *  duration: '7d',
+   *  replication: 1
+   * })
+   */
+  public createRetentionPolicy(name: string, options: RetentionOptions): Promise<void> {
+    const q = `create retention policy ${grammar.escape.quoted(name)} on `
+      + grammar.escape.quoted(options.database || this.defaultDB())
+      + ` duration ${options.duration} replication ${options.replication}`
+      + (options.default ? " default" : "");
+
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Alters an existing retention policy on a database.
+   *
+   * @param {String} name The retention policy name
+   * @param {Object} options
+   * @param {String} [options.database] Database to create the policy on,
+   *     uses the default database if not provided.
+   * @param {String} options.duration How long data in the retention policy
+   *     should be stored for, should be in a format like `7d`. See details
+   *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
+   * @param {Number} options.replication How many servers data in the series
+   *     should be replicated to.
+   * @param {Boolean} [options.default] Whether the retention policy should
+   *     be the default policy on the database.
+   * @returns {Promise<void>}
+   * @example
+   * influx.alterRetentionPolicy('7d', {
+   *  duration: '7d',
+   *  replication: 1,
+   *  default: true
+   * })
+   */
+  public alterRetentionPolicy(name: string, options: RetentionOptions): Promise<void> {
+    const q = `alter retention policy ${grammar.escape.quoted(name)} on `
+      + grammar.escape.quoted(options.database || this.defaultDB())
+      + ` duration ${options.duration} replication ${options.replication}`
+      + (options.default ? " default" : "");
+
+    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Shows retention policies on the database
+   *
+   * @param {String} [database] The database to list policies on, uses the
+   *     default database if not provided.
+   * @returns {Promise<Array<{
+   *     name: String,
+   *     duration: String,
+   *     shardGroupDuration: String,
+   *     replicaN: Number,
+   *     default: Boolean
+   * }>>}
+   * @example
+   * influx.showRetentionPolicies().then(policies => {
+   *   expect(policies.slice()).to.deep.equal([
+   *     {
+   *       name: 'autogen',
+   *       duration: '0s',
+   *       shardGroupDuration: '168h0m0s',
+   *       replicaN: 1,
+   *       default: true,
+   *     },
+   *     {
+   *       name: '7d',
+   *       duration: '168h0m0s',
+   *       shardGroupDuration: '24h0m0s',
+   *       replicaN: 1,
+   *       default: false,
+   *     },
+   *   ])
+   * })
+   */
+  public showRetentionPolicies(database: string = this.defaultDB()): Promise<{
+    default: boolean,
+    duration: string,
+    name: string,
+    replicaN: number,
+    shardGroupDuration: string,
+  }[]> {
+    return this.pool.json(this.getQueryOpts({
+      q: `show retention policies on ${grammar.escape.quoted(database)}`,
+    }, "GET")).then(parseSingle);
   }
 
   /**
