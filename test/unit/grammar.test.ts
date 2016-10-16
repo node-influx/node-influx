@@ -1,5 +1,5 @@
 import * as grammar from "../../src/grammar";
-import { expect } from "./helpers";
+import { expect } from "chai";
 
 const escapeTables = require("../fixture/escapeTables.json");
 

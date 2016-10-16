@@ -1,6 +1,6 @@
 import { BackoffStrategy } from "../../src/backoff/backoff";
 import { ExponentialBackoff } from "../../src/backoff/exponential";
-import { expect } from "./helpers";
+import { expect } from "chai";
 
 describe("backoff strategies", () => {
   describe("exponential strategy", () => {

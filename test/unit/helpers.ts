@@ -1,8 +1,9 @@
-const influxVersion = process.env.INFLUX_VERSION || 'v1.0.0';
+import { use } from "chai";
+import * as sinonChai from "sinon-chai";
 
-const chai = require('chai');
-chai.use(require('sinon-chai'));
-export const expect = chai.expect;
+use(sinonChai);
+
+const influxVersion = process.env.INFLUX_VERSION || "v1.0.0";
 
 /**
  * dbFixture synchronously loads and returns a fixture for the current

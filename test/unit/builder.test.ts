@@ -1,5 +1,5 @@
 import { Expression, Measurement, toNanoDate } from '../../src/index';
-import { expect } from './helpers';
+import { expect } from "chai";
 
 describe('query builder', () => {
   describe('measurement builder', () => {

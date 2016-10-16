@@ -1,7 +1,8 @@
 'use strict'
 
 import { InfluxDB, FieldType, toNanoDate } from '../../src';
-import { expect, dbFixture } from "./helpers";
+import { dbFixture } from "./helpers";
+import { expect } from "chai";
 
 const sinon = require('sinon');
 
@@ -77,7 +78,7 @@ describe('influxdb', () => {
         hosts: [{ host: '192.168.0.1' }],
       }));
 
-      expect(client.schema.my_db.my_measurement).to.be.defined;
+      expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
       client = (<any> new InfluxDB({
         schema: [{
@@ -89,7 +90,7 @@ describe('influxdb', () => {
         hosts: [{ host: '192.168.0.1' }],
       }));
 
-      expect(client.schema.my_db.my_measurement).to.be.defined;
+      expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
       expect(() => {
         new InfluxDB({
@@ -699,6 +700,12 @@ describe('influxdb', () => {
       });
     });
 
+    it('drops retention policies', () => {
+      setDefaultDB('my_db');
+      expectQuery('json', 'drop retention policy "7d\\"" on "my_db"');
+      return influx.dropRetentionPolicy('7d"');
+    });
+
     it('shows retention policies', () => {
       const data = dbFixture('showRetentionPolicies');
       expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
@@ -723,7 +730,7 @@ describe('influxdb', () => {
             default: false,
           },
         ])
-      })
+      });
     });
   });
 });

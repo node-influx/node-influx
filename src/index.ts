@@ -21,7 +21,7 @@ const defaultOptions: ClusterConfig = Object.freeze({
 });
 
 export * from "./builder";
-export { FieldType, Precision, Raw, TimePrecision, toNanoDate } from "./grammar";
+export { FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
 export { PingStats, PoolOptions } from "./pool";
 export { ResultError } from "./results";
@@ -790,6 +790,25 @@ export class InfluxDB {
       + (options.default ? " default" : "");
 
     return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Deletes a retention policy and associated data. Note that the data will
+   * not be immediately destroyed, and will hang around until Influx's
+   * bi-hourly cron.
+   *
+   * @param {String} name The retention policy name
+   * @param {String} [database] Database name that the policy lives in,
+   *     uses the default database if not provided.
+   * @returns {Promise<void>}
+   * @example
+   * influx.dropRetentionPolicy('7d')
+   */
+  public dropRetentionPolicy(name: string, database: string = this.defaultDB()): Promise<void> {
+    return this.pool.json(this.getQueryOpts({
+      q: `drop retention policy ${grammar.escape.quoted(name)} `
+        + `on ${grammar.escape.quoted(database)}`,
+    }, "POST")).then(assertNoErrors);
   }
 
   /**
