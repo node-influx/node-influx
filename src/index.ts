@@ -230,7 +230,7 @@ function defaults<T>(target: T, ...srcs: T[]): T {
  * This is a "driver-level" module, not a a full-fleged ORM or ODM; you run
  * queries directly by calling methods on this class.
  *
- * Please check out some out [the tutorials](https://node-influx.github.io/manual/tutorial.html)
+ * Please check out some of [the tutorials](https://node-influx.github.io/manual/tutorial.html)
  * if you want help getting started!
  *
  * @example
