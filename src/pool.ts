@@ -336,14 +336,18 @@ export class Pool {
     });
 
     // Handle timeouts:
-    req.setTimeout(this.timeout, () => {
-      if (shouldHandle()) {
-        this.handleRequestError(
-          new ServiceNotAvailableError("Request timed out"),
-          host, options, callback
-        );
-      }
-    });
+    // We wrap this in a conditional pending better browser support. See:
+    // https://github.com/node-influx/node-influx/issues/221
+    if (typeof req.setTimeout === "function") {
+      req.setTimeout(this.timeout, () => {
+        if (shouldHandle()) {
+          this.handleRequestError(
+            new ServiceNotAvailableError("Request timed out"),
+            host, options, callback
+          );
+        }
+      });
+    }
 
     // Write out the body:
     if (options.body) {
