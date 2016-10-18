@@ -551,7 +551,7 @@ export class InfluxDB {
    * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
    */
   public dropSeries(options: b.measurement | b.where | { database: string }): Promise<void> {
-    const db = 'database' in options ? (<any> options).database : this.defaultDB();
+    const db = "database" in options ? (<any> options).database : this.defaultDB();
 
     let q = "drop series";
     if ("measurement" in options) {
@@ -730,7 +730,7 @@ export class InfluxDB {
   }>> {
     return this.pool.json(this.getQueryOpts({
       db: database,
-      q: 'show continuous queries',
+      q: "show continuous queries",
     })).then(parseSingle);
   }
 
