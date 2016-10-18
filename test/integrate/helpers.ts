@@ -1,4 +1,12 @@
 import { InfluxDB, HostConfig, FieldType } from '../../src';
+import * as path from 'path';
+
+const sampleData = require('fs')
+  .readFileSync(path.join(__dirname, '../fixture/integrateSampleData.json'))
+  .toString()
+  .split('\n')
+  .filter(line => line.length > 0)
+  .map(line => JSON.parse(line));
 
 const details: HostConfig = process.env.INFLUX_HOST
   ? JSON.parse(process.env.INFLUX_HOST)
@@ -30,4 +38,8 @@ export function newClient(): Promise<InfluxDB> {
   return client.dropDatabase(db)
     .then(() => client.createDatabase(db))
     .then(() => client);
+}
+
+export function writeSampleData(db: InfluxDB): Promise<void> {
+  return db.writePoints(sampleData, { precision: 's' });
 }

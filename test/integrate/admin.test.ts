@@ -84,4 +84,49 @@ describe('administrative actions', () => {
         .then(rps => expect(rps.map(rp => rp.name)).to.not.contain('7d'))
     })
   });
+
+  describe('continuous queries', () => {
+    const sampleQuery = 'SELECT MEAN(cpu) INTO "7d"."perf" FROM "1d"."perf" GROUP BY time(1m)';
+
+    beforeEach(() => {
+      return Promise.all([
+        db.createRetentionPolicy('7d', {
+          duration: '7d',
+          replication: 1,
+        }),
+        db.createRetentionPolicy('1d', {
+          duration: '1d',
+          replication: 1,
+        }),
+      ]);
+    });
+
+    afterEach(() => {
+      return Promise.all([
+        db.dropRetentionPolicy('7d'),
+        db.dropRetentionPolicy('1d'),
+        db.dropContinuousQuery('7d_perf').catch(err => { /* noop */ }),
+      ]);
+    });
+
+    it('creates continuous queries', () => {
+      return db.createContinuousQuery('7d_perf', sampleQuery)
+        .then(() => db.showContinousQueries())
+        .then(queries => {
+          expect(queries.slice()).to.deep.equal([
+            { name: '7d_perf', query: 'CREATE CONTINUOUS QUERY "7d_perf" ON '
+              + 'influx_test_db BEGIN SELECT mean(cpu) INTO influx_test_db."7d".perf '
+              + 'FROM influx_test_db."1d".perf GROUP BY time(1m) END' },
+          ]);
+        });
+    });
+
+    it('drops continuous queries', () => {
+      return db.createContinuousQuery('7d_perf', sampleQuery)
+        .then(() => db.showContinousQueries())
+        .then(() => db.dropContinuousQuery('7d_perf'))
+        .then(() => db.showContinousQueries())
+        .then(queries => expect(queries).to.have.length(0));
+    });
+  });
 });

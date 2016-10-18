@@ -415,6 +415,21 @@ describe('influxdb', () => {
       });
     });
 
+    describe('.showContinousQueries()', () => {
+      it('queries correctly', () => {
+        expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
+        return influx.showContinousQueries('my_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.showContinousQueries()).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_db');
+        expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
+        return influx.showContinousQueries();
+      });
+    });
+
     describe('.writePoints()', () => {
       it('writes with all options specified without a schema', () => {
         expectWrite('mymeas,my_tag=1 myfield=90 1463683075', {

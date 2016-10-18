@@ -21,9 +21,8 @@ export enum FieldType {
   BOOLEAN
 };
 
-const numericRe = /^[0-9]+$/;
-export function isNumeric(value: string) {
-  return numericRe.test(value);
+export function isNumeric(value: string): boolean {
+  return !Number.isNaN(Number(value));
 }
 
 /**

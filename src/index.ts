@@ -400,7 +400,7 @@ export class InfluxDB {
     });
 
     this.options.schema.forEach(schema => {
-      const db = schema.database || this.options.database;
+      const db = schema.database = schema.database || this.options.database;
       if (!db) {
         throw new Error(
           `Schema ${schema.measurement} doesn't have a database specified,` +
@@ -448,7 +448,7 @@ export class InfluxDB {
    * influx.getMeasurements().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
    */
-  public getDatabaseNames(data): Promise<string[]> {
+  public getDatabaseNames(): Promise<string[]> {
     return this.pool.json(this.getQueryOpts({ q: "show databases" }))
       .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
   }
@@ -545,11 +545,14 @@ export class InfluxDB {
    *
    * influx.dropSeries({
    *   measurement: m => m.name('cpu').policy('autogen'),
-   *   where: e => e.tag('cpu').equals.value('cpu8')
+   *   where: e => e.tag('cpu').equals.value('cpu8'),
+   *   database: 'my_db'
    * })
    * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
    */
-  public dropSeries(options: b.measurement | b.where): Promise<void> {
+  public dropSeries(options: b.measurement | b.where | { database: string }): Promise<void> {
+    const db = 'database' in options ? (<any> options).database : this.defaultDB();
+
     let q = "drop series";
     if ("measurement" in options) {
       q += " from " + b.parseMeasurement(<b.measurement> options);
@@ -558,7 +561,7 @@ export class InfluxDB {
       q += " where " + b.parseWhere(<b.where> options);
     }
 
-    return this.pool.json(this.getQueryOpts({ q }, "POST")).then(assertNoErrors);
+    return this.pool.json(this.getQueryOpts({ db, q }, "POST")).then(assertNoErrors);
   }
 
   /**
@@ -712,6 +715,23 @@ export class InfluxDB {
       q: `create continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)} begin ${query} end`,
     }, "POST")).then(assertNoErrors);
+  }
+
+  /**
+   * Returns a list of continous queries in the database.
+   * @param {String} [database] If not provided, uses the default database.
+   * @returns {Promise<void>}
+   * @example
+   * influx.showContinousQueries()
+   */
+  public showContinousQueries(database: string = this.defaultDB()): Promise<Results<{
+    name: string,
+    query: string
+  }>> {
+    return this.pool.json(this.getQueryOpts({
+      db: database,
+      q: 'show continuous queries',
+    })).then(parseSingle);
   }
 
   /**
