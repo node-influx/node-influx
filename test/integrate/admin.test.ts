@@ -68,7 +68,7 @@ describe('administrative actions', () => {
         replication: 1,
         default: true,
       }).then(() => {
-        expectPolicy({
+        return expectPolicy({
           default: true,
           duration: '168h0m0s',
           name: '7d',

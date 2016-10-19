@@ -286,28 +286,30 @@ describe('influxdb', () => {
     });
 
     describe('.dropSeries()', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
       it('drops with only from clause by string', () => {
-        expectQuery('json', 'drop series from "series_0"');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: '"series_0"' });
       });
 
       it('drops with only from clause by builder', () => {
-        expectQuery('json', 'drop series from "series_0"');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: m => m.name('series_0') });
       });
 
       it('drops with only where clause by string', () => {
-        expectQuery('json', 'drop series where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
         influx.dropSeries({ where: '"my_tag" = 1' });
       });
 
       it('drops with only where clause by builder', () => {
-        expectQuery('json', 'drop series where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
         influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) });
       });
 
       it('drops with both', () => {
-        expectQuery('json', 'drop series from "series_0" where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0" where "my_tag" = 1' });
         influx.dropSeries({
           measurement: m => m.name('series_0'),
           where: e => e.tag('my_tag').equals.value(1)
