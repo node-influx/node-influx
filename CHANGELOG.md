@@ -5,6 +5,7 @@
 * Multiple fixes have been made for Webpack support, awaiting resolution of [node-libs-browser#41](https://github.com/webpack/node-libs-browser/pull/41)
 * The `epoch` property in the QueryOptions type has been renamed to `precision` for consistency.
 * Fixed an issue where precision could be lost when querying for nanosecond precision.
+* All `time` columns in Results are parsed to NanoDates, increased NanoDate parsing speed.
 
 ## 2016-10-15, 5.0.0-alpha.1
 

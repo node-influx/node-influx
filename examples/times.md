@@ -27,15 +27,13 @@ expect(myNanoDate.toISOString()).to.equal('2016-10-09T03:58:00.231Z')
 expect(myNanoDate.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
 ```
 
-By default, **all times returned from Influx queries are parsed to NanoDates**. For example, you can do something like the following:
+**All times returned from Influx queries are parsed to NanoDates**. For example, you can do something like the following:
 
 ```js
 influx.query('select * from perf').then(results => {
   results.forEach(row => console.log(`Used ${row.cpu} at ${row.time.toNanoISOString()}`))
 })
 ```
-
-The exception is if you manually ask for a precision of `ms` or coarser in the `options` parameter of the [`Influx#query` method](https://node-influx.github.io/class/src/index.js~InfluxDB.html#instance-method-query). Then, we parse your times into normal Dates.
 
 When writing data to Influx, **all write methods accept NanoDates in all situations**. This means if you select data from Influx and want to update a data point, you can pass that time right back into the `write` method. (Remember, points within series are unique by their time!) If you have a nanosecond timestamp from some external source, you can convert it to a NanoDate using [`toNanoDate`](https://node-influx.github.io/function/index.html#static-function-toNanoDate).
 

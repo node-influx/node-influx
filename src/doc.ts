@@ -134,7 +134,8 @@ import { Tags } from "./results";
  * Results are returned from the .query method. It marshals the raw Influx
  * results into a more palatable, JavaScript-y structure. All query results
  * are marshalled into a single, flat arrays, and methods are provided to
- * example grouped results as necessary.
+ * example grouped results as necessary. The `time` column, if included, is
+ * converted into a {@link NanoDate}.
  *
  * @class Result<T>
  * @example
@@ -295,4 +296,28 @@ export class BackoffStrategy { // for doc only, implementation in src/pool/backo
    * @return {BackoffStrategy}
    */
   public reset(): BackoffStrategy { return this; }
+}
+
+/**
+ * A NanoDate is a type of Date that holds a nanosecond-precision unix
+ * timestamp. It's the default date type parsed in {@link Results} and
+ * can be created manually using {@link toNanoDate}.
+ * @interface
+ */
+export class NanoDate extends Date { // for doc only, implementations in src/grammar/times.ts
+  /**
+   * Returns the unix nanoseconds timestamp as a string.
+   * @example
+   * const date = toNanoDate('1475985480231035677')
+   * expect(date.getNanoTime()).to.equal('1475985480231035677')
+   */
+  public getNanoTime(): string { return ""; };
+
+  /**
+   * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
+   * @example
+   * const date = toNanoDate('1475985480231035677')
+   * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
+   */
+  public toNanoISOString(): string { return ""; };
 }

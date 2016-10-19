@@ -67,25 +67,25 @@ describe("grammar", () => {
     it('parses numeric `ms` timestamps', () => {
       const parsed = grammar.isoOrTimeToDate(1475985480231, 'ms');
       expect(parsed.getTime()).to.equal(1475985480231);
-      expect(parsed).to.not.have.property('getNanoTime');
+      expect(parsed.getNanoTime()).to.equal('1475985480231000000');
     });
 
     it('parses numeric `s` timestamps', () => {
       const parsed = grammar.isoOrTimeToDate(1475985480, 's');
       expect(parsed.getTime()).to.equal(1475985480000);
-      expect(parsed).to.not.have.property('getNanoTime');
+      expect(parsed.getNanoTime()).to.equal('1475985480000000000');
     });
 
     it('parses numeric `m` timestamps', () => {
       const parsed = grammar.isoOrTimeToDate(24599758, 'm');
       expect(parsed.getTime()).to.equal(1475985480000);
-      expect(parsed).to.not.have.property('getNanoTime');
+      expect(parsed.getNanoTime()).to.equal('1475985480000000000');
     });
 
     it('parses numeric `h` timestamps', () => {
       const parsed = grammar.isoOrTimeToDate(409995, 'h');
       expect(parsed.getTime()).to.equal(1475982000000);
-      expect(parsed).to.not.have.property('getNanoTime');
+      expect(parsed.getNanoTime()).to.equal('1475982000000000000');
     });
   });
 

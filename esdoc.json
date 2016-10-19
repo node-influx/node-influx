@@ -17,7 +17,7 @@
     ],
     "usage": [
       "./examples/times.md",
-      "./examples/testing.md"
+      "./examples/testing.md",
       "./CONTRIBUTING.md"
     ],
     "changelog": ["./CHANGELOG.md"]

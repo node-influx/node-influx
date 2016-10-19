@@ -307,7 +307,11 @@ class NanosecondsDateManipulator implements IDateManipulator<NanoDate> {
     case "u":
       timestamp *= 1000;
     case "n":
-      return toNanoDate(String(timestamp));
+      const date = <any> new Date(timestamp / nsPer.ms);
+      date._nanoTime = String(timestamp);
+      date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
+      date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
+      return date;
 
     default:
       throw new Error(`Unknown precision "${precision}"!`);
@@ -352,16 +356,11 @@ export function dateToTime(date: Date | NanoDate, precision: TimePrecision): str
 export function isoOrTimeToDate(
   stamp: string | number,
   precision: TimePrecision = "n"
-): Date | NanoDate {
-
-  const manipulator = !precision || precision === "u" || precision === "n"
-    ? nanoManipulator
-    : milliManipulator;
-
+): NanoDate {
   if (typeof stamp === "string") {
-    return manipulator.isoToDate(stamp);
+    return nanoManipulator.isoToDate(stamp);
   } else {
-    return manipulator.timetoDate(stamp, precision);
+    return nanoManipulator.timetoDate(stamp, precision);
   }
 };
 

@@ -34,14 +34,15 @@ suite(`results: ${count} grouped results`, () => {
         'mean'
       ],
       values: [
-        [1474819971787272, 42],
-        [1474821271999944, 44]
+        [14748199717, 42],
+        [14748212719, 44]
       ]
     })
   }
 
   const r = results.parse(grouped)
-  bench('parsing', () => results.parse(grouped))
+  bench('parsing ms', () => results.parse(grouped, 'ms'))
+  bench('parsing ns', () => results.parse(grouped, 'n'))
   bench('parsing (old)', () => parseOld(grouped.results))
   bench('computing groups', () => r.groups())
   bench('searching for present', () => r.group({ tag: `value${count - 1}` }))
@@ -67,6 +68,7 @@ suite(`results: ${count} flat results`, () => {
     grouped.results[0].series[0].values.push([1474819971787272, 42])
   }
 
-  bench('parsing', () => results.parse(grouped))
+  bench('parsing ms', () => results.parse(grouped, 'ms'))
+  bench('parsing ns', () => results.parse(grouped, 'n'))
   bench('parsing (old)', () => parseOld(grouped.results))
 })
