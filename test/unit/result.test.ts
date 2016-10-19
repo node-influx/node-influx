@@ -1,5 +1,5 @@
 import * as results from "../../src/results";
-import { expect } from "./helpers";
+import { expect } from "chai";
 
 describe('results', () => {
   it('parses a empty result', () => {

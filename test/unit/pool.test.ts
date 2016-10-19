@@ -1,6 +1,6 @@
 import { ExponentialBackoff} from "../../src/backoff/exponential";
 import { Pool, ServiceNotAvailableError, RequestError } from "../../src/pool";
-import { expect } from "./helpers";
+import { expect } from "chai";
 
 import * as http from "http";
 import * as async from "async";

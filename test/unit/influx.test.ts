@@ -1,7 +1,8 @@
 'use strict'
 
 import { InfluxDB, FieldType, toNanoDate } from '../../src';
-import { expect, dbFixture } from "./helpers";
+import { dbFixture } from "./helpers";
+import { expect } from "chai";
 
 const sinon = require('sinon');
 
@@ -77,7 +78,7 @@ describe('influxdb', () => {
         hosts: [{ host: '192.168.0.1' }],
       }));
 
-      expect(client.schema.my_db.my_measurement).to.be.defined;
+      expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
       client = (<any> new InfluxDB({
         schema: [{
@@ -89,7 +90,7 @@ describe('influxdb', () => {
         hosts: [{ host: '192.168.0.1' }],
       }));
 
-      expect(client.schema.my_db.my_measurement).to.be.defined;
+      expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
       expect(() => {
         new InfluxDB({
@@ -285,28 +286,30 @@ describe('influxdb', () => {
     });
 
     describe('.dropSeries()', () => {
+      beforeEach(() => setDefaultDB('my_db'));
+
       it('drops with only from clause by string', () => {
-        expectQuery('json', 'drop series from "series_0"');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: '"series_0"' });
       });
 
       it('drops with only from clause by builder', () => {
-        expectQuery('json', 'drop series from "series_0"');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: m => m.name('series_0') });
       });
 
       it('drops with only where clause by string', () => {
-        expectQuery('json', 'drop series where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
         influx.dropSeries({ where: '"my_tag" = 1' });
       });
 
       it('drops with only where clause by builder', () => {
-        expectQuery('json', 'drop series where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
         influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) });
       });
 
       it('drops with both', () => {
-        expectQuery('json', 'drop series from "series_0" where "my_tag" = 1');
+        expectQuery('json', { db: 'my_db', q: 'drop series from "series_0" where "my_tag" = 1' });
         influx.dropSeries({
           measurement: m => m.name('series_0'),
           where: e => e.tag('my_tag').equals.value(1)
@@ -411,6 +414,21 @@ describe('influxdb', () => {
         setDefaultDB('my_"_db');
         expectQuery('json', 'drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q');
+      });
+    });
+
+    describe('.showContinousQueries()', () => {
+      it('queries correctly', () => {
+        expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
+        return influx.showContinousQueries('my_db');
+      });
+      it('throws if DB unspecified', () => {
+        expect(() => influx.showContinousQueries()).to.throw(/default database/);
+      });
+      it('fills in default DB', () => {
+        setDefaultDB('my_db');
+        expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
+        return influx.showContinousQueries();
       });
     });
 
@@ -699,6 +717,12 @@ describe('influxdb', () => {
       });
     });
 
+    it('drops retention policies', () => {
+      setDefaultDB('my_db');
+      expectQuery('json', 'drop retention policy "7d\\"" on "my_db"');
+      return influx.dropRetentionPolicy('7d"');
+    });
+
     it('shows retention policies', () => {
       const data = dbFixture('showRetentionPolicies');
       expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
@@ -723,7 +747,7 @@ describe('influxdb', () => {
             default: false,
           },
         ])
-      })
+      });
     });
   });
 });

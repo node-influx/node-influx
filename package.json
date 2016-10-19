@@ -5,15 +5,17 @@
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index",
   "scripts": {
-    "clean": "rimraf coverage doc lib",
-    "test": "npm-run-all --parallel test:lint test:unit",
-    "test:lint": "tslint 'src/**/*.ts'",
-    "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
-    "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
-    "test:travis": "npm-run-all --parallel test:lint build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "build:dist": "npm run clean && tsc && cp -R test/fixture lib/test",
     "build:doc": "npm run clean && tsc -m es2015 --moduleResolution node && esdoc -c esdoc.json",
-    "prepublish": "npm run clean && tsc -d"
+    "clean": "rimraf coverage doc lib",
+    "prepublish": "npm run clean && tsc -d",
+    "test": "npm-run-all --parallel test:lint test:unit test:integrate",
+    "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
+    "test:integrate": "mocha -R dot --compilers ts:ts-node/register test/integrate/*.test.ts",
+    "test:lint": "tslint 'src/**/*.ts'",
+    "test:travis": "npm-run-all --parallel test:integrate test:lint build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
+    "test:unit": "mocha -R dot --compilers ts:ts-node/register test/unit/*.test.ts",
+    "test:watch": "mocha -R min --watch --compilers ts:ts-node/register test/unit/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -35,9 +37,11 @@
   "license": "MIT",
   "devDependencies": {
     "@types/async": "^2.0.32",
+    "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.38",
     "@types/sinon": "^1.16.31",
+    "@types/sinon-chai": "^2.7.27",
     "chai": "^3.5.0",
     "coveralls": "^2.11.1",
     "esdoc": "^0.4.8",

@@ -1,6 +1,6 @@
 import { Schema, coerceBadly } from "../../src/schema";
 import { FieldType } from "../../src/grammar";
-import { expect } from "./helpers";
+import { expect } from "chai";
 
 describe("schema", () => {
   let schema: Schema;
