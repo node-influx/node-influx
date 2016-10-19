@@ -89,8 +89,7 @@ export class RequestError extends Error {
     callback: (e: RequestError) => void
   ) {
       let body = "";
-      res.setEncoding("utf8");
-      res.on("data", str => body = body + str);
+      res.on("data", str => body = body + str.toString());
       res.on("end", () => callback(new RequestError(req, res, body)));
   }
 
@@ -197,8 +196,7 @@ export class Pool {
         }
 
         let output = "";
-        res.setEncoding("utf8");
-        res.on("data", str => { output = output + str; });
+        res.on("data", str => output = output + str.toString());
         res.on("end", () => resolve(output));
       });
     });
