@@ -621,7 +621,7 @@ describe('influxdb', () => {
       });
     });
 
-    describe('.write methods', () => {
+    describe('.query', () => {
       beforeEach(() => setDefaultDB('my_db'));
 
       it('runs raw queries', () => {
@@ -662,6 +662,34 @@ describe('influxdb', () => {
         }, 'GET', dbFixture('selectFromOne'));
 
         return influx.query(['select * from series_0', 'select * from series_1']);
+      });
+
+      it('passes in options', () => {
+        expectQuery('json', {
+          q: 'select * from series_0',
+          epoch: 'ms',
+          rp: 'asdf',
+          db: 'my_db',
+        }, 'GET', dbFixture('selectFromOne'));
+
+        return influx.query(['select * from series_0'], {
+          precision: 'ms',
+          retentionPolicy: 'asdf',
+        });
+      });
+
+      it('rewrites nanosecond precisions', () => {
+        expectQuery('json', {
+          q: 'select * from series_0',
+          epoch: undefined,
+          rp: 'asdf',
+          db: 'my_db',
+        }, 'GET', dbFixture('selectFromOne'));
+
+        return influx.query(['select * from series_0'], {
+          precision: 'n',
+          retentionPolicy: 'asdf',
+        });
       });
     });
 

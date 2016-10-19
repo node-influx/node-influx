@@ -151,14 +151,10 @@ export interface WriteOptions {
 export interface QueryOptions {
 
   /**
-   * Epoch defining the precision at which to query points.
-   *
-   * WARNING: if this, is set to nanoseconds `ns`, timestamps will be unable
-   * to correctly be represented in JavaScript due to precision limitations.
-   * If this is left unset, Influx returns an ISO formatted date from which
-   * we are able to parse nanosecond precision dates (see the Results type).
+   * Defines the precision at which to query points. When left blank, it will
+   * query in nanosecond precision.
    */
-  epoch?: grammar.TimePrecision;
+  precision?: grammar.TimePrecision;
 
   /**
    * Retention policy to query from, defaults to the DEFAULT
@@ -1035,8 +1031,15 @@ export class InfluxDB {
     if (Array.isArray(query)) {
       query = query.join(";");
     }
+    // If the consumer asked explicitly for nanosecond precision parsing,
+    // remove that to cause Influx to give us ISO dates that
+    // we can parse correctly.
+    if (options.precision === "n") {
+      options = Object.assign({}, options); // avoid mutating
+      delete options.precision;
+    }
 
-    return this.queryRaw(query, options).then(res => parse(res, options.epoch));
+    return this.queryRaw(query, options).then(res => parse(res, options.precision));
   }
 
   /**
@@ -1055,13 +1058,12 @@ export class InfluxDB {
   public queryRaw<T>(query: string, options: QueryOptions = {}): Promise<any> {
     const {
       database = this.defaultDB(),
-      epoch,
       retentionPolicy,
     } = options;
 
     return this.pool.json(this.getQueryOpts({
       db: database,
-      epoch,
+      epoch: options.precision,
       q: query,
       rp: retentionPolicy,
     }));

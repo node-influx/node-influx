@@ -237,21 +237,9 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
 /**
  * The QueryOptions allow you to configure how queries are run against Influx.
  *
- * --
- *
- * Warning: if the epoch is set to nanoseconds `ns`, timestamps will be unable
- * to correctly be represented in JavaScript due to precision limitations. If
- * you wish to read nanosecond-precision timstamps, simply leave it unset; this
- * will cause Influx to return ISO formatted dates which we can parse. See the
- * {@link Results} type for more information about how to access them.
- *
- * Please see [A Moment for Times](https://node-influx.github.io/manual/
- * usage.html#a-moment-for-times) for a more complete and eloquent explanation
- * of time handling in this module.
- *
  * @typedef {Object} QueryOptions
- * @property {TimePrecision} [epoch] Epoch defining the precision at which
- *     to query points.
+ * @property {TimePrecision} [precision] Defines the precision at which
+ *     to query points. Defaults to querying in nanosecond precision.
  * @property {String} [retentionPolicy] Retention policy to query from,
  *     defaults to the DEFAULT retention policy.
  * @property {String} [database]  Database under which to query the points.

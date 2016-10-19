@@ -1,32 +1,38 @@
 # node-influx Changelog
 
+## TBA, 5.0.0-alpha.2
+
+* Multiple fixes have been made for Webpack support, awaiting resolution of [node-libs-browser#41](https://github.com/webpack/node-libs-browser/pull/41)
+* The `epoch` property in the QueryOptions type has been renamed to `precision` for consistency.
+* Fixed an issue where precision could be lost when querying for nanosecond precision.
+
 ## 2016-10-15, 5.0.0-alpha.1
 
 5.0.0 is a port/rewrite of node-influx to TypeScript, aiming to provide a stronger foundation while fixing many of the pain points and bugs which currently exist. These include issues with escaping data passed to node-influx, date handling difficulties, quirks in the connection, and the lack of complete unit tests. We also take the opportunity to build a more modern, promise-based API. Concretely, here's what we've got for you:
 
- - A modern promise based API;
- - Order-of-magnitude performance increases (varying per situation);
- - A more consistent API with predictable and consistent escaping;
- - The ability to correctly and accurately [deal with times](https://node-influx.github.io/manual/usage.html#a-moment-for-times);
- - The ability to correctly and accurately [deal with all data types](https://node-influx.github.io/typedef/index.html#static-typedef-SchemaOptions);
- - Fix some methods plain not working;
- - Isomorphism, allowing the adapter to work in both Node and the browser;
- - Less weird connection pool failures;
- - Much better and more complete [documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html);
+- A modern promise based API;
+- Order-of-magnitude performance increases (varying per situation);
+- A more consistent API with predictable and consistent escaping;
+- The ability to correctly and accurately [deal with times](https://node-influx.github.io/manual/usage.html#a-moment-for-times);
+- The ability to correctly and accurately [deal with all data types](https://node-influx.github.io/typedef/index.html#static-typedef-SchemaOptions);
+- Fix some methods plain not working;
+- Isomorphism, allowing the adapter to work in both Node and the browser;
+- Less weird connection pool failures;
+- Much better and more complete [documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html);
 
 Please see the documentation linked in the readme for more information. The following is a list of breaking changes:
 
- * **breaking:** all methods have been modified to return promises
- * **breaking:** result output for grouped results has changed
- * **breaking:** data passed into Influx, except where otherwise noted, will be escaped automatically
- * **breaking:** the point structure for `.write*` methods has changed
- * **breaking:** the `.writePoint` method has been removed
- * **breaking:** `.writeSeries` as been more appropriately renamed `writeMeasurement`
- * **breaking:** write methods now write in nanosecond precision by default
- * **breaking:** `.getSeriesNames` has been renamed `.getSeries`
- * **breaking:** the old `.getSeries` method has been removed in favor of the behaviour exhibited by `getSeriesNames`
- * **breaking:** the InfluxDB client must now be invoked as `new InfluxDB`
- * **breaking:** the connection pool configuration has changed
+* **breaking:** all methods have been modified to return promises
+* **breaking:** result output for grouped results has changed
+* **breaking:** data passed into Influx, except where otherwise noted, will be escaped automatically
+* **breaking:** the point structure for `.write*` methods has changed
+* **breaking:** the `.writePoint` method has been removed
+* **breaking:** `.writeSeries` as been more appropriately renamed `writeMeasurement`
+* **breaking:** write methods now write in nanosecond precision by default
+* **breaking:** `.getSeriesNames` has been renamed `.getSeries`
+* **breaking:** the old `.getSeries` method has been removed in favor of the behaviour exhibited by `getSeriesNames`
+* **breaking:** the InfluxDB client must now be invoked as `new InfluxDB`
+* **breaking:** the connection pool configuration has changed
 
 ## 2016-10-06, Version 4.2.3
 
