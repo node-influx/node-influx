@@ -230,6 +230,7 @@ function defaults<T>(target: T, ...srcs: T[]): T {
  * if you want help getting started!
  *
  * @example
+ * const Influx = require('influx');
  * const influx = new Influx.InfluxDB({
  *  host: 'localhost',
  *  database: 'express_response_db',
@@ -307,57 +308,65 @@ export class InfluxDB {
   /**
    * Connect to a single InfluxDB instance by specifying
    * a set of connection options.
-   * @param {ClusterConfig|SingleHostConfig|string} options
+   * @param {ClusterConfig|SingleHostConfig|string} [options='http://root:root@127.0.0.1:8086']
    *
    * @example
-   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   * const Influx = require('influx')
    *
    * // Connect to a single host with a DSN:
-   * const client = new InfluxDB('http://user:password@host:8086/database')
+   * const influx = new Influx.InfluxDB('http://user:password@host:8086/database')
    *
    * @example
-   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   * const Influx = require('influx')
    *
    * // Connect to a single host with a full set of config details and
    * // a custom schema
-   * const client = new InfluxDB({
+   * const client = new Influx.InfluxDB({
    *   database: 'my_db',
    *   host: 'localhost',
    *   port: 8086,
    *   username: 'connor',
    *   password: 'pa$$w0rd',
-   *   schema: [{
-   *     measurement: 'perf',
-   *     tags: ['hostname'],
-   *     fields: {
-   *       memory_usage: FieldType.INTEGER,
-   *       cpu_usage: FieldType.FLOAT,
-   *       is_online: FieldType.BOOLEAN,
+   *   schema: [
+   *     {
+   *       measurement: 'perf',
+   *       fields: {
+   *         memory_usage: Influx.FieldType.INTEGER,
+   *         cpu_usage: Influx.FieldType.FLOAT,
+   *         is_online: Influx.FieldType.BOOLEAN
+   *       }
+   *       tags: [
+   *         'hostname'
+   *       ]
    *     }
-   *   }]
+   *   ]
    * })
    *
    * @example
-   * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
+   * const Influx = require('influx')
    *
    * // Use a pool of several host connections and balance queries across them:
-   * const client = new InfluxDB({
+   * const client = new Influx.InfluxDB({
    *   database: 'my_db',
    *   username: 'connor',
    *   password: 'pa$$w0rd',
    *   hosts: [
    *     { host: 'db1.example.com' },
    *     { host: 'db2.example.com' },
-   *   ]
-   *   schema: [{
-   *     measurement: 'perf',
-   *     tags: ['hostname'],
-   *     fields: {
-   *       memory_usage: FieldType.INTEGER,
-   *       cpu_usage: FieldType.FLOAT,
-   *       is_online: FieldType.BOOLEAN,
+   *   ],
+   *   schema: [
+   *     {
+   *       measurement: 'perf',
+   *       fields: {
+   *         memory_usage: Influx.FieldType.INTEGER,
+   *         cpu_usage: Influx.FieldType.FLOAT,
+   *         is_online: Influx.FieldType.BOOLEAN
+   *       }
+   *       tags: [
+   *         'hostname'
+   *       ]
    *     }
-   *   }]
+   *   ]
    * })
    *
    */
