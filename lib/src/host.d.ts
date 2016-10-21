@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { BackoffStrategy } from "./backoff/backoff";
 import * as urlModule from "url";
-export default class Host {
+export declare class Host {
     private backoff;
     url: urlModule.Url;
     /**

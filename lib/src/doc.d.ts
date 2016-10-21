@@ -129,7 +129,8 @@ import { Tags } from "./results";
  * Results are returned from the .query method. It marshals the raw Influx
  * results into a more palatable, JavaScript-y structure. All query results
  * are marshalled into a single, flat arrays, and methods are provided to
- * example grouped results as necessary.
+ * example grouped results as necessary. The `time` column, if included, is
+ * converted into a {@link NanoDate}.
  *
  * @class Result<T>
  * @example
@@ -231,21 +232,9 @@ export declare class Results<T> extends Array {
 /**
  * The QueryOptions allow you to configure how queries are run against Influx.
  *
- * --
- *
- * Warning: if the epoch is set to nanoseconds `ns`, timestamps will be unable
- * to correctly be represented in JavaScript due to precision limitations. If
- * you wish to read nanosecond-precision timstamps, simply leave it unset; this
- * will cause Influx to return ISO formatted dates which we can parse. See the
- * {@link Results} type for more information about how to access them.
- *
- * Please see [A Moment for Times](https://node-influx.github.io/manual/
- * usage.html#a-moment-for-times) for a more complete and eloquent explanation
- * of time handling in this module.
- *
  * @typedef {Object} QueryOptions
- * @property {TimePrecision} [epoch] Epoch defining the precision at which
- *     to query points.
+ * @property {TimePrecision} [precision] Defines the precision at which
+ *     to query points. Defaults to querying in nanosecond precision.
  * @property {String} [retentionPolicy] Retention policy to query from,
  *     defaults to the DEFAULT retention policy.
  * @property {String} [database]  Database under which to query the points.
@@ -296,4 +285,26 @@ export declare class BackoffStrategy {
      * @return {BackoffStrategy}
      */
     reset(): BackoffStrategy;
+}
+/**
+ * A NanoDate is a type of Date that holds a nanosecond-precision unix
+ * timestamp. It's the default date type parsed in {@link Results} and
+ * can be created manually using {@link toNanoDate}.
+ * @interface
+ */
+export declare class NanoDate extends Date {
+    /**
+     * Returns the unix nanoseconds timestamp as a string.
+     * @example
+     * const date = toNanoDate('1475985480231035677')
+     * expect(date.getNanoTime()).to.equal('1475985480231035677')
+     */
+    getNanoTime(): string;
+    /**
+     * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
+     * @example
+     * const date = toNanoDate('1475985480231035677')
+     * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
+     */
+    toNanoISOString(): string;
 }

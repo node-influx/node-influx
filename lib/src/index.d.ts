@@ -4,7 +4,7 @@ import { SchemaOptions } from "./schema";
 import * as b from "./builder";
 import * as grammar from "./grammar";
 export * from "./builder";
-export { FieldType, Precision, Raw, TimePrecision, toNanoDate } from "./grammar";
+export { FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from "./grammar";
 export { SchemaOptions } from "./schema";
 export { PingStats, PoolOptions } from "./pool";
 export { ResultError } from "./results";
@@ -112,14 +112,10 @@ export interface WriteOptions {
 }
 export interface QueryOptions {
     /**
-     * Epoch defining the precision at which to query points.
-     *
-     * WARNING: if this, is set to nanoseconds `ns`, timestamps will be unable
-     * to correctly be represented in JavaScript due to precision limitations.
-     * If this is left unset, Influx returns an ISO formatted date from which
-     * we are able to parse nanosecond precision dates (see the Results type).
+     * Defines the precision at which to query points. When left blank, it will
+     * query in nanosecond precision.
      */
-    epoch?: grammar.TimePrecision;
+    precision?: grammar.TimePrecision;
     /**
      * Retention policy to query from, defaults to the DEFAULT
      * database policy.
@@ -153,6 +149,7 @@ export interface RetentionOptions {
  * if you want help getting started!
  *
  * @example
+ * const Influx = require('influx');
  * const influx = new Influx.InfluxDB({
  *  host: 'localhost',
  *  database: 'express_response_db',
@@ -242,7 +239,7 @@ export declare class InfluxDB {
      * influx.getMeasurements().then(names =>
      *   console.log('My database names are: ' + names.join(', ')));
      */
-    getDatabaseNames(data: any): Promise<string[]>;
+    getDatabaseNames(): Promise<string[]>;
     /**
      * Returns array of measurements.
      * @returns {Promise<String[]>} a list of measurement names
@@ -307,11 +304,14 @@ export declare class InfluxDB {
      *
      * influx.dropSeries({
      *   measurement: m => m.name('cpu').policy('autogen'),
-     *   where: e => e.tag('cpu').equals.value('cpu8')
+     *   where: e => e.tag('cpu').equals.value('cpu8'),
+     *   database: 'my_db'
      * })
      * // DROP SERIES FROM "autogen"."cpu" WHERE "cpu" = 'cpu8'
      */
-    dropSeries(options: b.measurement | b.where): Promise<void>;
+    dropSeries(options: b.measurement | b.where | {
+        database: string;
+    }): Promise<void>;
     /**
      * Returns a list of users on the Influx database.
      * @return {Promise<Array<{ user: String, admin: Boolean }>>}
@@ -411,6 +411,17 @@ export declare class InfluxDB {
      */
     createContinuousQuery(name: string, query: string, database?: string): Promise<void>;
     /**
+     * Returns a list of continous queries in the database.
+     * @param {String} [database] If not provided, uses the default database.
+     * @returns {Promise<void>}
+     * @example
+     * influx.showContinousQueries()
+     */
+    showContinousQueries(database?: string): Promise<Results<{
+        name: string;
+        query: string;
+    }>>;
+    /**
      * Creates a continuous query in a database
      * @param {String} name The query name
      * @param {String} [database] If not provided, uses the default database.
@@ -466,6 +477,19 @@ export declare class InfluxDB {
      * })
      */
     alterRetentionPolicy(name: string, options: RetentionOptions): Promise<void>;
+    /**
+     * Deletes a retention policy and associated data. Note that the data will
+     * not be immediately destroyed, and will hang around until Influx's
+     * bi-hourly cron.
+     *
+     * @param {String} name The retention policy name
+     * @param {String} [database] Database name that the policy lives in,
+     *     uses the default database if not provided.
+     * @returns {Promise<void>}
+     * @example
+     * influx.dropRetentionPolicy('7d')
+     */
+    dropRetentionPolicy(name: string, database?: string): Promise<void>;
     /**
      * Shows retention policies on the database
      *

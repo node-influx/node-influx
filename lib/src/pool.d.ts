@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { BackoffStrategy } from "./backoff/backoff";
-import Host from "./host";
+import { Host } from "./host";
 import * as http from "http";
 import * as urlModule from "url";
 export interface PoolOptions {

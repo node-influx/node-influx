@@ -65,7 +65,7 @@ export declare function dateToTime(date: Date | NanoDate, precision: TimePrecisi
  * the precision is finer than "ms" the returned value will be a NanoDate.
  * @private
  */
-export declare function isoOrTimeToDate(stamp: string | number, precision?: TimePrecision): Date | NanoDate;
+export declare function isoOrTimeToDate(stamp: string | number, precision?: TimePrecision): NanoDate;
 /**
  * Converts a timestamp to a string with the correct precision. Assumes
  * that raw number and string instances are already in the correct precision.
