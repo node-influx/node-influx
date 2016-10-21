@@ -1,6 +1,6 @@
 import { BackoffStrategy } from "./backoff/backoff";
 import { ExponentialBackoff } from "./backoff/exponential";
-import Host from "./host";
+import { Host } from "./host";
 
 import * as http from "http";
 import * as querystring from "querystring";
@@ -307,11 +307,7 @@ export class Pool {
         return;
       }
 
-      // Resolve an error if we get a >500 status code. Note that we *exclude*
-      // 500 error codes. Sometimes malformed queries to influx cause panics,
-      // and trying to retry those queries on other hosts would just lead
-      // to a domino effect of crashing servers.
-      if (res.statusCode > 500) {
+      if (res.statusCode >= 500) {
         return this.handleRequestError(
           new ServiceNotAvailableError(res.statusMessage),
           host, options, callback

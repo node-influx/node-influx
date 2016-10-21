@@ -1,13 +1,7 @@
 import { InfluxDB, HostConfig, FieldType } from '../../src';
 import * as path from 'path';
 
-const sampleData = require('fs')
-  .readFileSync(path.join(__dirname, '../fixture/integrateSampleData.json'))
-  .toString()
-  .split('\n')
-  .filter(line => line.length > 0)
-  .map(line => JSON.parse(line));
-
+const sampleData = require('../fixture/integrateSampleData.json');
 const details: HostConfig = process.env.INFLUX_HOST
   ? JSON.parse(process.env.INFLUX_HOST)
   : { host: '127.0.01', port: 8086 };

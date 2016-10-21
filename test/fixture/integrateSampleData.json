@@ -1,28 +1,30 @@
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"8.120","level description":"between 6 and 9 feet"},"timestamp":"1439856000"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"8.005","level description":"between 6 and 9 feet"},"timestamp":"1439856360"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.887","level description":"between 6 and 9 feet"},"timestamp":"1439856720"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.762","level description":"between 6 and 9 feet"},"timestamp":"1439857080"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.635","level description":"between 6 and 9 feet"},"timestamp":"1439857440"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.500","level description":"between 6 and 9 feet"},"timestamp":"1439857800"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.372","level description":"between 6 and 9 feet"},"timestamp":"1439858160"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.234","level description":"between 6 and 9 feet"},"timestamp":"1439858520"}
-{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.110","level description":"between 6 and 9 feet"},"timestamp":"1439858880"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.064","level description":"below 3 feet"},"timestamp":"1439856000"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.116","level description":"below 3 feet"},"timestamp":"1439856360"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.028","level description":"below 3 feet"},"timestamp":"1439856720"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.126","level description":"below 3 feet"},"timestamp":"1439857080"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.041","level description":"below 3 feet"},"timestamp":"1439857440"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.051","level description":"below 3 feet"},"timestamp":"1439857800"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.067","level description":"below 3 feet"},"timestamp":"1439858160"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.057","level description":"below 3 feet"},"timestamp":"1439858520"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"1.991","level description":"below 3 feet"},"timestamp":"1439858880"}
-{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.736","level description":"below 3 feet"},"timestamp":"1442532240"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"41"},"timestamp":"1439856000"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"11"},"timestamp":"1439856360"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"38"},"timestamp":"1439856720"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"50"},"timestamp":"1439857080"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"35"},"timestamp":"1439857440"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"2"},"fields":{"index":"49"},"timestamp":"1439857800"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"24"},"timestamp":"1439858160"}
-{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"92"},"timestamp":"1439858520"}
+[
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"8.120","level description":"between 6 and 9 feet"},"timestamp":"1439856000"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"8.005","level description":"between 6 and 9 feet"},"timestamp":"1439856360"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.887","level description":"between 6 and 9 feet"},"timestamp":"1439856720"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.762","level description":"between 6 and 9 feet"},"timestamp":"1439857080"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.635","level description":"between 6 and 9 feet"},"timestamp":"1439857440"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.500","level description":"between 6 and 9 feet"},"timestamp":"1439857800"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.372","level description":"between 6 and 9 feet"},"timestamp":"1439858160"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.234","level description":"between 6 and 9 feet"},"timestamp":"1439858520"},
+{"measurement":"h2o_feet","tags":{"location":"coyote_creek"},"fields":{"water_level":"7.110","level description":"between 6 and 9 feet"},"timestamp":"1439858880"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.064","level description":"below 3 feet"},"timestamp":"1439856000"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.116","level description":"below 3 feet"},"timestamp":"1439856360"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.028","level description":"below 3 feet"},"timestamp":"1439856720"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.126","level description":"below 3 feet"},"timestamp":"1439857080"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.041","level description":"below 3 feet"},"timestamp":"1439857440"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.051","level description":"below 3 feet"},"timestamp":"1439857800"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.067","level description":"below 3 feet"},"timestamp":"1439858160"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.057","level description":"below 3 feet"},"timestamp":"1439858520"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"1.991","level description":"below 3 feet"},"timestamp":"1439858880"},
+{"measurement":"h2o_feet","tags":{"location":"santa_monica"},"fields":{"water_level":"2.736","level description":"below 3 feet"},"timestamp":"1442532240"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"41"},"timestamp":"1439856000"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"11"},"timestamp":"1439856360"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"38"},"timestamp":"1439856720"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"50"},"timestamp":"1439857080"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"35"},"timestamp":"1439857440"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"2"},"fields":{"index":"49"},"timestamp":"1439857800"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"1"},"fields":{"index":"24"},"timestamp":"1439858160"},
+{"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"92"},"timestamp":"1439858520"},
 {"measurement":"h2o_quality","tags":{"location":"coyote_creek","randtag":"3"},"fields":{"index":"56"},"timestamp":"1439858880"}
+]

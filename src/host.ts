@@ -1,7 +1,7 @@
 import { BackoffStrategy } from "./backoff/backoff";
 import * as urlModule from "url";
 
-export default class Host {
+export class Host {
 
   public url: urlModule.Url;
 
