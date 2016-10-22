@@ -1,6 +1,6 @@
 # node-influx
 
-An [InfluxDB](http://influxdb.org/) Node.js Client
+An [InfluxDB](http://influxdb.org/) Client for Node.js and Browsers
 
 [![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
 [![build](http://img.shields.io/travis/node-influx/node-influx/master.svg)](https://travis-ci.org/node-influx/node-influx)
@@ -9,9 +9,15 @@ An [InfluxDB](http://influxdb.org/) Node.js Client
 [![bitHound Code](https://www.bithound.io/github/node-influx/node-influx/badges/code.svg)](https://www.bithound.io/github/node-influx/node-influx)
 [![bitHound Dependencies](https://www.bithound.io/github/node-influx/node-influx/badges/dependencies.svg)](https://www.bithound.io/github/node-influx/node-influx/master/dependencies/npm)
 
+[![Sauce Test Status](https://saucelabs.com/buildstatus/node-influx)](https://saucelabs.com/u/node-influx)
+
 ## Installation
 
-    $ npm install influx@next
+For Node, simply:
+
+    $ npm install --save influx@next
+
+For browsers, see the [browser setup](https://node-influx.github.io/manual/usage.html#browser-setup) instructions.
 
 ## Features
 

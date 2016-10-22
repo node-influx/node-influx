@@ -47,7 +47,7 @@ const queries = [
 
   update(`drop user john`),
   update(`drop user steve`),
-  update(`drop database "${db}"`),
+  update(`drop database "${db}"`)
 ]
 
 const influxHost = process.env.INFLUX_HOST || 'http://localhost:8086'
@@ -98,7 +98,7 @@ function update (query, params = {}) {
         throw new Error(`Unsuccessful update. Response: ${res.status}, body: ${body}`)
       })
     }
-    return res.buffer();
+    return res.buffer()
   })
 }
 

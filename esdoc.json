@@ -17,6 +17,7 @@
     ],
     "usage": [
       "./examples/times.md",
+      "./examples/browser-setup.md",
       "./examples/testing.md",
       "./CONTRIBUTING.md"
     ],

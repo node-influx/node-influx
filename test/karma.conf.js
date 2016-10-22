@@ -1,5 +1,5 @@
 const path = require('path')
-const isSaucy = !!process.env.SAUCE;
+const isSaucy = !!process.env.SAUCE
 const sauceLaunchers = {
   sauceChrome: {
     base: 'SauceLabs',
@@ -22,8 +22,8 @@ const sauceLaunchers = {
 }
 
 if ((/^[0-9]+$/).test(process.env.TRAVIS_PULL_REQUEST)) {
-  console.log('Refusing to run SauceLabs tests in pull requests');
-  return process.exit(0);
+  console.log('Refusing to run SauceLabs tests in pull requests')
+  process.exit(0)
 }
 
 module.exports = function (config) {
@@ -36,13 +36,13 @@ module.exports = function (config) {
     reporters: isSaucy ? ['mocha', 'saucelabs'] : ['mocha'],
 
     plugins: [
-        require('karma-mocha'),
-        require('karma-mocha-reporter'),
-        require('karma-chrome-launcher'),
-        require('karma-webpack'),
-        require('karma-sourcemap-loader'),
-        require('karma-sauce-launcher'),
-        { 'middleware:pool-tests': ['factory', require('./fixture/pool-middleware.js')] }
+      require('karma-mocha'),
+      require('karma-mocha-reporter'),
+      require('karma-chrome-launcher'),
+      require('karma-webpack'),
+      require('karma-sourcemap-loader'),
+      require('karma-sauce-launcher'),
+      { 'middleware:pool-tests': ['factory', require('./fixture/pool-middleware.js')] }
     ],
 
     /**
@@ -60,7 +60,7 @@ module.exports = function (config) {
      */
     sauceLabs: {
       testName: 'node-influx',
-      public: 'public',
+      public: 'public'
     },
     customLaunchers: sauceLaunchers,
 

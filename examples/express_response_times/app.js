@@ -49,7 +49,7 @@ app.use((req, res, next) => {
       {
         measurement: 'response_times',
         tags: { host: os.hostname() },
-        fields: { duration, path: req.path },
+        fields: { duration, path: req.path }
       }
     ]).catch(err => {
       console.error(`Error saving data to InfluxDB! ${err.stack}`)

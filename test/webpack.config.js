@@ -6,7 +6,7 @@ module.exports = (() => {
 
   config.resolve = {
     extensions: ['.ts', '.js', '.json', ''],
-    alias: { 'http': path.resolve(__dirname, '../node_modules/stream-http/index.js') }
+    alias: { http: path.resolve(__dirname, '../node_modules/stream-http/index.js') }
   }
 
   config.module = {
@@ -30,7 +30,7 @@ module.exports = (() => {
     new webpack.DefinePlugin({
       'process.env': {
         WEBPACK: '"1"',
-        ENV: JSON.stringify(process.ENV),
+        ENV: JSON.stringify(process.ENV)
       }
     })
   ]

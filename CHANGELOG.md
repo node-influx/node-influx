@@ -6,6 +6,8 @@
 * The `epoch` property in the QueryOptions type has been renamed to `precision` for consistency.
 * Fixed an issue where precision could be lost when querying for nanosecond precision.
 * All `time` columns in Results are parsed to NanoDates, increased NanoDate parsing speed.
+* Fixed various compatibilit issues with browser polyfills.
+* Documentation typos have been fixed (thanks @dandv!) and made more consistent.
 
 ## 2016-10-15, 5.0.0-alpha.1
 

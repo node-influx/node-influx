@@ -14,7 +14,7 @@ module.exports = function () {
    *    malformed responses, respectively
    */
 
-  return function handle(req, res, next) {
+  return function handle (req, res, next) {
     const url = urlModule.parse(req.url)
     const parts = url.pathname.slice(1).split('/')
     if (parts[0] !== 'pool') {
@@ -30,7 +30,7 @@ module.exports = function () {
     }
 
     for (let i = 0; i < parts.length; i++) {
-      const sid = parts[i];
+      const sid = parts[i]
       if (sid.startsWith('altFail-')) {
         if (failNext.has(sid)) {
           failNext.delete(sid)
@@ -43,8 +43,7 @@ module.exports = function () {
       }
     }
 
-
-    const last = parts[parts.length - 1];
+    const last = parts[parts.length - 1]
     switch (last) {
       case 'ping':
         res.setHeader('X-Influxdb-Version', 'v1.0.0')
@@ -55,13 +54,12 @@ module.exports = function () {
       case 'echo':
         let body = ''
         req.setEncoding('utf8')
-        req.on('data', str => body += str)
+        req.on('data', str => { body += str })
         req.on('end', () => {
           res.end(JSON.stringify({
             method: req.method,
             query: url.query,
-            body
-          }))
+            body}))
         })
         break
 
@@ -74,9 +72,9 @@ module.exports = function () {
         break
 
       default:
-        const code = Number(last);
+        const code = Number(last)
         if (Number.isNaN(code)) {
-          console.error(`Could not handle path ${req.url}`);
+          console.error(`Could not handle path ${req.url}`)
         }
 
         res.writeHead(code)
