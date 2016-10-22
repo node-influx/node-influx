@@ -95,6 +95,13 @@ export interface BinaryOp {
   lte: ExpressionTail;
 }
 
+function regexHasFlags(re: RegExp): boolean {
+  if (typeof re.flags !== "undefined") {
+    return re.flags.length > 0;
+  }
+  return !(/\/$/).test(re.toString());
+}
+
 /**
  * Expression is used to build filtering expressions, like those used in WHERE
  * clauses. It can be used for fluent and safe building of queries using
@@ -192,7 +199,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
         }
 
         if (value instanceof RegExp) {
-          if (value.flags) {
+          if (regexHasFlags(value)) {
             throw new Error("Attmempted to query using a regex with flags, " +
               "but Influx doesn't support flags in queries.");
           }

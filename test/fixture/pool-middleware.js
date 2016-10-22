@@ -1,24 +1,20 @@
 const urlModule = require('url')
 
 module.exports = function () {
-  let firstFailed = false
+  const failNext = new Set()
 
   /**
    * Create a middleware that serves routes starting with /pool. Rounds can:
    *  - be `/ping`
-   *  - contain a `failFirst` segment to alternate request failures
-   *  - end with a status code, like `/pool/failFirst/204`
-   *  - end with `reset` to reset failFirst routes
+   *  - contain a `altFail-x` segment to alternate request failures
+   *  - end with a status code, like `/pool/altFail/204`
+   *  - end with `reset` to reset altFail routes
    *  - end with `echo` to print back what it was requested with
    *  - end with `json` or `badjson` to get valid and
    *    malformed responses, respectively
    */
 
   return function handle(req, res, next) {
-    if (req.url === '/ping') { // special case
-      req.url = '/pool/failFirst/ping'
-    }
-
     const url = urlModule.parse(req.url)
     const parts = url.pathname.slice(1).split('/')
     if (parts[0] !== 'pool') {
@@ -33,33 +29,27 @@ module.exports = function () {
       return
     }
 
+    for (let i = 0; i < parts.length; i++) {
+      const sid = parts[i];
+      if (sid.startsWith('altFail-')) {
+        if (failNext.has(sid)) {
+          failNext.delete(sid)
+          res.writeHead(500)
+          res.end()
+          return
+        } else {
+          failNext.add(sid)
+        }
+      }
+    }
+
+
     const last = parts[parts.length - 1];
-    if (last === 'reset') {
-      firstFailed = false
-      res.writeHead(204)
-      res.end()
-      return
-    }
-
-    if (parts.includes('failFirst') && !firstFailed) {
-      firstFailed = true
-      res.writeHead(500)
-      res.end()
-      return
-    }
-
     switch (last) {
       case 'ping':
-        setTimeout(() => {
-          if (firstFailed) {
-            res.setHeader('X-Influxdb-Version', 'v1.0.0')
-            res.writeHead(204)
-          } else {
-            res.writeHead(502)
-          }
-          firstFailed = !firstFailed
-          res.end()
-        }, 1)
+        res.setHeader('X-Influxdb-Version', 'v1.0.0')
+        res.writeHead(204)
+        res.end()
         break
 
       case 'echo':

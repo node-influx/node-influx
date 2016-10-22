@@ -12,6 +12,7 @@ describe('pool', () => {
   let pool: Pool
   let clock: sinon.SinonFakeTimers
   let server: http.Server
+  let sid: string // random string to avoid conflicts with other running tests
 
   beforeEach(done => {
     pool = new Pool({
@@ -22,6 +23,7 @@ describe('pool', () => {
       })
     });
 
+    sid = `${Date.now()}${Math.random()}`
     if (!process.env.WEBPACK) {
       const handler = require('../fixture/pool-middleware');
       server = http.createServer(handler())
@@ -47,10 +49,7 @@ describe('pool', () => {
     if (!process.env.WEBPACK) {
       server.close(() => done())
     } else {
-      pool.resetHosts();
-      pool.discard({ method: 'GET', path: '/pool/reset' })
-        .then(() => done())
-        .catch(done);
+      done()
     }
   });
 
@@ -100,7 +99,7 @@ describe('pool', () => {
   });
 
   it('retries on a request error', () => {
-    return pool.text({ method: 'GET', path: '/pool/failFirst/json' })
+    return pool.text({ method: 'GET', path: `/pool/altFail-${sid}/json` })
       .then(body => expect(body).to.equal('{"ok":true}'));
   });
 
@@ -126,7 +125,11 @@ describe('pool', () => {
   });
 
   it('pings servers', () => {
-    return pool.ping(50).then(results => {
+    return pool.ping(1000, `/pool/altFail-${sid}/ping`).then(results => {
+      if (results[0].online) {
+        [results[0], results[1]] = [results[1], results[0]];
+      }
+
       expect(results[0].online).to.be.false;
       expect(results[1].online).to.be.true;
       expect(results[1].version).to.equal('v1.0.0');

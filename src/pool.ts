@@ -161,14 +161,6 @@ export class Pool {
   }
 
   /**
-   * Makes all disabled hosts available again.
-   */
-  public resetHosts(): void {
-    this.hostsDisabled.forEach(host => this.hostsAvailable.add(host));
-    this.hostsDisabled.clear();
-  }
-
-  /**
    * Returns a list of currently active hosts.
    * @return {Host[]}
    */
@@ -249,7 +241,7 @@ export class Pool {
    * Ping sends out a request to all available Influx servers, reporting on
    * their response time and version number.
    */
-  public ping(timeout: number): Promise<PingStats[]> {
+  public ping(timeout: number, path: string = "/ping"): Promise<PingStats[]> {
     let todo: Promise<number>[] = [];
 
     [...this.hostsAvailable, ...this.hostsDisabled].forEach(host => {
@@ -261,7 +253,7 @@ export class Pool {
         const req = http.request(<any> { // <any> DefinitelyTyped has not update defs yet
           hostname: url.hostname,
           method: "GET",
-          path: "/ping",
+          path,
           port: Number(url.port),
           protocol: url.protocol,
           timeout,
