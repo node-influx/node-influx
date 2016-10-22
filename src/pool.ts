@@ -2,6 +2,7 @@ import { BackoffStrategy } from "./backoff/backoff";
 import { ExponentialBackoff } from "./backoff/exponential";
 import { Host } from "./host";
 
+import * as https from "https";
 import * as http from "http";
 import * as querystring from "querystring";
 import * as urlModule from "url";
@@ -123,6 +124,17 @@ export interface PingStats {
   rtt: number;
   version: string;
 }
+
+const request = (
+  options: http.RequestOptions,
+  callback: (res: http.IncomingMessage) => void
+): http.ClientRequest => {
+  if (options.protocol === "https:") {
+    return https.request(options, callback);
+  } else {
+    return http.request(options, callback);
+  }
+};
 
 /**
  *
@@ -250,7 +262,7 @@ export class Pool {
       const once = doOnce();
 
       return todo.push(new Promise(resolve => {
-        const req = http.request(<any> { // <any> DefinitelyTyped has not update defs yet
+        const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
           hostname: url.hostname,
           method: "GET",
           path,
@@ -312,7 +324,7 @@ export class Pool {
 
     const once = doOnce();
     const host = this.getHost();
-    const req = http.request(<any> { // <any> DefinitelyTyped has not update defs yet
+    const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
       headers: { "content-length": options.body ? options.body.length : 0 },
       hostname: host.url.hostname,
       method: options.method,

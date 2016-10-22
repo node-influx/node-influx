@@ -1,5 +1,10 @@
 # node-influx Changelog
 
+## 2016-10-22, 5.0.0-alpha.3
+
+* Fix more documentation typos
+* Fix requests to `https` hosts failing
+
 ## 2016-10-21, 5.0.0-alpha.2
 
 * Multiple fixes have been made for Webpack support, awaiting resolution of [node-libs-browser#41](https://github.com/webpack/node-libs-browser/pull/41)

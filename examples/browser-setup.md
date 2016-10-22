@@ -17,13 +17,13 @@ npm install --save node-influx/stream-http
 You can tell Webpack to use this module by adding the following section in your `webpack.config.js`:
 
 ```js
+const http = path.resolve(__dirname, 'node_modules/stream-http/index.js')
+
 module.exports = {
   resolve: {
-    alias: {
-      http: path.resolve(__dirname, 'node_modules/stream-http/index.js')
-    }
+    alias: { http, https: http }
   }
-  
+
   // the rest of your webpack config
 }
 ```
@@ -31,12 +31,14 @@ module.exports = {
 You can tell Browserify to use this module by adding the following into your build config:
 
 ```js
+const http = require('stream-http')
+
 browserify(myFiles, {
   builtins: Object.assign(
     {}, require('browserify/lib/builtins'),
-    { http: require('stream-http') }
+    { http, https: http }
   )
-  
+
   // the rest of your browserify config
 })
 ```

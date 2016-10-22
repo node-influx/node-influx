@@ -14,14 +14,18 @@ describe('pool', () => {
   let server: http.Server
   let sid: string // random string to avoid conflicts with other running tests
 
-  beforeEach(done => {
-    pool = new Pool({
+  const createPool = () => {
+    return  new Pool({
       backoff: new ExponentialBackoff({
         initial: 300,
         random: 0,
         max: 10 * 1000
       })
     });
+  };
+
+  beforeEach(done => {
+    pool = createPool();
 
     sid = `${Date.now()}${Math.random()}`
     if (!process.env.WEBPACK) {
@@ -51,6 +55,12 @@ describe('pool', () => {
     } else {
       done()
     }
+  });
+
+  it('attempts to make an https request', () => {
+    const pool = createPool();
+    pool.addHost('https://httpbin.org/get');
+    return pool.json({ method: 'GET', path: '/get' });
   });
 
   describe('request generators', () => {
