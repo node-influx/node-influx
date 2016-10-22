@@ -9,7 +9,7 @@ An [InfluxDB](http://influxdb.org/) Client for Node.js and Browsers
 [![bitHound Code](https://www.bithound.io/github/node-influx/node-influx/badges/code.svg)](https://www.bithound.io/github/node-influx/node-influx)
 [![bitHound Dependencies](https://www.bithound.io/github/node-influx/node-influx/badges/dependencies.svg)](https://www.bithound.io/github/node-influx/node-influx/master/dependencies/npm)
 
-[![Sauce Test Status](https://saucelabs.com/buildstatus/node-influx)](https://saucelabs.com/u/node-influx)
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/node-influx.svg)](https://saucelabs.com/u/node-influx)
 
 ## Installation
 
