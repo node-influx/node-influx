@@ -13,7 +13,7 @@
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
     "test:integrate": "mocha --compilers ts:ts-node/register test/integrate/*.test.ts",
-    "test:lint": "tslint 'src/**/*.ts'",
+    "test:lint": "tslint --type-check --project tsconfig.json 'src/**/*.ts'",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all --parallel test:sauce test:integrate test:lint build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
@@ -66,6 +66,7 @@
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "^1.3.0",
     "tslint": "^3.11.0",
+    "tslint-microsoft-contrib": "^2.0.13",
     "typescript": "^2.0.0",
     "webpack": "^1.13.2"
   }
