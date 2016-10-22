@@ -2,8 +2,8 @@ import { BackoffStrategy } from "./backoff/backoff";
 import { ExponentialBackoff } from "./backoff/exponential";
 import { Host } from "./host";
 
-import * as https from "https";
 import * as http from "http";
+import * as https from "https";
 import * as querystring from "querystring";
 import * as urlModule from "url";
 
