@@ -23,7 +23,7 @@ module.exports = function (config) {
         'test/karma.shim.js',
     ],
     preprocessors: {
-        'test/karma.shim.js': ['webpack']
+        'test/karma.shim.js': ['sourcemap', 'webpack']
     },
 
     middleware: ['pool-tests'],

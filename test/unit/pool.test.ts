@@ -33,7 +33,7 @@ describe('pool', () => {
       });
      } else {
       for (let i = 0; i < hosts; i++) {
-        pool.addHost(`http://127.0.0.1:9876`)
+        pool.addHost(location.origin)
       }
       done()
      }
@@ -47,7 +47,10 @@ describe('pool', () => {
     if (!process.env.WEBPACK) {
       server.close(() => done())
     } else {
-      done()
+      pool.resetHosts();
+      pool.discard({ method: 'GET', path: '/pool/reset' })
+        .then(() => done())
+        .catch(done);
     }
   });
 
@@ -92,7 +95,8 @@ describe('pool', () => {
     (<any> pool).timeout = 1;
     return pool.text({ method: 'GET', path: '/pool/json' })
       .then(() => { throw new Error('Expected to have thrown'); })
-      .catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError));
+      .catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
+      .then(() => (<any> pool).timeout = 10000);
   });
 
   it('retries on a request error', () => {

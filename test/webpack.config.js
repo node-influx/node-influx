@@ -5,7 +5,8 @@ module.exports = (() => {
   const config = {}
 
   config.resolve = {
-    extensions: ['.ts', '.js', '.json', '']
+    extensions: ['.ts', '.js', '.json', ''],
+    alias: { 'http': path.resolve(__dirname, '../node_modules/stream-http/index.js') }
   }
 
   config.module = {
@@ -32,7 +33,7 @@ module.exports = (() => {
         ENV: JSON.stringify(process.ENV),
       }
     })
-  ];
+  ]
 
   return config
 })()

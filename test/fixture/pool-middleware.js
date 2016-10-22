@@ -5,8 +5,13 @@ module.exports = function () {
 
   /**
    * Create a middleware that serves routes starting with /pool. Rounds can:
+   *  - be `/ping`
    *  - contain a `failFirst` segment to alternate request failures
-   *  - a desired status code or `ping`
+   *  - end with a status code, like `/pool/failFirst/204`
+   *  - end with `reset` to reset failFirst routes
+   *  - end with `echo` to print back what it was requested with
+   *  - end with `json` or `badjson` to get valid and
+   *    malformed responses, respectively
    */
 
   return function handle(req, res, next) {
@@ -28,6 +33,14 @@ module.exports = function () {
       return
     }
 
+    const last = parts[parts.length - 1];
+    if (last === 'reset') {
+      firstFailed = false
+      res.writeHead(204)
+      res.end()
+      return
+    }
+
     if (parts.includes('failFirst') && !firstFailed) {
       firstFailed = true
       res.writeHead(500)
@@ -35,7 +48,7 @@ module.exports = function () {
       return
     }
 
-    switch (parts[parts.length - 1]) {
+    switch (last) {
       case 'ping':
         setTimeout(() => {
           if (firstFailed) {
@@ -71,7 +84,7 @@ module.exports = function () {
         break
 
       default:
-        const code = Number(parts[parts.length - 1]);
+        const code = Number(last);
         if (Number.isNaN(code)) {
           console.error(`Could not handle path ${req.url}`);
         }

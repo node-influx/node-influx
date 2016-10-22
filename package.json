@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.38",
+    "@types/node": "^6.0.45",
     "@types/sinon": "^1.16.31",
     "@types/sinon-chai": "^2.7.27",
     "awesome-typescript-loader": "^2.2.4",
@@ -61,6 +61,7 @@
     "opn-cli": "^3.1.0",
     "sinon": "^2.0.0-pre.3",
     "sinon-chai": "^2.8.0",
+    "stream-http": "github:node-influx/stream-http",
     "ts-node": "^1.3.0",
     "tslint": "^3.11.0",
     "typescript": "^2.0.0",
