@@ -5,9 +5,7 @@ An [InfluxDB](http://influxdb.org/) Client for Node.js and Browsers
 [![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
 [![build](http://img.shields.io/travis/node-influx/node-influx/master.svg)](https://travis-ci.org/node-influx/node-influx)
 [![coverage](http://img.shields.io/coveralls/node-influx/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
-[![bitHound Overall Score](https://www.bithound.io/github/node-influx/node-influx/badges/score.svg)](https://www.bithound.io/github/node-influx/node-influx)
-[![bitHound Code](https://www.bithound.io/github/node-influx/node-influx/badges/code.svg)](https://www.bithound.io/github/node-influx/node-influx)
-[![bitHound Dependencies](https://www.bithound.io/github/node-influx/node-influx/badges/dependencies.svg)](https://www.bithound.io/github/node-influx/node-influx/master/dependencies/npm)
+[![dependencies Status](https://david-dm.org/node-influx/node-influx/status.svg)](https://david-dm.org/node-influx/node-influx)
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/node-influx.svg)](https://saucelabs.com/u/node-influx)
 
