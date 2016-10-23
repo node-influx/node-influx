@@ -1,13 +1,18 @@
-# node-influx
+<p align="center">
+  <img src="https://raw.github.com/node-influx/node-influx/master/logo.png?v3" alt="node-influx, an InfluxDB client for Node.js and Browsers">
 
-An [InfluxDB](http://influxdb.org/) Client for Node.js and Browsers
+  <br>
 
-[![npm](http://img.shields.io/npm/v/influx.svg)](https://www.npmjs.org/package/influx)
-[![build](http://img.shields.io/travis/node-influx/node-influx/master.svg)](https://travis-ci.org/node-influx/node-influx)
-[![coverage](http://img.shields.io/coveralls/node-influx/node-influx/master.svg)](https://coveralls.io/r/node-influx/node-influx?branch=master)
-[![dependencies Status](https://david-dm.org/node-influx/node-influx/status.svg)](https://david-dm.org/node-influx/node-influx)
+  <a href="https://www.npmjs.org/package/influx"><img src="http://img.shields.io/npm/v/influx.svg" alt="NPM Version"></a>
+  <a href="https://travis-ci.org/node-influx/node-influx"><img src="http://img.shields.io/travis/node-influx/node-influx/master.svg" alt="Build Status"></a>
+  <a href="https://coveralls.io/github/node-influx/node-influx?branch=master"><img src="https://coveralls.io/repos/github/node-influx/node-influx/badge.svg?branch=master" alt="Coverage Status"></a>
+  <a href="https://david-dm.org/node-influx/node-influx"><img src="https://david-dm.org/node-influx/node-influx/status.svg" alt="Dependencies Status"></a>
 
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/node-influx.svg)](https://saucelabs.com/u/node-influx)
+  <br>
+
+
+  <a href="https://saucelabs.com/u/node-influx"><img src="https://saucelabs.com/browser-matrix/node-influx.svg" alt="Browser Test Status"></a>
+</p>
 
 ## Installation
 
@@ -37,3 +42,4 @@ Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have update
  * [API Documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html)
  * [Tutorials & Examples](https://node-influx.github.io/manual/tutorial.html)
  * [Changelog](https://node-influx.github.io/manual/changelog.html)
+ * [Contributing](https://node-influx.github.io/manual/changelog.html)

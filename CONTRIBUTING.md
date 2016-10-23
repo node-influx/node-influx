@@ -7,7 +7,7 @@ We try to make it as easy as possible for you but there are a few things to cons
 ## How to prepare
 
 * You need a [GitHub account](https://github.com/signup/free)
-* Submit an [issue ticket](https://github.com/node-influx/node-influx/issues) for your issue if there is no one yet.
+* Submit an [issue ticket](https://github.com/node-influx/node-influx/issues) for your issue if there is not one yet.
 	* Describe the issue and include steps to reproduce if it's a bug.
 	* Ensure to mention the earliest version that you know is affected.
 * If you are able and want to fix this, fork the repository on GitHub
@@ -36,4 +36,3 @@ We try to make it as easy as possible for you but there are a few things to cons
 
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
-* [Read the Issue Guidelines by @necolas](https://github.com/necolas/issue-guidelines/blob/master/CONTRIBUTING.md) for more details
