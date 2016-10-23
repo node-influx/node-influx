@@ -1,66 +1,65 @@
-import { ExponentialBackoff } from "../../src/backoff/exponential";
-import { Host } from "../../src/host";
-import { Pool, ServiceNotAvailableError, RequestError } from "../../src/pool";
-import { expect } from "chai";
+import { ExponentialBackoff } from '../../src/backoff/exponential';
+import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
+import { expect } from 'chai';
 
-import * as http from "http";
-import * as sinon from "sinon";
+import * as http from 'http';
+import * as sinon from 'sinon';
 
 const hosts = 2;
 
 describe('pool', () => {
-  let pool: Pool
-  let clock: sinon.SinonFakeTimers
-  let server: http.Server
-  let sid: string // random string to avoid conflicts with other running tests
+  let pool: Pool;
+  let clock: sinon.SinonFakeTimers;
+  let server: http.Server;
+  let sid: string; // random string to avoid conflicts with other running tests
 
   const createPool = () => {
     return  new Pool({
       backoff: new ExponentialBackoff({
         initial: 300,
         random: 0,
-        max: 10 * 1000
-      })
+        max: 10 * 1000,
+      }),
     });
   };
 
   beforeEach(done => {
     pool = createPool();
 
-    sid = `${Date.now()}${Math.random()}`
+    sid = `${Date.now()}${Math.random()}`; // tslint:disable-line
     if (!process.env.WEBPACK) {
       const handler = require('../fixture/pool-middleware');
-      server = http.createServer(handler())
+      server = http.createServer(handler());
       server.listen(0, () => {
-        for (let i = 0; i < hosts; i++) {
-          pool.addHost(`http://127.0.0.1:${server.address().port}`)
+        for (let i = 0; i < hosts; i += 1) {
+          pool.addHost(`http://127.0.0.1:${server.address().port}`);
         }
-        done()
+        done();
       });
      } else {
-      for (let i = 0; i < hosts; i++) {
-        pool.addHost(location.origin)
+      for (let i = 0; i < hosts; i += 1) {
+        pool.addHost(location.origin);
       }
-      done()
+      done();
      }
   });
 
   afterEach(done => {
     if (clock) {
-      clock.restore()
+      clock.restore();
     }
 
     if (!process.env.WEBPACK) {
-      server.close(() => done())
+      server.close(() => done());
     } else {
-      done()
+      done();
     }
   });
 
   it('attempts to make an https request', () => {
-    const pool = createPool();
-    pool.addHost('https://httpbin.org/get');
-    return pool.json({ method: 'GET', path: '/get' });
+    const p = createPool();
+    p.addHost('https://httpbin.org/get');
+    return p.json({ method: 'GET', path: '/get' });
   });
 
   describe('request generators', () => {
@@ -74,13 +73,13 @@ describe('pool', () => {
         method: 'POST',
         path: '/pool/echo',
         query: { a: 42 },
-        body: 'asdf'
+        body: 'asdf',
       }).then(data => {
         expect(data).to.deep.equal({
           query: 'a=42',
           body: 'asdf',
           method: 'POST',
-        })
+        });
       });
     });
 
@@ -155,8 +154,9 @@ describe('pool', () => {
 
   describe('backoff', () => {
     beforeEach(() => {
-      clock = sinon.useFakeTimers()
-      return pool.discard({ method: 'GET', path: '/pool/502' }).catch(() => {});
+      clock = sinon.useFakeTimers();
+      return pool.discard({ method: 'GET', path: '/pool/502' })
+        .catch(() => { /* ignore */ });
     });
 
     it('should error if there are no available hosts', () => {

@@ -1,24 +1,24 @@
-import { Tags } from "./results";
+import { Tags } from './results';
 
 /**
  * Pool options can be passed into the database to configure the behaviour
  * of the connection pool.
- * @typedef {Object} PoolOptions
+ * @typedef {Object} IPoolOptions
  * @property {Number} [maxRetries=2] Number of times we should retry running
  *     a query before calling back with an error.
  * @property {Number} [requestTimeout=30000] The length of time after which
  *     HTTP requests will error if they do not receive a response.
- * @property {BackoffStrategy} [backoff] The backoff strategy to use for
+ * @property {IBackoffStrategy} [backoff] The backoff strategy to use for
  *     unhealthy connections. Defaults to an exponential backoff with an
  *     initial delay of 300ms and a maximum delay of 10 seconds.
  */
 
 /**
- * A SingleHostConfig can be provided into `new InfluxDB(config)` when you
+ * A ISingleHostConfig can be provided into `new InfluxDB(config)` when you
  * have a single Influx address to connect to.
  *
  * @public
- * @typedef {Object} SingleHostConfig
+ * @typedef {Object} ISingleHostConfig
  * @property {String} [username='root'] Username for connecting to the database.
  * @property {String} [password='root'] Password for connecting to the database.
  * @property {String} [database] Default database to operate on. Providing this
@@ -26,10 +26,10 @@ import { Tags } from "./results";
  *     if your app is primarily dealing with a single database.
  * @property {String} [host='127.0.0.1'] Influx host to connect to.
  * @property {Number} [port=8060] Influx port to connect to.
- * @property {String} [protocol="http"] Protocol to connect over, either
- *     "http" or "https".
- * @property {PoolOptions} [pool] Options for the connection pool.
- * @property {SchemaOptions[]} [schema] An optional list of data schema to use.
+ * @property {String} [protocol='http'] Protocol to connect over, either
+ *     'http' or 'https'.
+ * @property {IPoolOptions} [pool] Options for the connection pool.
+ * @property {ISchemaOptions[]} [schema] An optional list of data schema to use.
  *
  * @example
  * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
@@ -55,10 +55,10 @@ import { Tags } from "./results";
  */
 
 /**
- * A ClusterConfig can be provided into `new InfluxDB(config)` when you
+ * A IClusterConfig can be provided into `new InfluxDB(config)` when you
  * have a multiple Influx nodes to connect to.
  *
- * @typedef {Object} ClusterConfig
+ * @typedef {Object} IClusterConfig
  * @property {String} [username='root'] Username for connecting to the database.
  * @property {String} [password='root'] Password for connecting to the database.
  * @property {String} [database] Default database to operate on. Providing this
@@ -67,10 +67,10 @@ import { Tags } from "./results";
  * @property {Array} hosts A list of Influx hosts to connect to.
  * @property {String} [hosts.host='127.0.0.1'] Influx host to connect to.
  * @property {Number} [hosts.port=8060] Influx port to connect to.
- * @property {String} [hosts.protocol="http"] Protocol to connect over, either
- *     "http" or "https".
- * @property {PoolOptions} [pool] Options for the connection pool.
- * @property {SchemaOptions[]} [schema] An optional list of data schema to use.
+ * @property {String} [hosts.protocol='http'] Protocol to connect over, either
+ *     'http' or 'https'.
+ * @property {IPoolOptions} [pool] Options for the connection pool.
+ * @property {ISchemaOptions[]} [schema] An optional list of data schema to use.
  *
  * @example
  * import { InfluxDB } from 'influx'; // or const InfluxDB = require('influx').InfluxDB
@@ -108,7 +108,7 @@ import { Tags } from "./results";
  * either if you include tags of fields which are not present in your schema,
  * or you enter the wrong datatype for one of your schema fields.
  *
- * @typedef {Object} SchemaOptions
+ * @typedef {Object} ISchemaOptions
  * @property {String} [database] The database where the measurement lives. This
  *     is required if you don't provide a default database in Influx.
  * @property {String} measurement The measurement name in Influx this refers to
@@ -131,13 +131,13 @@ import { Tags } from "./results";
  */
 
 /**
- * Results are returned from the .query method. It marshals the raw Influx
+ * IResults are returned from the .query method. It marshals the raw Influx
  * results into a more palatable, JavaScript-y structure. All query results
  * are marshalled into a single, flat arrays, and methods are provided to
  * example grouped results as necessary. The `time` column, if included, is
- * converted into a {@link NanoDate}.
+ * converted into a {@link INanoDate}.
  *
- * @class Result<T>
+ * @interface
  * @example
  * influx.query('select host, cpu, mem from perf').then(results => {
  *   expect(results).to.deep.equal([
@@ -147,7 +147,7 @@ import { Tags } from "./results";
  *   ])
  * })
  */
-export class Results<T> extends Array { // for doc only, implementation in src/results.ts
+export class IResults<T> extends Array { // for doc only, implementation in src/results.ts
 
   /**
    * Group looks for and returns the first group in the results
@@ -208,9 +208,9 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
 }
 
 /**
- * Point is passed to the client's write methods to store a point in InfluxDB.
+ * IPoint is passed to the client's write methods to store a point in InfluxDB.
  *
- * @typedef {Object} Point
+ * @typedef {Object} IPoint
  * @property {String} measurement Measurement is the Influx measurement name.
  * @property {Object.<String, String>} [tags] Tags is the list of tag
  *     values to insert.
@@ -223,11 +223,11 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  */
 
 /**
- * WriteOptions configure how points are written in the database.
+ * IWriteOptions configure how points are written in the database.
  *
- * @typedef {Object} WriteOptions
+ * @typedef {Object} IWriteOptions
  * @property {TimePrecision} [precision] Precision at which the points are
- *     written, defaults to milliseconds "ms". Influx recommends that you use
+ *     written, defaults to milliseconds 'ms'. Influx recommends that you use
  *     the coarsest precision possible in order to maximize efficiency.
  * @property {String} [retentionPolicy] The retention policy to insert
  *     the points under, uses the DEFAULT policy if not provided.
@@ -236,9 +236,9 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  */
 
 /**
- * The QueryOptions allow you to configure how queries are run against Influx.
+ * The IQueryOptions allow you to configure how queries are run against Influx.
  *
- * @typedef {Object} QueryOptions
+ * @typedef {Object} IQueryOptions
  * @property {TimePrecision} [precision] Defines the precision at which
  *     to query points. Defaults to querying in nanosecond precision.
  * @property {String} [retentionPolicy] Retention policy to query from,
@@ -248,9 +248,9 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  */
 
 /**
- * PingStats is returned from {@link InfluxDB#ping}.
+ * IPingStats is returned from {@link InfluxDB#ping}.
  *
- * @typedef {Object} PingStats
+ * @typedef {Object} IPingStats
  * @property {Url} url URL is the host's URL
  * @property {Boolean} online Whether the request was completed successfully.
  * @property {http.ServerResponse} res The raw response from the server, may be
@@ -260,7 +260,7 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  */
 
 /**
- * The BackoffStrategy dictates behaviour to use when hosts in the connection
+ * The IBackoffStrategy dictates behaviour to use when hosts in the connection
  * pool start failing. We remove them from the pool for a duration of time
  * specified by the backoff strategy.
  *
@@ -276,7 +276,7 @@ export class Results<T> extends Array { // for doc only, implementation in src/r
  * backoff = backoff.reset();
  * console.log(backoff.getDelay()); // => 10
  */
-export class BackoffStrategy { // for doc only, implementation in src/pool/backoff.ts
+export class IBackoffStrategy { // for doc only, implementation in src/pool/backoff.ts
 
   /**
    * getDelay returns the amount of delay of the current backoff.
@@ -287,31 +287,31 @@ export class BackoffStrategy { // for doc only, implementation in src/pool/backo
   /**
    * Next is called when a failure occurs on a host to
    * return the next backoff amount.
-   * @return {BackoffStrategy}
+   * @return {IBackoffStrategy}
    */
-  public next(): BackoffStrategy { return this; }
+  public next(): IBackoffStrategy { return this; }
 
   /**
    * Returns a strategy with a reset backoff counter.
-   * @return {BackoffStrategy}
+   * @return {IBackoffStrategy}
    */
-  public reset(): BackoffStrategy { return this; }
+  public reset(): IBackoffStrategy { return this; }
 }
 
 /**
- * A NanoDate is a type of Date that holds a nanosecond-precision unix
- * timestamp. It's the default date type parsed in {@link Results} and
+ * An INanoDate is a type of Date that holds a nanosecond-precision unix
+ * timestamp. It's the default date type parsed in {@link IResults} and
  * can be created manually using {@link toNanoDate}.
  * @interface
  */
-export class NanoDate extends Date { // for doc only, implementations in src/grammar/times.ts
+export class INanoDate extends Date { // for doc only, implementations in src/grammar/times.ts
   /**
    * Returns the unix nanoseconds timestamp as a string.
    * @example
    * const date = toNanoDate('1475985480231035677')
    * expect(date.getNanoTime()).to.equal('1475985480231035677')
    */
-  public getNanoTime(): string { return ""; };
+  public getNanoTime(): string { return ''; };
 
   /**
    * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
@@ -319,5 +319,5 @@ export class NanoDate extends Date { // for doc only, implementations in src/gra
    * const date = toNanoDate('1475985480231035677')
    * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
    */
-  public toNanoISOString(): string { return ""; };
+  public toNanoISOString(): string { return ''; };
 }

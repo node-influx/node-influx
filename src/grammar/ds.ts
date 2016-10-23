@@ -18,8 +18,8 @@ export enum FieldType {
   FLOAT,
   INTEGER,
   STRING,
-  BOOLEAN
-};
+  BOOLEAN,
+}
 
 export function isNumeric(value: string): boolean {
   return !Number.isNaN(Number(value));

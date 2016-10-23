@@ -1,9 +1,9 @@
-import { use } from "chai";
-import * as sinonChai from "sinon-chai";
+import { use } from 'chai';
+import * as sinonChai from 'sinon-chai';
 
 use(sinonChai);
 
-const influxVersion = process.env.INFLUX_VERSION || "v1.0.0";
+const influxVersion = process.env.INFLUX_VERSION || 'v1.0.0';
 
 // This tree is created statically rather than dynamically required for Webpack.
 const fixtures = {
@@ -29,5 +29,4 @@ const fixtures = {
  */
 export function dbFixture (name: string): any {
   return fixtures[influxVersion][name];
-};
-
+}

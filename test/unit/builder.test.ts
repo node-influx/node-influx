@@ -1,12 +1,12 @@
 import { Expression, Measurement, toNanoDate } from '../../src/index';
-import { expect } from "chai";
+import { expect } from 'chai';
 
 describe('query builder', () => {
   describe('measurement builder', () => {
     it('builds with only name', () => {
       expect(new Measurement()
         .name('my_"meas')
-        .toString()
+        .toString(),
       ).to.equal('"my_\\"meas"');
     });
 
@@ -14,7 +14,7 @@ describe('query builder', () => {
       expect(new Measurement()
         .name('my_"meas')
         .policy('po"licy')
-        .toString()
+        .toString(),
       ).to.equal('"po\\"licy"."my_\\"meas"');
     });
 
@@ -23,7 +23,7 @@ describe('query builder', () => {
         .name('my_"meas')
         .policy('po"licy')
         .db('my_"db')
-        .toString()
+        .toString(),
       ).to.equal('"my_\\"db"."po\\"licy"."my_\\"meas"');
     });
 
@@ -31,14 +31,14 @@ describe('query builder', () => {
       expect(new Measurement()
         .name('my_"meas')
         .db('my_"db')
-        .toString()
+        .toString(),
       ).to.equal('"my_\\"db"."my_\\"meas"');
     });
 
     it('throws when a name is omitted', () => {
       expect(() => new Measurement()
         .db('my_"db')
-        .toString()
+        .toString(),
       ).to.throw(/must specify a measurement/);
     });
   });
@@ -49,8 +49,8 @@ describe('query builder', () => {
         .tag('my_"tag')
         .equals
         .value('42')
-        .toString()
-      ).to.equal('"my_\\"tag" = \'42\'')
+        .toString(),
+      ).to.equal('"my_\\"tag" = \'42\'');
     });
 
     it('inserts data types correctly', () => {
@@ -88,12 +88,12 @@ describe('query builder', () => {
           .field('f')
           .doesntMatch
           .value({ toString: () => '/my-custom-re/' })
-        .toString()
+        .toString(),
       ).to.equal(
         '"f" = \'str\\\'\' OR "f" =~ /[0-9]+/ OR "f" = 42 ' +
         'OR "f" = "my_\\"tag" OR "f" = "2016-10-09 03:58:00.231" ' +
         'OR "f" = "2016-10-09 03:58:00.231035600" OR "f" = TRUE ' +
-        'OR ("a" = 1 OR "b" = 2) OR "f" !~ /my-custom-re/'
+        'OR ("a" = 1 OR "b" = 2) OR "f" !~ /my-custom-re/',
       );
     });
 

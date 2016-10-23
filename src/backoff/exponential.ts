@@ -1,17 +1,17 @@
-import { BackoffStrategy } from "./backoff";
+import { IBackoffStrategy } from './backoff';
 
 /**
- * ExponentialOptions are passed into the ExponentialBackoff constructor. The
+ * IExponentialOptions are passed into the ExponentialBackoff constructor. The
  * backoff equation is, in general, min(max, initial ^ n), where `n` is
  * an incremented backoff factor. The result of the equation is a delay
  * given in milliseconds.
  *
- * @typedef {Object} ExponentialOptions
+ * @typedef {Object} IExponentialOptions
  * @property {Number} initial The initial delay passed to the equation.
  * @property {Number} random Random factor to subtract from the `n` count.
  * @property {Number} max Max is the maximum value of the delay.
  */
-export interface ExponentialOptions {
+export interface IExponentialOptions {
 
   /**
    * The initial delay passed to the equation.
@@ -32,18 +32,18 @@ export interface ExponentialOptions {
 
 /**
  * @class
- * @implements {BackoffStrategy}
+ * @implements {IBackoffStrategy}
  */
-export class ExponentialBackoff implements BackoffStrategy {
+export class ExponentialBackoff implements IBackoffStrategy {
 
   private counter: number;
 
   /**
    * Creates a new exponential backoff strategy.
    * @see https://en.wikipedia.org/wiki/Exponential_backoff
-   * @param {ExponentialOptions} options
+   * @param {IExponentialOptions} options
    */
-  constructor (protected options: ExponentialOptions) {
+  constructor (protected options: IExponentialOptions) {
     this.counter = 0;
   }
 
@@ -51,14 +51,14 @@ export class ExponentialBackoff implements BackoffStrategy {
    * @inheritDoc
    */
   public getDelay(): number {
-    const count = this.counter - Math.round(Math.random() * this.options.random);
+    const count = this.counter - Math.round(Math.random() * this.options.random); // tslint:disable-line
     return Math.min(this.options.max, this.options.initial * Math.pow(2, Math.max(count, 0)));
   }
 
   /**
    * @inheritDoc
    */
-  public next(): BackoffStrategy {
+  public next(): IBackoffStrategy {
     const next = new ExponentialBackoff(this.options);
     next.counter = this.counter + 1;
     return next;
@@ -67,7 +67,7 @@ export class ExponentialBackoff implements BackoffStrategy {
   /**
    * @inheritDoc
    */
-  public reset(): BackoffStrategy {
+  public reset(): IBackoffStrategy {
     return new ExponentialBackoff(this.options);
   }
 

@@ -1,9 +1,9 @@
-import * as grammar from "../../src/grammar";
-import { expect } from "chai";
+import * as grammar from '../../src/grammar';
+import { expect } from 'chai';
 
-const escapeTables = require("../fixture/escapeTables.json");
+const escapeTables = require('../fixture/escapeTables.json');
 
-describe("grammar", () => {
+describe('grammar', () => {
   Object.keys(escapeTables).forEach(escaper => {
     describe(escaper, () => {
       escapeTables[escaper].forEach(test => {
@@ -18,11 +18,11 @@ describe("grammar", () => {
     expect(grammar.escape.quoted(<any> new grammar.Raw('don"t escape'))).to.equal('don"t escape');
   });
 
-  let nanoDate: grammar.NanoDate;
+  let nanoDate: grammar.INanoDate;
   let milliDate: Date;
 
   beforeEach(() => {
-    nanoDate = <grammar.NanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
+    nanoDate = <grammar.INanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
     milliDate = new Date(1475985480231);
   });
 
@@ -34,31 +34,31 @@ describe("grammar", () => {
   });
 
   describe('formatting', () => {
-    it("formats nanosecond dates", () => {
-      expect(grammar.formatDate(nanoDate)).to.equal("\"2016-10-09 03:58:00.231035677\"");
+    it('formats nanosecond dates', () => {
+      expect(grammar.formatDate(nanoDate)).to.equal('"2016-10-09 03:58:00.231035677"');
     });
-    it("formats millisecond dates", () => {
-      expect(grammar.formatDate(milliDate)).to.equal("\"2016-10-09 03:58:00.231\"");
+    it('formats millisecond dates', () => {
+      expect(grammar.formatDate(milliDate)).to.equal('"2016-10-09 03:58:00.231"');
     });
   });
 
   describe('parsing', () => {
     it('parses ISO dates correctly', () => {
-      const parsed = <grammar.NanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
+      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035677');
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z');
     });
 
     it('parses numeric `ns` timestamps', () => {
-      const parsed = <grammar.NanoDate> grammar.isoOrTimeToDate(1475985480231035677, 'n');
+      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate(1475985480231035677, 'n');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035600'); // precision is lost
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
     });
 
     it('parses numeric `u` timestamps', () => {
-      const parsed = <grammar.NanoDate> grammar.isoOrTimeToDate(1475985480231035, 'u');
+      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate(1475985480231035, 'u');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035000');
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035000Z');
@@ -89,33 +89,33 @@ describe("grammar", () => {
     });
   });
 
-  describe("timestamp casting", () => {
-    it("casts dates into timestamps", () => {
+  describe('timestamp casting', () => {
+    it('casts dates into timestamps', () => {
       const d = new Date(1475121809084);
-      expect(grammar.castTimestamp(d, "n")).to.equal('1475121809084000000');
-      expect(grammar.castTimestamp(d, "u")).to.equal('1475121809084000');
-      expect(grammar.castTimestamp(d, "ms")).to.equal('1475121809084');
-      expect(grammar.castTimestamp(d, "s")).to.equal('1475121809');
-      expect(grammar.castTimestamp(d, "m")).to.equal('24585363');
-      expect(grammar.castTimestamp(d, "h")).to.equal('409756');
+      expect(grammar.castTimestamp(d, 'n')).to.equal('1475121809084000000');
+      expect(grammar.castTimestamp(d, 'u')).to.equal('1475121809084000');
+      expect(grammar.castTimestamp(d, 'ms')).to.equal('1475121809084');
+      expect(grammar.castTimestamp(d, 's')).to.equal('1475121809');
+      expect(grammar.castTimestamp(d, 'm')).to.equal('24585363');
+      expect(grammar.castTimestamp(d, 'h')).to.equal('409756');
     });
 
-    it("casts nanodates into timestamps", () => {
+    it('casts nanodates into timestamps', () => {
       const d = grammar.toNanoDate('1475985480231035600');
-      expect(grammar.castTimestamp(d, "n")).to.equal('1475985480231035600');
-      expect(grammar.castTimestamp(d, "u")).to.equal('1475985480231035');
-      expect(grammar.castTimestamp(d, "ms")).to.equal('1475985480231');
-      expect(grammar.castTimestamp(d, "s")).to.equal('1475985480');
-      expect(grammar.castTimestamp(d, "m")).to.equal('24599758');
-      expect(grammar.castTimestamp(d, "h")).to.equal('409995');
+      expect(grammar.castTimestamp(d, 'n')).to.equal('1475985480231035600');
+      expect(grammar.castTimestamp(d, 'u')).to.equal('1475985480231035');
+      expect(grammar.castTimestamp(d, 'ms')).to.equal('1475985480231');
+      expect(grammar.castTimestamp(d, 's')).to.equal('1475985480');
+      expect(grammar.castTimestamp(d, 'm')).to.equal('24599758');
+      expect(grammar.castTimestamp(d, 'h')).to.equal('409995');
     });
 
-    it("accepts strings, numbers liternally", () => {
+    it('accepts strings, numbers liternally', () => {
       expect(grammar.castTimestamp('1475985480231035600', 's')).to.equal('1475985480231035600');
       expect(grammar.castTimestamp(1475985480231, 's')).to.equal('1475985480231');
     });
 
-    it("throws on non-numeric strings", () => {
+    it('throws on non-numeric strings', () => {
       expect(() => grammar.castTimestamp('wut', 's')).to.throw(/numeric value/);
     });
   });

@@ -1,4 +1,4 @@
-import { Raw } from "./ds";
+import { Raw } from './ds';
 
 const reEscape = /[-|\\{()[\]^$+*?.]/g;
 
@@ -37,9 +37,9 @@ class Escaper {
 
   private re: RegExp;
 
-  constructor(chars: string[], private wrap = "", private escaper = "\\") {
-    const patterns = chars.join("").replace(reEscape, "\\$&");
-    this.re = new RegExp("[" + patterns + "]", "g");
+  constructor(chars: string[], private wrap: string = '', private escaper: string = '\\') {
+    const patterns = chars.join('').replace(reEscape, '\\$&');
+    this.re = new RegExp('[' + patterns + ']', 'g');
   }
 
   /**
@@ -52,7 +52,7 @@ class Escaper {
     }
 
     let chunkIndex = this.re.lastIndex = 0;
-    let escapedVal = "";
+    let escapedVal = '';
     let match = this.re.exec(val);
 
     while (match) {
@@ -98,19 +98,19 @@ export const escape = {
   /**
    * measurement escapes measurement names.
    */
-  measurement: bindEsc(new Escaper([",", " "])),
+  measurement: bindEsc(new Escaper([',', ' '])),
 
   /**
    * quoted escapes quoted values, such as database names.
    */
-  quoted: bindEsc(new Escaper(["\""], "\"")),
+  quoted: bindEsc(new Escaper(['"'], '"')),
 
   /**
    * stringLitEscaper escapes single quotes in string literals.
    */
-  stringLit: bindEsc(new Escaper(["'"], "'")),
+  stringLit: bindEsc(new Escaper(['\''], '\'')),
   /**
    * tagEscaper escapes tag keys, tag values, and field keys.
    */
-  tag: bindEsc(new Escaper([",", "=", " "])),
+  tag: bindEsc(new Escaper([',', '=', ' '])),
 };

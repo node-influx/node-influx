@@ -1,8 +1,7 @@
-import { InfluxDB, HostConfig, FieldType } from '../../src';
-import * as path from 'path';
+import { FieldType, IHostConfig, InfluxDB } from '../../src';
 
 const sampleData = require('../fixture/integrateSampleData.json');
-const details: HostConfig = process.env.INFLUX_HOST
+const details: IHostConfig = process.env.INFLUX_HOST
   ? JSON.parse(process.env.INFLUX_HOST)
   : { host: '127.0.01', port: 8086 };
 
@@ -34,6 +33,6 @@ export function newClient(): Promise<InfluxDB> {
     .then(() => client);
 }
 
-export function writeSampleData(db: InfluxDB): Promise<void> {
-  return db.writePoints(sampleData, { precision: 's' });
+export function writeSampleData(client: InfluxDB): Promise<void> {
+  return client.writePoints(sampleData, { precision: 's' });
 }

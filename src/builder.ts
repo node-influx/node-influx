@@ -1,6 +1,6 @@
-import { escape, formatDate } from "./grammar";
+import { escape, formatDate } from './grammar';
 
-export interface BaseExpression<T> {
+export interface IBaseExpression<T> {
   /**
    * Inserts a tag name in the expression.
    */
@@ -19,84 +19,84 @@ export interface BaseExpression<T> {
   value(value: any): T;
 }
 
-export interface ExpressionHead extends BaseExpression<BinaryOp> {}
+export interface IExpressionHead extends IBaseExpression<IBinaryOp> {}
 
-export interface ExpressionTail extends BaseExpression<ExpressionHead> {}
+export interface IExpressionTail extends IBaseExpression<IExpressionHead> {}
 
-export interface BinaryOp {
+export interface IBinaryOp {
   /**
-   * Adds an "AND" operator
+   * Adds an 'AND' operator
    */
-  and: ExpressionTail;
-
-  /**
-   * Adds an "OR" operator
-   */
-  or: ExpressionTail;
+  and: IExpressionTail;
 
   /**
-   * Adds a "+" addition symbol
+   * Adds an 'OR' operator
    */
-  plus: ExpressionTail;
+  or: IExpressionTail;
 
   /**
-   * Adds a "*" multiplication symbol
+   * Adds a '+' addition symbol
    */
-  times: ExpressionTail;
+  plus: IExpressionTail;
 
   /**
-   * Adds a "-" subtraction symbol
+   * Adds a '*' multiplication symbol
    */
-  minus: ExpressionTail;
+  times: IExpressionTail;
 
   /**
-   * Adds a "/" division symbol
+   * Adds a '-' subtraction symbol
    */
-  div: ExpressionTail;
+  minus: IExpressionTail;
 
   /**
-   * Adds a "=" symbol
+   * Adds a '/' division symbol
    */
-  equals: ExpressionTail;
+  div: IExpressionTail;
 
   /**
-   * Adds a "=~" comparator to select entries matching a regex.
+   * Adds a '=' symbol
    */
-  matches: ExpressionTail;
+  equals: IExpressionTail;
 
   /**
-   * Adds a "!~" comparator to select entries not matching a regex.
+   * Adds a '=~' comparator to select entries matching a regex.
    */
-  doesntMatch: ExpressionTail;
+  matches: IExpressionTail;
 
   /**
-   * Adds a "!=" comparator to select entries not equaling a certain value.
+   * Adds a '!~' comparator to select entries not matching a regex.
    */
-  notEqual: ExpressionTail;
+  doesntMatch: IExpressionTail;
 
   /**
-   * Adds a ">" symbol
+   * Adds a '!=' comparator to select entries not equaling a certain value.
    */
-  gt: ExpressionTail;
+  notEqual: IExpressionTail;
 
   /**
-   * Adds a ">=" symbol
+   * Adds a '>' symbol
    */
-  gte: ExpressionTail;
+  gt: IExpressionTail;
 
   /**
-   * Adds a "<" symbol
+   * Adds a '>=' symbol
    */
-  lt: ExpressionTail;
+  gte: IExpressionTail;
 
   /**
-   * Adds a "<=" symbol
+   * Adds a '<' symbol
    */
-  lte: ExpressionTail;
+  lt: IExpressionTail;
+
+  /**
+   * Adds a '<=' symbol
+   */
+  lte: IExpressionTail;
 }
 
 function regexHasFlags(re: RegExp): boolean {
-  if (typeof re.flags !== "undefined") {
+  if (typeof re.flags !== 'undefined') {
     return re.flags.length > 0;
   }
   return !(/\/$/).test(re.toString());
@@ -122,9 +122,9 @@ function regexHasFlags(re: RegExp): boolean {
  * // "host" = 'ares.peet.io' OR "host" ~= /example\.com$/ OR \
  * //   ("county" = 'US' AND "state" = 'WA')
  */
-export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
+export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
-  private query = new Array<string>();
+  private query: string[] = [];
 
   /**
    * Inserts a tag reference into the expression; the name will be
@@ -159,10 +159,10 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    *     e.field('b').equals.value('b')
    *     .and.field('a').equals.value('c'))
    *   .toString()
-   * // "a" = 'b' OR ("b" = 'b' AND 'a' = "c")
+   * // "a" = 'b' OR ("b" = 'b' AND "a" = 'c')
    */
   public exp(fn: (e: Expression) => Expression): this {
-    this.query.push("(" + fn(new Expression()).toString() + ")");
+    this.query.push('(' + fn(new Expression()).toString() + ')');
     return this;
   }
 
@@ -172,7 +172,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    *  - Numbers will be inserted verbatim
    *  - Strings will be escaped and inserted
    *  - Booleans will be inserted correctly
-   *  - Dates will be formatted and inserted correctly, including NanoDates.
+   *  - Dates will be formatted and inserted correctly, including INanoDates.
    *  - Regular expressions will be inserted correctly, however an error will
    *    be thrown if they contain flags, as regex flags do not work in Influx
    *  - Otherwise we'll try to call `.toString()` on the value, throwing
@@ -183,14 +183,14 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    */
   public value(value: any): this {
     switch (typeof value) {
-      case "number":
+      case 'number':
         this.query.push(value);
         return this;
-      case "string":
+      case 'string':
         this.query.push(escape.stringLit(value));
         return this;
-      case "boolean":
-        this.query.push(value ? "TRUE" : "FALSE");
+      case 'boolean':
+        this.query.push(value ? 'TRUE' : 'FALSE');
         return this;
       default:
         if (value instanceof Date) {
@@ -200,20 +200,20 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
 
         if (value instanceof RegExp) {
           if (regexHasFlags(value)) {
-            throw new Error("Attmempted to query using a regex with flags, " +
-              "but Influx doesn't support flags in queries.");
+            throw new Error('Attempted to query using a regex with flags, ' +
+              'but Influx doesn\'t support flags in queries.');
           }
-          this.query.push("/" + value.source + "/");
+          this.query.push('/' + value.source + '/');
           return this;
         }
 
-        if (value && typeof value.toString === "function") {
+        if (value && typeof value.toString === 'function') {
           this.query.push(value.toString());
           return this;
         }
 
         throw new Error(`node-influx doesn't know how to encode the provided value into a ` +
-          "query. If you think this is a bug, open an issue here: https://git.io/influx-err");
+          'query. If you think this is a bug, open an issue here: https://git.io/influx-err');
     }
   }
   /**
@@ -221,7 +221,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get and(): this {
-    this.query.push("AND");
+    this.query.push('AND');
     return this;
   }
 
@@ -230,7 +230,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get or(): this {
-    this.query.push("OR");
+    this.query.push('OR');
     return this;
   }
 
@@ -239,7 +239,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get plus(): this {
-    this.query.push("+");
+    this.query.push('+');
     return this;
   }
 
@@ -248,7 +248,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get times(): this {
-    this.query.push("*");
+    this.query.push('*');
     return this;
   }
 
@@ -257,7 +257,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get minus(): this {
-    this.query.push("-");
+    this.query.push('-');
     return this;
   }
 
@@ -266,7 +266,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get div(): this {
-    this.query.push("/");
+    this.query.push('/');
     return this;
   }
 
@@ -275,7 +275,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get equals(): this {
-    this.query.push("=");
+    this.query.push('=');
     return this;
   }
 
@@ -284,7 +284,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get matches(): this {
-    this.query.push("=~");
+    this.query.push('=~');
     return this;
   }
 
@@ -293,7 +293,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get doesntMatch(): this {
-    this.query.push("!~");
+    this.query.push('!~');
     return this;
   }
 
@@ -302,7 +302,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get notEqual(): this {
-    this.query.push("!=");
+    this.query.push('!=');
     return this;
   }
 
@@ -311,7 +311,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get gt(): this {
-    this.query.push(">");
+    this.query.push('>');
     return this;
   }
 
@@ -320,7 +320,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get gte(): this {
-    this.query.push(">=");
+    this.query.push('>=');
     return this;
   }
 
@@ -329,7 +329,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get lt(): this {
-    this.query.push("<");
+    this.query.push('<');
     return this;
   }
 
@@ -338,7 +338,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @type {Expression}
    */
   get lte(): this {
-    this.query.push("<=");
+    this.query.push('<=');
     return this;
   }
 
@@ -347,7 +347,7 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
    * @return {String}
    */
   public toString(): string {
-    return this.query.join(" ");
+    return this.query.join(' ');
   }
 }
 
@@ -357,12 +357,12 @@ export class Expression implements ExpressionHead, ExpressionTail, BinaryOp {
  * policy and database it lives under.
  *
  * @example
- * m.name("my_measurement") // "my_measurement"
- * m.name("my_measurement").policy("one_day") // "one_day"."my_measurement"
- * m.name("my_measurement").policy("one_day").db("mydb") // "mydb".one_day"."my_measurement"
+ * m.name('my_measurement') // "my_measurement"
+ * m.name('my_measurement').policy('one_day') // "one_day"."my_measurement"
+ * m.name('my_measurement').policy('one_day').db('mydb') // "mydb".one_day"."my_measurement"
  */
 export class Measurement {
-  private parts = new Array<string>(3);
+  private parts: string[] = [null, null, null];
 
   /**
    * Sets the measurement name.
@@ -406,22 +406,22 @@ export class Measurement {
 
     return this.parts.filter(p => !!p)
       .map(p => escape.quoted(p))
-      .join(".");
+      .join('.');
   }
 }
 
 export type measurement = { measurement: string | ((m: Measurement) => Measurement) };
-export type where = { where: string | ((e: ExpressionHead) => Expression) };
+export type where = { where: string | ((e: IExpressionHead) => Expression) };
 
 export function parseMeasurement(q: measurement): string {
-  if (typeof q.measurement === "function") {
+  if (typeof q.measurement === 'function') {
     return q.measurement(new Measurement()).toString();
   }
   return q.measurement;
 }
 
 export function parseWhere(q: where): string {
-  if (typeof q.where === "function") {
+  if (typeof q.where === 'function') {
     return q.where(new Expression()).toString();
   }
   return q.where;

@@ -33,7 +33,7 @@ describe('administrative actions', () => {
     it('drops users', () => {
       return db.dropUser('connor')
         .then(() => db.getUsers())
-        .then(users => expect(users.map(u => u.user)).not.to.contain('connor'))
+        .then(users => expect(users.map(u => u.user)).not.to.contain('connor'));
     });
   });
 
@@ -66,7 +66,7 @@ describe('administrative actions', () => {
       return db.alterRetentionPolicy('7d', {
         duration: '7d',
         replication: 1,
-        default: true,
+        isDefault: true,
       }).then(() => {
         return expectPolicy({
           default: true,
@@ -81,8 +81,8 @@ describe('administrative actions', () => {
     it('drops policies', () => {
       return db.dropRetentionPolicy('7d')
         .then(() => db.showRetentionPolicies())
-        .then(rps => expect(rps.map(rp => rp.name)).to.not.contain('7d'))
-    })
+        .then(rps => expect(rps.map(rp => rp.name)).to.not.contain('7d'));
+    });
   });
 
   describe('continuous queries', () => {

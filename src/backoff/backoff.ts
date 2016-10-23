@@ -1,4 +1,4 @@
-export interface BackoffStrategy {
+export interface IBackoffStrategy {
 
   /**
    * getDelay returns the amount of delay of the current backoff.
@@ -9,11 +9,11 @@ export interface BackoffStrategy {
    * Next is called when a failure occurs on a host to
    * return the next backoff amount.
    */
-  next(): BackoffStrategy;
+  next(): IBackoffStrategy;
 
   /**
    * Returns a strategy with a reset backoff counter.
    */
-  reset(): BackoffStrategy;
+  reset(): IBackoffStrategy;
 
 }

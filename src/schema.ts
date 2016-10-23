@@ -1,6 +1,6 @@
-import { FieldType, escape, isNumeric } from "./grammar";
+import { escape, FieldType, isNumeric } from './grammar';
 
-export interface SchemaOptions {
+export interface ISchemaOptions {
   /**
    * The measurement name this schema is describing.
    */
@@ -34,7 +34,7 @@ export class Schema {
   private fieldNames: string[];
   private tagHash: { [tag: string]: true } = {};
 
-  constructor(private options: SchemaOptions) {
+  constructor(private options: ISchemaOptions) {
     // fieldNames are sorted for performance: when coerceFields is run the
     // fields will be added to the output in order.
     this.fieldNames = Object.keys(options.fields).sort();
@@ -57,7 +57,7 @@ export class Schema {
 
       const value = fields[field];
       const typ = typeof value;
-      consumed++;
+      consumed += 1;
       if (value == null) {
         return;
       }
@@ -69,30 +69,30 @@ export class Schema {
         break;
 
       case FieldType.INTEGER:
-        if (typ !== "number" && !isNumeric(String(value))) {
-          throw new Error(`Expected numeric value for ${this.ref(field)}, but got "${value}"!`);
+        if (typ !== 'number' && !isNumeric(String(value))) {
+          throw new Error(`Expected numeric value for ${this.ref(field)}, but got '${value}'!`);
         }
-        coerced = String(Math.floor(<number> value)) + "i";
+        coerced = String(Math.floor(<number> value)) + 'i';
         break;
 
       case FieldType.FLOAT:
-        if (typ !== "number" && !isNumeric(String(value))) {
-          throw new Error(`Expected numeric value for ${this.ref(field)}, but got "${value}"!`);
+        if (typ !== 'number' && !isNumeric(String(value))) {
+          throw new Error(`Expected numeric value for ${this.ref(field)}, but got '${value}'!`);
         }
         coerced = String(value);
         break;
 
       case FieldType.BOOLEAN:
-        if (typ !== "boolean") {
+        if (typ !== 'boolean') {
           throw new Error(`Expected boolean value for ${this.ref(field)}, but got a ${typ}!`);
         }
-        coerced = value ? "T" : "F";
+        coerced = value ? 'T' : 'F';
         break;
 
       default:
         throw new Error(
           `Unknown field type ${this.options.fields[field]} for ${field} in ` +
-          `${this.ref()}. Please ensure that your configuration is correct.`
+          `${this.ref()}. Please ensure that your configuration is correct.`,
         );
       }
 
@@ -105,7 +105,7 @@ export class Schema {
 
       throw new Error(
         `Extraneous fields detected for writing InfluxDB point in` +
-        `${this.ref()}: \`${extraneous.join("`, `")}\`.`
+        `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
       );
     }
 
@@ -122,7 +122,7 @@ export class Schema {
     if (extraneous.length > 0) {
       throw new Error(
         `Extraneous tags detected for writing InfluxDB point in` +
-        `${this.ref()}: \`${extraneous.join("`, `")}\`.`
+        `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
       );
     }
 
@@ -130,12 +130,12 @@ export class Schema {
   }
 
   /**
-   * Returns the "db"."measurement"[."field"] referencing the current schema.
+   * Returns the 'db'.'measurement'[.'field'] referencing the current schema.
    */
   private ref(field?: string): string {
-    let out = this.options.database + "." + this.options.measurement;
+    let out = this.options.database + '.' + this.options.measurement;
     if (field) {
-      out += "." + field;
+      out += '.' + field;
     }
     return out;
   }
@@ -149,10 +149,10 @@ export class Schema {
 export function coerceBadly (fields: FieldMap): [string, string][] {
   return Object.keys(fields).sort().map(field => {
     const value = fields[field];
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       return <[string, string]> [field, escape.quoted(value)];
     } else {
       return <[string, string]> [field, String(value)];
     }
   });
-};
+}

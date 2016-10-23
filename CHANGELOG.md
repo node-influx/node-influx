@@ -1,17 +1,21 @@
 # node-influx Changelog
 
+## TBA, 5.0.0-alpha.3
+
+* **breaking** (only TypeScript): interfaces have been renamed and prefixed with an `I`
+
 ## 2016-10-22, 5.0.0-alpha.3
 
-* Fix more documentation typos
-* Fix requests to `https` hosts failing
+* Fix more documentation typos.
+* Fix requests to `https` hosts failing.
 
 ## 2016-10-21, 5.0.0-alpha.2
 
 * Multiple fixes have been made for Webpack support, awaiting resolution of [node-libs-browser#41](https://github.com/webpack/node-libs-browser/pull/41)
-* The `epoch` property in the QueryOptions type has been renamed to `precision` for consistency.
+* The `epoch` property in the IQueryOptions type has been renamed to `precision` for consistency.
 * Fixed an issue where precision could be lost when querying for nanosecond precision.
 * All `time` columns in Results are parsed to NanoDates, increased NanoDate parsing speed.
-* Fixed various compatibilit issues with browser polyfills.
+* Fixed various compatibility issues with browser polyfills.
 * Documentation typos have been fixed (thanks @dandv!) and made more consistent.
 
 ## 2016-10-15, 5.0.0-alpha.1
@@ -22,7 +26,7 @@
 - Order-of-magnitude performance increases (varying per situation);
 - A more consistent API with predictable and consistent escaping;
 - The ability to correctly and accurately [deal with times](https://node-influx.github.io/manual/usage.html#a-moment-for-times);
-- The ability to correctly and accurately [deal with all data types](https://node-influx.github.io/typedef/index.html#static-typedef-SchemaOptions);
+- The ability to correctly and accurately [deal with all data types](https://node-influx.github.io/typedef/index.html#static-typedef-ISchemaOptions);
 - Fix some methods plain not working;
 - Isomorphism, allowing the adapter to work in both Node and the browser;
 - Less weird connection pool failures;

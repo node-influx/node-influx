@@ -1,4 +1,4 @@
-import { TimePrecision, isoOrTimeToDate } from "./grammar";
+import { isoOrTimeToDate, TimePrecision } from './grammar';
 
 /**
  * A ResultError is thrown when a query generates errorful results from Influx.
@@ -16,12 +16,12 @@ export class ResultError extends Error {
  * provided by the CLI. As of 1.0 this formatter changes the result structure
  * and it will confuse you, as it did me ;)
  */
-export interface Response {
-  results: ResultEntry[];
+export interface IResponse {
+  results: IResultEntry[];
 }
 
-export interface ResultEntry {
-  series?: ResponseSeries[];
+export interface IResultEntry {
+  series?: IResponseSeries[];
   error?: string;
 }
 
@@ -29,7 +29,7 @@ export type Tags = { [name: string]: string };
 
 export type Row = any;
 
-export interface ResponseSeries {
+export interface IResponseSeries {
   name?: string;
   columns: string[];
   tags?: Tags;
@@ -38,7 +38,7 @@ export interface ResponseSeries {
 
 function groupMethod(matcher: Tags): Row[] {
 
-  // We do a tiny bit of "custom" deep equality checking here, taking
+  // We do a tiny bit of 'custom' deep equality checking here, taking
   // advantage of the fact that the tag keys are consistent across all
   // series results. This lets us match groupings much more efficiently,
   // ~6000x faster than the fastest vanilla equality checker (lodash)
@@ -51,8 +51,8 @@ function groupMethod(matcher: Tags): Row[] {
   }
 
   L:
-  for (let i = 0; i < this.groupRows.length; i++) {
-    for (let k = 0; k < srcKeys.length; k++) {
+  for (let i = 0; i < this.groupRows.length; i += 1) {
+    for (let k = 0; k < srcKeys.length; k += 1) {
       if (this.groupRows[i].tags[srcKeys[k]] !== matcher[srcKeys[k]]) {
         continue L;
       }
@@ -79,31 +79,32 @@ function groupsMethod(): { name: string, tags: Tags, rows: Row[] }[] {
  * subclassed.
  */
 
-function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): Results<any> {
-  const results = <any> new Array<Row>();
+function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): IResults<any> {
+  const results: any = [];
   const tags
     = results.groupsTagsKeys
     = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
 
-  let nextGroup = new Array<Row>();
-  results.groupRows = new Array(series.length);
+  let nextGroup: Row[] = [];
+  results.groupRows = new Array(series.length); // tslint:disable-line
 
-  for (let i = 0, lastEnd = 0; i < series.length; i++, lastEnd = results.length) {
+  let lastEnd = 0;
+  for (let i = 0; i < series.length; i += 1, lastEnd = results.length) {
     const {
       columns = [],
       values = [],
     } = series[i];
 
-    for (let k = 0; k < values.length; k++) {
+    for (let k = 0; k < values.length; k += 1) {
       const obj: Row = {};
-      for (let j = 0; j < columns.length; j++) {
-        if (columns[j] === "time") {
+      for (let j = 0; j < columns.length; j += 1) {
+        if (columns[j] === 'time') {
           obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
         } else {
           obj[columns[j]] = values[k][j];
         }
       }
-      for (let j = 0; j < tags.length; j++) {
+      for (let j = 0; j < tags.length; j += 1) {
         obj[tags[j]] = series[i].tags[tags[j]];
       }
 
@@ -125,9 +126,9 @@ function parseInner(series: ResponseSeries[] = [], precision?: TimePrecision): R
 }
 
 /**
- * ResultsParser is a user-friendly results tables from raw Influx responses.
+ * IResultsParser is a user-friendly results tables from raw Influx responses.
  */
-export interface Results<T> extends Array<T> {
+export interface IResults<T> extends Array<T> {
   /**
    * Group looks for and returns the first group in the results
    * that matches the provided tags.
@@ -187,12 +188,12 @@ export interface Results<T> extends Array<T> {
 }
 
 /**
- * Checks if there are any errors in the Response and, if so, it throws them.
+ * Checks if there are any errors in the IResponse and, if so, it throws them.
  * @private
  * @throws {ResultError}
  */
-export function assertNoErrors(res: Response) {
-  for (let i = 0; i < res.results.length; i++) {
+export function assertNoErrors(res: IResponse) {
+  for (let i = 0; i < res.results.length; i += 1) {
     const { error } = res.results[i];
     if (error) {
       throw new ResultError(error);
@@ -211,7 +212,7 @@ export function assertNoErrors(res: Response) {
  *  3. Multiple queries of types 1 and 2
  * @private
  */
-export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[] | Results<T> {
+export function parse<T>(res: IResponse, precision?: TimePrecision): IResults<T>[] | IResults<T> {
   assertNoErrors(res);
 
   if (res.results.length === 1) { // normalize case 3
@@ -227,11 +228,11 @@ export function parse<T>(res: Response, precision?: TimePrecision): Results<T>[]
  * @throws {Error} if the number of results is not exactly one
  * @private
  */
-export function parseSingle<T>(res: Response, precision?: TimePrecision): Results<T> {
+export function parseSingle<T>(res: IResponse, precision?: TimePrecision): IResults<T> {
   assertNoErrors(res);
 
   if (res.results.length !== 1) {
-    throw new Error("node-influx expected the results length to equal 1, but " +
+    throw new Error('node-influx expected the results length to equal 1, but ' +
       `it was ${0}. Please report this here: https://git.io/influx-err`);
   }
 

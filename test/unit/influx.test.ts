@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
-import { InfluxDB, FieldType, toNanoDate } from '../../src';
-import { dbFixture } from "./helpers";
-import { expect } from "chai";
+import { FieldType, InfluxDB, toNanoDate } from '../../src';
+import { dbFixture } from './helpers';
+import { expect } from 'chai';
 
 const sinon = require('sinon');
 
@@ -18,8 +18,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '127.0.0.1',
           port: 8086,
-          protocol: 'http'
-        }]
+          protocol: 'http',
+        }],
       });
     });
 
@@ -33,8 +33,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 1337,
-          protocol: 'https'
-        }]
+          protocol: 'https',
+        }],
       });
     });
 
@@ -48,8 +48,8 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 8086,
-          protocol: 'http'
-        }]
+          protocol: 'http',
+        }],
       });
     });
 
@@ -62,18 +62,18 @@ describe('influxdb', () => {
         hosts: [{
           host: '192.168.0.1',
           port: 8086,
-          protocol: 'http'
-        }]
+          protocol: 'http',
+        }],
       });
     });
 
     it('parses parses schema', () => {
       let client = (<any> new InfluxDB({
         schema: [{
-          database: "my_db",
-          measurement: "my_measurement",
+          database: 'my_db',
+          measurement: 'my_measurement',
           fields: {},
-          tags: ["my_tag"],
+          tags: ['my_tag'],
         }],
         hosts: [{ host: '192.168.0.1' }],
       }));
@@ -82,22 +82,22 @@ describe('influxdb', () => {
 
       client = (<any> new InfluxDB({
         schema: [{
-          measurement: "my_measurement",
+          measurement: 'my_measurement',
           fields: {},
-          tags: ["my_tag"],
+          tags: ['my_tag'],
         }],
-        database: "my_db",
+        database: 'my_db',
         hosts: [{ host: '192.168.0.1' }],
       }));
 
       expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
       expect(() => {
-        new InfluxDB({
+        new InfluxDB({ // tslint:disable-line
           schema: [{
-            measurement: "my_measurement",
+            measurement: 'my_measurement',
             fields: {},
-            tags: ["my_tag"],
+            tags: ['my_tag'],
           }],
           hosts: [{ host: '192.168.0.1' }],
         });
@@ -106,17 +106,17 @@ describe('influxdb', () => {
   });
 
   describe('methods', () => {
-    let influx
-    let pool
-    let expectations = []
+    let influx;
+    let pool;
+    const expectations = [];
     beforeEach(() => {
       influx = new InfluxDB({
         hosts: [],
         schema: [
           {
-            database: "my_db",
-            measurement: "my_schemed_measure",
-            tags: ["my_tag"],
+            database: 'my_db',
+            measurement: 'my_schemed_measure',
+            tags: ['my_tag'],
             fields: {
               int: FieldType.INTEGER,
               float: FieldType.FLOAT,
@@ -147,10 +147,10 @@ describe('influxdb', () => {
         method: string,
         options: string | any,
         httpMethod: string = 'POST',
-        yields: any = { results: [{}] }
+        yields: any = { results: [{}] },
     ) => {
       if (typeof options === 'string') {
-        options = { q: options }
+        options = { q: options };
       }
 
       pool[method].returns(Promise.resolve(yields));
@@ -160,15 +160,15 @@ describe('influxdb', () => {
           path: '/query',
           query: Object.assign({
             u: 'root',
-            p: 'root'
-          }, options)
+            p: 'root',
+          }, options),
         });
       });
     };
 
     const expectWrite = (body: string, options: any) => {
       if (typeof options === 'string') {
-        options = { q: options }
+        options = { q: options };
       }
 
       pool.discard.returns(Promise.resolve());
@@ -179,8 +179,8 @@ describe('influxdb', () => {
           body,
           query: Object.assign({
             u: 'root',
-            p: 'root'
-          }, options)
+            p: 'root',
+          }, options),
         });
       });
     };
@@ -250,7 +250,7 @@ describe('influxdb', () => {
           'series_2,my_tag=6',
           'series_2,my_tag=7',
           'series_2,my_tag=8',
-          'series_2,my_tag=9'
+          'series_2,my_tag=9',
         ]);
       });
     });
@@ -272,7 +272,7 @@ describe('influxdb', () => {
           'series_1,my_tag=6',
           'series_1,my_tag=7',
           'series_1,my_tag=8',
-          'series_1,my_tag=9'
+          'series_1,my_tag=9',
         ]);
       });
     });
@@ -280,7 +280,7 @@ describe('influxdb', () => {
     it('.dropMeasurement()', () => {
       expectQuery('json', {
         db: 'my_db',
-        q: 'drop measurement "series_1"'
+        q: 'drop measurement "series_1"',
       });
       return influx.dropMeasurement('series_1', 'my_db');
     });
@@ -312,7 +312,7 @@ describe('influxdb', () => {
         expectQuery('json', { db: 'my_db', q: 'drop series from "series_0" where "my_tag" = 1' });
         influx.dropSeries({
           measurement: m => m.name('series_0'),
-          where: e => e.tag('my_tag').equals.value(1)
+          where: e => e.tag('my_tag').equals.value(1),
         });
       });
     });
@@ -488,7 +488,7 @@ describe('influxdb', () => {
               int: 42,
               float: 43,
               bool: true,
-            }
+            },
           },
         ]);
       });
@@ -703,7 +703,7 @@ describe('influxdb', () => {
         return influx.createRetentionPolicy('7d"', {
           database: 'test',
           duration: '7d',
-          replication: 1
+          replication: 1,
         });
       });
 
@@ -714,7 +714,7 @@ describe('influxdb', () => {
         return influx.createRetentionPolicy('7d"', {
           duration: '7d',
           replication: 1,
-          default: true,
+          isDefault: true,
         });
       });
     });
@@ -729,7 +729,7 @@ describe('influxdb', () => {
         return influx.alterRetentionPolicy('7d"', {
           database: 'test',
           duration: '7d',
-          replication: 1
+          replication: 1,
         });
       });
 
@@ -740,7 +740,7 @@ describe('influxdb', () => {
         return influx.alterRetentionPolicy('7d"', {
           duration: '7d',
           replication: 1,
-          default: true,
+          isDefault: true,
         });
       });
     });
@@ -755,7 +755,7 @@ describe('influxdb', () => {
       const data = dbFixture('showRetentionPolicies');
       expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
       influx.showRetentionPolicies('my"db');
-      setDefaultDB('my_db')
+      setDefaultDB('my_db');
       expectQuery('json', 'show retention policies on "my_db"', 'GET', data);
 
       return influx.showRetentionPolicies().then(res => {
@@ -774,7 +774,7 @@ describe('influxdb', () => {
             replicaN: 1,
             default: false,
           },
-        ])
+        ]);
       });
     });
   });

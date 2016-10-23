@@ -1,5 +1,5 @@
-import { BackoffStrategy } from "./backoff/backoff";
-import * as urlModule from "url";
+import { IBackoffStrategy } from './backoff/backoff';
+import * as urlModule from 'url';
 
 export class Host {
 
@@ -8,9 +8,9 @@ export class Host {
   /**
    * Creates a new Host instance.
    * @param {String} url
-   * @param {BackoffStrategy} backoff
+   * @param {IBackoffStrategy} backoff
    */
-  constructor (url: string, private backoff: BackoffStrategy) {
+  constructor (url: string, private backoff: IBackoffStrategy) {
     this.url = urlModule.parse(url);
   }
 

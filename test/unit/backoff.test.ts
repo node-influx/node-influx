@@ -1,11 +1,11 @@
-import { BackoffStrategy } from "../../src/backoff/backoff";
-import { ExponentialBackoff } from "../../src/backoff/exponential";
-import { expect } from "chai";
+import { IBackoffStrategy } from '../../src/backoff/backoff';
+import { ExponentialBackoff } from '../../src/backoff/exponential';
+import { expect } from 'chai';
 
-describe("backoff strategies", () => {
-  describe("exponential strategy", () => {
-    it("appears to work", () => {
-      let exp: BackoffStrategy = new ExponentialBackoff({
+describe('backoff strategies', () => {
+  describe('exponential strategy', () => {
+    it('appears to work', () => {
+      let exp: IBackoffStrategy = new ExponentialBackoff({
         initial: 500,
         max: 5000,
         random: 1,
@@ -19,7 +19,7 @@ describe("backoff strategies", () => {
 
       const checkSequence = () => {
         expect(next()).to.equal(500);
-        expect(next()).to.be.oneOf([500, 1000])
+        expect(next()).to.be.oneOf([500, 1000]);
         expect(next()).to.be.oneOf([1000, 2000]);
         expect(next()).to.be.oneOf([2000, 4000]);
         expect(next()).to.be.oneOf([4000, 5000]);
