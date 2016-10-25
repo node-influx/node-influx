@@ -6,7 +6,7 @@
   "typings": "./lib/src/index",
   "scripts": {
     "build:dist": "npm run clean && tsc && cp -R test/fixture lib/test",
-    "build:doc": "npm run clean && tsc -m es2015 --moduleResolution node && esdoc -c esdoc.json",
+    "build:doc": "npm run clean && tsc -m es2015 -t es6 --moduleResolution node && esdoc -c esdoc.json",
     "clean": "rm -rf coverage doc lib",
     "prepublish": "npm run clean && tsc -d",
     "test": "npm-run-all --parallel test:lint test:unit test:integrate",

@@ -31,7 +31,7 @@ For browsers, see the [browser setup](https://node-influx.github.io/manual/usage
 
 ## Compatibility
 
-Version 5.x.x is compatible with InfluxDB 1.x on Node 6 and modern browsers
+Version 5.x.x is compatible with InfluxDB 1.x on Node 4 on onwards, and modern browsers
 
 Version 4.x.x is compatible with InfluxDB 0.9.x - 0.13.x on Node 0.12 and onwards
 
