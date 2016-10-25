@@ -35,6 +35,12 @@ module.exports = function (config) {
     frameworks: ['mocha'],
     reporters: isSaucy ? ['mocha', 'saucelabs'] : ['mocha'],
 
+    client: {
+      mocha: {
+        timeout: 10000
+      }
+    },
+
     plugins: [
       require('karma-mocha'),
       require('karma-mocha-reporter'),
