@@ -1,3 +1,5 @@
+'use strict'
+
 const urlModule = require('url')
 
 module.exports = function () {
