@@ -1,8 +1,9 @@
 # node-influx Changelog
 
-## TBA, 5.0.0-alpha.3
+## 2016-10-24, 5.0.0-alpha.4
 
 * **breaking** (only TypeScript): interfaces have been renamed and prefixed with an `I`
+* added compatibility with Node 4 (and non-ES6 targets with polyfills).
 
 ## 2016-10-22, 5.0.0-alpha.3
 
@@ -11,8 +12,8 @@
 
 ## 2016-10-21, 5.0.0-alpha.2
 
+* **breaking**: The `epoch` property in the IQueryOptions type has been renamed to `precision` for consistency.
 * Multiple fixes have been made for Webpack support, awaiting resolution of [node-libs-browser#41](https://github.com/webpack/node-libs-browser/pull/41)
-* The `epoch` property in the IQueryOptions type has been renamed to `precision` for consistency.
 * Fixed an issue where precision could be lost when querying for nanosecond precision.
 * All `time` columns in Results are parsed to NanoDates, increased NanoDate parsing speed.
 * Fixed various compatibility issues with browser polyfills.

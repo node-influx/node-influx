@@ -5,7 +5,8 @@ import { isoOrTimeToDate, TimePrecision } from './grammar';
  */
 export class ResultError extends Error {
   constructor(message: string) {
-    super(`Error from InfluxDB: ${message}`);
+    super();
+    this.message = `Error from InfluxDB: ${message}`;
   }
 }
 

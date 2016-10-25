@@ -76,7 +76,12 @@ export interface IPoolRequestOptions {
  * An ServiceNotAvailableError is returned as an error from requests that
  * result in a > 500 error code.
  */
-export class ServiceNotAvailableError extends Error {}
+export class ServiceNotAvailableError extends Error {
+  constructor(message: string) {
+    super();
+    this.message = message;
+  }
+}
 
 /**
  * An RequestError is returned as an error from requests that
@@ -95,7 +100,8 @@ export class RequestError extends Error {
   }
 
   constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
-    super(`A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`);
+    super();
+    this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
   }
 }
 
@@ -123,6 +129,15 @@ export interface IPingStats {
   online: boolean;
   rtt: number;
   version: string;
+}
+
+function setToArray<T>(itemSet: Set<T>): T[] {
+  const output: T[] = [];
+  itemSet.forEach(value => {
+    output.push(value);
+  });
+
+  return output;
 }
 
 const request = (
@@ -177,7 +192,7 @@ export class Pool {
    * @return {Host[]}
    */
   public getHostsAvailable(): Host[] {
-    return Array.from(this.hostsAvailable);
+    return setToArray(this.hostsAvailable);
   }
 
   /**
@@ -186,7 +201,7 @@ export class Pool {
    * @return {Host[]}
    */
   public getHostsDisabled(): Host[] {
-    return Array.from(this.hostsDisabled);
+    return setToArray(this.hostsDisabled);
   }
 
   /**
@@ -256,51 +271,53 @@ export class Pool {
   public ping(timeout: number, path: string = '/ping'): Promise<IPingStats[]> {
     const todo: Promise<number>[] = [];
 
-    [...this.hostsAvailable, ...this.hostsDisabled].forEach(host => {
-      const start = Date.now();
-      const url = host.url;
-      const once = doOnce();
+    setToArray(this.hostsAvailable)
+      .concat(setToArray(this.hostsDisabled))
+      .forEach(host => {
+        const start = Date.now();
+        const url = host.url;
+        const once = doOnce();
 
-      return todo.push(new Promise(resolve => {
-        const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
-          hostname: url.hostname,
-          method: 'GET',
-          path,
-          port: Number(url.port),
-          protocol: url.protocol,
-          timeout,
-        }, once((res: http.IncomingMessage) => {
-          resolve({
-            url,
-            res,
-            online: res.statusCode < 300,
-            rtt: Date.now() - start,
-            version: res.headers['x-influxdb-version'],
+        return todo.push(new Promise(resolve => {
+          const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
+            hostname: url.hostname,
+            method: 'GET',
+            path,
+            port: Number(url.port),
+            protocol: url.protocol,
+            timeout,
+          }, once((res: http.IncomingMessage) => {
+            resolve({
+              url,
+              res,
+              online: res.statusCode < 300,
+              rtt: Date.now() - start,
+              version: res.headers['x-influxdb-version'],
+            });
+          }));
+
+          const fail = once(() => {
+            resolve({
+              online: false,
+              res: null,
+              rtt: Infinity,
+              url,
+              version: null,
+            });
           });
+
+          // Support older Nodes and polyfills which don't allow .timeout() in
+          // the request options, wrapped in a conditional for even worse
+          // polyfills. See: https://github.com/node-influx/node-influx/issues/221
+          if (typeof req.setTimeout === 'function') {
+            req.setTimeout(timeout, fail); // tslint:disable-line
+          }
+
+          req.on('timeout', fail);
+          req.on('error', fail);
+          req.end();
         }));
-
-        const fail = once(() => {
-          resolve({
-            online: false,
-            res: null,
-            rtt: Infinity,
-            url,
-            version: null,
-          });
-        });
-
-        // Support older Nodes and polyfills which don't allow .timeout() in
-        // the request options, wrapped in a conditional for even worse
-        // polyfills. See: https://github.com/node-influx/node-influx/issues/221
-        if (typeof req.setTimeout === 'function') {
-          req.setTimeout(timeout, fail); // tslint:disable-line
-        }
-
-        req.on('timeout', fail);
-        req.on('error', fail);
-        req.end();
-      }));
-    });
+      });
 
     return Promise.all(todo);
   }
@@ -380,7 +397,7 @@ export class Pool {
    * @return {Host}
    */
   private getHost(): Host {
-    const available = Array.from(this.hostsAvailable);
+    const available = setToArray(this.hostsAvailable);
     const host = available[this.index];
     this.index = (this.index + 1) % available.length;
     return host;
