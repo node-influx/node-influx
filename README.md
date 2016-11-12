@@ -11,7 +11,7 @@
   <br>
 
 
-  <a href="https://saucelabs.com/u/node-influx"><img src="https://saucelabs.com/browser-matrix/node-influx.svg" alt="Browser Test Status"></a>
+  <a href="https://saucelabs.com/u/influx"><img src="https://saucelabs.com/browser-matrix/influx.svg" alt="Browser Test Status"></a>
 </p>
 
 ## Installation
