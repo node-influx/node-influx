@@ -768,7 +768,7 @@ export class InfluxDB {
    *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
    * @param {Number} options.replication How many servers data in the series
    *     should be replicated to.
-   * @param {Boolean} [options.default] Whether the retention policy should
+   * @param {Boolean} [options.isDefault] Whether the retention policy should
    *     be the default policy on the database.
    * @returns {Promise<void>}
    * @example
