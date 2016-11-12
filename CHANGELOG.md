@@ -1,5 +1,15 @@
 # node-influx Changelog
 
+## 2016-11-12, 5.0.1
+
+ * bug: `.grantPrivilege` generating invalid queries ([#239](https://github.com/node-influx/node-influx/issues/239))
+ * doc: a documentation issue in `.createRetentionPolicy`'s options ([#238](https://github.com/node-influx/node-influx/issues/238))
+ * doc: `tags` and `fields` being swapped in a couple of usage examples
+
+## 2016-10-27, 5.0.0
+
+Stable release! No new changes.
+
 ## 2016-10-24, 5.0.0-alpha.4
 
 * **breaking** (only TypeScript): interfaces have been renamed and prefixed with an `I`
