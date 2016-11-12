@@ -920,8 +920,8 @@ export class InfluxDB {
    * influx.writePoints([
    *   {
    *     measurement: 'perf',
-   *     fields: { host: 'box1.example.com' },
-   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *     tags: { host: 'box1.example.com' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage() },
    *   }
    * ])
    *
@@ -930,8 +930,8 @@ export class InfluxDB {
    * influx.writePoints([
    *   {
    *     measurement: 'perf',
-   *     fields: { host: 'box1.example.com' },
-   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *     tags: { host: 'box1.example.com' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage() },
    *     timestamp: getLastRecordedTime(),
    *   }
    * ], {
@@ -1005,8 +1005,8 @@ export class InfluxDB {
    * @example
    * influx.writeMeasurement('perf', [
    *   {
-   *     fields: { host: 'box1.example.com' },
-   *     tags: { cpu: getCpuUsage(), mem: getMemUsage() },
+   *     tags: { host: 'box1.example.com' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage() },
    *   }
    * ])
    */
