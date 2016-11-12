@@ -30,6 +30,10 @@ describe('administrative actions', () => {
         .then(() => expectUser('connor', false));
     });
 
+    it('grants specific privs', () => {
+      return db.grantPrivilege('connor', 'READ'); // should not reject
+    });
+
     it('drops users', () => {
       return db.dropUser('connor')
         .then(() => db.getUsers())

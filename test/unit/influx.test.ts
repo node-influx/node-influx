@@ -344,7 +344,7 @@ describe('influxdb', () => {
 
     describe('.grantPrivilege()', () => {
       it('queries correctly', () => {
-        expectQuery('json', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'grant READ on "my_\\"_db" to "con\\"nor"');
         return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -352,7 +352,7 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_\\"_db');
-        expectQuery('json', 'grant READ to "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'grant READ on "my_\\"_db" to "con\\"nor"');
         return influx.grantPrivilege('con"nor', 'READ', 'my_"_db');
       });
     });
