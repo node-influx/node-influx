@@ -7,6 +7,7 @@
   <a href="https://travis-ci.org/node-influx/node-influx"><img src="http://img.shields.io/travis/node-influx/node-influx/master.svg" alt="Build Status"></a>
   <a href="https://coveralls.io/github/node-influx/node-influx?branch=master"><img src="https://coveralls.io/repos/github/node-influx/node-influx/badge.svg?branch=master" alt="Coverage Status"></a>
   <a href="https://david-dm.org/node-influx/node-influx"><img src="https://david-dm.org/node-influx/node-influx/status.svg" alt="Dependencies Status"></a>
+  <a href="https://gitter.im/node-influx/node-influx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/node-influx/node-influx.svg"></a>
 
   <br>
 
