@@ -24,7 +24,7 @@ export * from './builder';
 export { FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from './grammar';
 export { ISchemaOptions } from './schema';
 export { IPingStats, IPoolOptions } from './pool';
-export { IResults, ResultError } from './results';
+export { IResults, IResponse, ResultError } from './results';
 
 export interface IHostConfig {
 
