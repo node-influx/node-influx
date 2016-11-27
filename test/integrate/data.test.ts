@@ -15,6 +15,13 @@ describe('data operations', () => {
     return db.getDatabaseNames().then(res => expect(res).contain('influx_test_db'));
   });
 
+  it('writes complex values (issue #242)', () => {
+    const original = JSON.stringify({ a: JSON.stringify({ b: 'c c' }) });
+    return db.writeMeasurement('complex_value_series', [
+      { fields: { msg: original } }
+    ]);
+  });
+
   it('lists measurements', () => {
     return db.getMeasurements().then(res => {
       expect(res).to.deep.equal(['h2o_feet', 'h2o_quality']);

@@ -39,7 +39,7 @@ class Escaper {
 
   constructor(chars: string[], private wrap: string = '', private escaper: string = '\\') {
     const patterns = chars.join('').replace(reEscape, '\\$&');
-    this.re = new RegExp('[' + patterns + ']', 'g');
+    this.re = new RegExp('[' + patterns + '\\\\]', 'g');
   }
 
   /**

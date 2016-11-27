@@ -18,6 +18,12 @@ describe('grammar', () => {
     expect(grammar.escape.quoted(<any> new grammar.Raw('don"t escape'))).to.equal('don"t escape');
   });
 
+  it('escapes complex values (issue #242)', () => {
+    const original = JSON.stringify({a: JSON.stringify({b: 'c c'})});
+    expect(grammar.escape.quoted(original))
+      .to.equal('"{\\"a\\":\\"{\\\\\\"b\\\\\\":\\\\\\"c c\\\\\\"}\\"}"');
+  });
+
   let nanoDate: grammar.INanoDate;
   let milliDate: Date;
 
