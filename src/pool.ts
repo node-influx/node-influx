@@ -207,8 +207,8 @@ export class Pool {
   /**
    * Inserts a new host to the pool.
    */
-  public addHost(url: string): Host {
-    const host = new Host(url, this.options.backoff.reset());
+  public addHost(url: string, options: https.RequestOptions = {}): Host {
+    const host = new Host(url, this.options.backoff.reset(), options);
     this.hostsAvailable.add(host);
     return host;
   }
@@ -279,14 +279,14 @@ export class Pool {
         const once = doOnce();
 
         return todo.push(new Promise(resolve => {
-          const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
+          const req = request(Object.assign({
             hostname: url.hostname,
             method: 'GET',
             path,
             port: Number(url.port),
             protocol: url.protocol,
             timeout,
-          }, once((res: http.IncomingMessage) => {
+          }, host.options), once((res: http.IncomingMessage) => {
             resolve({
               url,
               res,
@@ -341,7 +341,7 @@ export class Pool {
 
     const once = doOnce();
     const host = this.getHost();
-    const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
+    const req = request(Object.assign({
       headers: { 'content-length': options.body ? options.body.length : 0 },
       hostname: host.url.hostname,
       method: options.method,
@@ -349,7 +349,7 @@ export class Pool {
       port: Number(host.url.port),
       protocol: host.url.protocol,
       timeout: this.timeout,
-    }, once((res: http.IncomingMessage) => {
+    }, host.options), once((res: http.IncomingMessage) => {
       if (res.statusCode >= 500) {
         return this.handleRequestError(
           new ServiceNotAvailableError(res.statusMessage),

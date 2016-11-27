@@ -1,6 +1,7 @@
 import { IPingStats, IPoolOptions, Pool } from './pool';
 import { assertNoErrors, IResults, parse, parseSingle } from './results';
 import { coerceBadly, ISchemaOptions, Schema } from './schema';
+import { RequestOptions } from 'https';
 
 import * as b from './builder';
 import * as grammar from './grammar';
@@ -40,6 +41,11 @@ export interface IHostConfig {
    * Protocol to connect over, defaults to 'http'.
    */
   protocol?: 'http' | 'https';
+
+  /**
+   * Optional request option overrides.
+   */
+  options?: RequestOptions;
 
 }
 
@@ -401,7 +407,7 @@ export class InfluxDB {
     this.options = defaults(resolved, defaultOptions);
 
     resolved.hosts.forEach(host => {
-      this.pool.addHost(`${host.protocol}://${host.host}:${host.port}`);
+      this.pool.addHost(`${host.protocol}://${host.host}:${host.port}`, host.options);
     });
 
     this.options.schema.forEach(schema => {

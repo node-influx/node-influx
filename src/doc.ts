@@ -28,6 +28,8 @@ import { Tags } from './results';
  * @property {Number} [port=8060] Influx port to connect to.
  * @property {String} [protocol='http'] Protocol to connect over, either
  *     'http' or 'https'.
+ * @property {https.RequestOptions} [options={}] Option overrides to use in
+ *     passing to http.request or https.request.
  * @property {IPoolOptions} [pool] Options for the connection pool.
  * @property {ISchemaOptions[]} [schema] An optional list of data schema to use.
  *
@@ -69,6 +71,8 @@ import { Tags } from './results';
  * @property {Number} [hosts.port=8060] Influx port to connect to.
  * @property {String} [hosts.protocol='http'] Protocol to connect over, either
  *     'http' or 'https'.
+ * @property {https.RequestOptions} [hosts.options={}] Option overrides to
+ *     use in passing to http.request or https.request.
  * @property {IPoolOptions} [pool] Options for the connection pool.
  * @property {ISchemaOptions[]} [schema] An optional list of data schema to use.
  *
