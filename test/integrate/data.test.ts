@@ -18,7 +18,7 @@ describe('data operations', () => {
   it('writes complex values (issue #242)', () => {
     const original = JSON.stringify({ a: JSON.stringify({ b: 'c c' }) });
     return db.writeMeasurement('complex_value_series', [
-      { fields: { msg: original } }
+      { fields: { msg: original } },
     ]);
   });
 
