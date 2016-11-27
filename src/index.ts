@@ -118,14 +118,14 @@ export interface IPoint {
   /**
    * Fields is the list of field values to insert.
    */
-  fields?: { [name: string]: grammar.FieldType };
+  fields?: { [name: string]: any };
 
   /**
    * Timestamp tags this measurement with a date. This can be a Date object,
    * in which case we'll adjust it to the desired precision, or a numeric
    * string or number, in which case it gets passed directly to Influx.
    */
-  timestamp: Date | string | number;
+  timestamp?: Date | string | number;
 }
 
 export interface IWriteOptions {
