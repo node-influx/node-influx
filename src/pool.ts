@@ -342,7 +342,6 @@ export class Pool {
     const once = doOnce();
     const host = this.getHost();
     const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
-      headers: { 'content-length': options.body ? options.body.length : 0 },
       hostname: host.url.hostname,
       method: options.method,
       path,
