@@ -1052,19 +1052,19 @@ export class InfluxDB {
   }
 
   /**
-   * queryRaw functions similarly to .query() but it does no fancy
-   * transformations on the returned data; it calls `JSON.parse` and returns
-   * those results verbatim.
+   * queryRaw functions similarly to .query() but only takes one query and does no
+   * fancy transformations on the returned data; it calls `JSON.parse` and returns
+   * the InfluxDB response verbatim.
    *
-   * @param {String|String[]} query
+   * @param {String} query
    * @param {IQueryOptions} [options]
-   * @return {Promise<*>}
+   * @return {Promise<Object>}
    * @example
    * influx.queryRaw('select * from perf').then(rawData => {
-   *   console.log(rawData)
+   *   console.log(rawData.results[0].series)  // array of series
    * })
    */
-  public queryRaw<T>(query: string, options: IQueryOptions = {}): Promise<any> {
+  public queryRaw<T>(query: string, options: IQueryOptions = {}): Promise<Object> {
     const {
       database = this.defaultDB(),
       retentionPolicy,
