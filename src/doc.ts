@@ -25,7 +25,7 @@ import { Tags } from './results';
  *     will let you omit database names in most operations, and is convenient
  *     if your app is primarily dealing with a single database.
  * @property {String} [host='127.0.0.1'] Influx host to connect to.
- * @property {Number} [port=8060] Influx port to connect to.
+ * @property {Number} [port=8086] Influx port to connect to.
  * @property {String} [protocol='http'] Protocol to connect over, either
  *     'http' or 'https'.
  * @property {IPoolOptions} [pool] Options for the connection pool.
@@ -66,7 +66,7 @@ import { Tags } from './results';
  *     if your app is primarily dealing with a single database.
  * @property {Array} hosts A list of Influx hosts to connect to.
  * @property {String} [hosts.host='127.0.0.1'] Influx host to connect to.
- * @property {Number} [hosts.port=8060] Influx port to connect to.
+ * @property {Number} [hosts.port=8086] Influx port to connect to.
  * @property {String} [hosts.protocol='http'] Protocol to connect over, either
  *     'http' or 'https'.
  * @property {IPoolOptions} [pool] Options for the connection pool.
