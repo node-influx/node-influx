@@ -33,7 +33,7 @@ export interface IHostConfig {
    */
   host: string;
   /**
-   * Influx port to connect to, defaults to 8060.
+   * Influx port to connect to, defaults to 8086.
    */
   port?: number;
   /**
