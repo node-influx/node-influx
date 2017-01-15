@@ -131,11 +131,12 @@ import { Tags } from './results';
  */
 
 /**
- * IResults are returned from the .query method. It marshals the raw Influx
+ * IResults are returned from the {@link InfluxDB#query} method. It marshals the raw Influx
  * results into a more palatable, JavaScript-y structure. All query results
- * are marshalled into a single, flat arrays, and methods are provided to
- * example grouped results as necessary. The `time` column, if included, is
- * converted into a {@link INanoDate}.
+ * are marshalled into a single, flat array, and methods are provided to
+ * examine grouped results as necessary. The `time` column, if included, is
+ * converted into a {@link INanoDate}. If `.query()` was called on an array of strings,
+ * it will return an array of IResults, one result per query string.
  *
  * @interface
  * @example
@@ -150,7 +151,7 @@ import { Tags } from './results';
 export class IResults<T> extends Array { // for doc only, implementation in src/results.ts
 
   /**
-   * Group looks for and returns the first group in the results
+   * Looks for and returns the first group in the results
    * that matches the provided tags.
    *
    * If you've used lodash or underscore, we do something quite similar to
