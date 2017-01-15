@@ -593,7 +593,7 @@ export class InfluxDB {
    * @param {String} password
    * @param {Boolean} [admin=false] If true, the user will be given all
    *     privileges on all databases.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.createUser('connor', 'pa55w0rd', true) // make 'connor' an admin
    *
@@ -615,7 +615,7 @@ export class InfluxDB {
    * Sets a password for an Influx user.
    * @param {String} username
    * @param {String} password
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.setPassword('connor', 'pa55w0rd')
    */
@@ -631,7 +631,7 @@ export class InfluxDB {
    * @param {String} username
    * @param {String} privilege Should be one of 'READ' or 'WRITE'
    * @param {String} [database] If not provided, uses the default database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.grantPrivilege('connor', 'READ', 'my_db') // grants read access on my_db to connor
    */
@@ -649,7 +649,7 @@ export class InfluxDB {
    * @param {String} username
    * @param {String} privilege Should be one of 'READ' or 'WRITE'
    * @param {String} [database] If not provided, uses the default database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.revokePrivilege('connor', 'READ', 'my_db') // removes read access on my_db from connor
    */
@@ -665,7 +665,7 @@ export class InfluxDB {
   /**
    * Grants admin privileges to a specified user.
    * @param {String} username
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.grantAdminPrivilege('connor')
    */
@@ -678,7 +678,7 @@ export class InfluxDB {
   /**
    * Removes a admin privilege from a specified user.
    * @param {String} username
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.revokeAdminPrivilege('connor')
    */
@@ -691,7 +691,7 @@ export class InfluxDB {
   /**
    * Removes a user from the database.
    * @param {String} username
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.dropUser('connor')
    */
@@ -706,7 +706,7 @@ export class InfluxDB {
    * @param {String} name The query name, for later reference
    * @param {String} query The body of the query to run
    * @param {String} [database] If not provided, uses the default database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
@@ -725,7 +725,7 @@ export class InfluxDB {
   /**
    * Returns a list of continous queries in the database.
    * @param {String} [database] If not provided, uses the default database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.showContinousQueries()
    */
@@ -743,7 +743,7 @@ export class InfluxDB {
    * Creates a continuous query in a database
    * @param {String} name The query name
    * @param {String} [database] If not provided, uses the default database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
@@ -770,7 +770,7 @@ export class InfluxDB {
    *     should be replicated to.
    * @param {Boolean} [options.isDefault] Whether the retention policy should
    *     be the default policy on the database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.createRetentionPolicy('7d', {
    *  duration: '7d',
@@ -800,7 +800,7 @@ export class InfluxDB {
    *     should be replicated to.
    * @param {Boolean} [options.default] Whether the retention policy should
    *     be the default policy on the database.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.alterRetentionPolicy('7d', {
    *  duration: '7d',
@@ -825,7 +825,7 @@ export class InfluxDB {
    * @param {String} name The retention policy name
    * @param {String} [database] Database name that the policy lives in,
    *     uses the default database if not provided.
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
    * @example
    * influx.dropRetentionPolicy('7d')
    */
@@ -841,7 +841,7 @@ export class InfluxDB {
    *
    * @param {String} [database] The database to list policies on, uses the
    *     default database if not provided.
-   * @returns {Promise<Array<{
+   * @return {Promise<Array<{
    *     name: String,
    *     duration: String,
    *     shardGroupDuration: String,
@@ -1020,14 +1020,13 @@ export class InfluxDB {
   public query<T>(query: string, options?: IQueryOptions): Promise<IResults<T>>;
 
   /**
-   * .query() run a query (or list of queries), runs them, and returns the
-   * results in a friendly format. If you run multiple queries, multiple
-   * sets of results will be returned, otherwise a single result will
-   * be returned.
+   * .query() runs a query (or list of queries), and returns the results in a 
+   * friendly format, {@link IResults}. If you run multiple queries, an array of results
+   * will be returned, otherwise a single result (array of objects) will be returned.
    *
    * @param {String|String[]} query
    * @param {IQueryOptions} [options]
-   * @return {Promise<IResults|Results[]>} query
+   * @return {Promise<IResults|Results[]>} result(s)
    * @example
    * influx.query('select * from perf').then(results => {
    *   console.log(results)
