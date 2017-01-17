@@ -217,8 +217,8 @@ export class IResults<T> extends Array { // for doc only, implementation in src/
  *     values to insert.
  * @property {Object.<String, *>} [fields] Fields is the list of
  *     field values to insert.
- * @property {Date|string|number} [fields] Timestamp tags this measurement with
- *     a date. This can be a Date object, in which case we'll adjust it to the
+ * @property {Date|string|number} [timestamp] Specifies a timestamp for this
+ *     point. This can be a Date object, in which case we'll adjust it to the
  *     desired precision, or a numeric string or number, in which case
  *     it gets passed directly to Influx.
  */
