@@ -104,7 +104,7 @@ export class Schema {
       const extraneous = keys.filter(f => this.fieldNames.indexOf(f) === -1);
 
       throw new Error(
-        `Extraneous fields detected for writing InfluxDB point in` +
+        `Extraneous fields detected for writing InfluxDB point in ` +
         `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
       );
     }
@@ -121,7 +121,7 @@ export class Schema {
     const extraneous = names.filter(tag => !this.tagHash[tag]);
     if (extraneous.length > 0) {
       throw new Error(
-        `Extraneous tags detected for writing InfluxDB point in` +
+        `Extraneous tags detected for writing InfluxDB point in ` +
         `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
       );
     }
