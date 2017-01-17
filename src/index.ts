@@ -908,10 +908,10 @@ export class InfluxDB {
    *  - if you provide a string or number as the timestamp, we'll pass it
    *    straight into Influx.
    *
-   * Please see the IPoint and IWriteOptions type for a
+   * Please see the IPoint and IWriteOptions types for a
    * full list of possible options.
    *
-   * @param {Point[]} points
+   * @param {IPoint[]} points
    * @param {IWriteOptions} [options]
    * @return {Promise<void>}
    * @example
@@ -999,7 +999,7 @@ export class InfluxDB {
    * it automatically fills in the `measurement` value for all points for you.
    *
    * @param {String} measurement
-   * @param {Point[]} points
+   * @param {IPoint[]} points
    * @param {IWriteOptions} [options]
    * @return {Promise<void>}
    * @example
