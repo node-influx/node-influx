@@ -68,6 +68,6 @@
     "tslint": "^3.11.0",
     "tslint-microsoft-contrib": "^2.0.13",
     "typescript": "^2.0.0",
-    "webpack": "^1.13.2"
+    "webpack": "^1.13.3"
   }
 }
