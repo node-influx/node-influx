@@ -1,6 +1,7 @@
+import { expect } from 'chai';
+
 import { InfluxDB } from '../../src';
 import { newClient } from './helpers';
-import { expect } from 'chai';
 
 describe('administrative actions', () => {
   let db: InfluxDB;
@@ -10,7 +11,9 @@ describe('administrative actions', () => {
 
   describe('users', () => {
     const expectUser = (name: string, admin: boolean): Promise<void> => {
-      return db.getUsers().then(users => expect(users).to.contain({ user: name, admin }));
+      return db.getUsers()
+        .then(users => expect(users).to.contain({ user: name, admin }))
+        .then(() => undefined);
     };
 
     beforeEach(() => db.createUser('connor', 'foo', false));
@@ -44,7 +47,8 @@ describe('administrative actions', () => {
   describe('retention policies', () => {
     const expectPolicy = (policy: any): Promise<void> => {
       return db.showRetentionPolicies()
-        .then(rps => expect(rps).to.contain(policy));
+        .then(rps => expect(rps).to.contain(policy))
+        .then(() => undefined);
     };
 
     beforeEach(() => {

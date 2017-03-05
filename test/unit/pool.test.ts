@@ -1,9 +1,9 @@
-import { ExponentialBackoff } from '../../src/backoff/exponential';
-import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
 import { expect } from 'chai';
-
 import * as http from 'http';
 import * as sinon from 'sinon';
+
+import { ExponentialBackoff } from '../../src/backoff/exponential';
+import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
 
 const hosts = 2;
 
@@ -60,6 +60,16 @@ describe('pool', () => {
     const p = createPool();
     p.addHost('https://httpbin.org/get');
     return p.json({ method: 'GET', path: '/get' });
+  });
+
+  it('passes through request options', () => {
+    const spy = sinon.spy(http, 'request');
+    const p = createPool();
+    p.addHost('https://httpbin.org/get', { rejectUnauthorized: false });
+
+    return p.json({ method: 'GET', path: '/get' }).then(() => {
+      expect(spy.args[0][0].rejectUnauthorized).to.be.false;
+    });
   });
 
   describe('request generators', () => {

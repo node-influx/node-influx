@@ -9,6 +9,8 @@ before_install:
   - npm i -g npm
   - docker pull influxdb
   - docker run -d -p 8083:8083 -p 8086:8086 influxdb
+addons:
+  sauce_connect: true
 script: npm run test:travis
 
 after_script:

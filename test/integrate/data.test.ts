@@ -1,6 +1,7 @@
+import { expect } from 'chai';
+
 import { InfluxDB } from '../../src';
 import { newClient, writeSampleData } from './helpers';
-import { expect } from 'chai';
 
 describe('data operations', () => {
   let db: InfluxDB;

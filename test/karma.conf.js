@@ -66,7 +66,9 @@ module.exports = function (config) {
      */
     sauceLabs: {
       testName: 'node-influx',
-      public: 'public'
+      public: 'public',
+      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+      startConnect: false,
     },
     customLaunchers: sauceLaunchers,
 

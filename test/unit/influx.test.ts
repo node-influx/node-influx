@@ -1,8 +1,9 @@
 'use strict';
 
+import { expect } from 'chai';
+
 import { FieldType, InfluxDB, toNanoDate } from '../../src';
 import { dbFixture } from './helpers';
-import { expect } from 'chai';
 
 const sinon = require('sinon');
 

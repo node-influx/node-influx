@@ -3,7 +3,7 @@ import { FieldType, IHostConfig, InfluxDB } from '../../src';
 const sampleData = require('../fixture/integrateSampleData.json');
 const details: IHostConfig = process.env.INFLUX_HOST
   ? JSON.parse(process.env.INFLUX_HOST)
-  : { host: '127.0.01', port: 8086 };
+  : { host: '127.0.0.1', port: 8086 };
 
 export const db = process.env.INFLUX_TEST_DB || 'influx_test_db';
 

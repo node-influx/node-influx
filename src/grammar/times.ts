@@ -181,10 +181,16 @@ const nsPer = {
 };
 
 function nanoIsoToTime(iso: string): string {
-  const [secondsStr, decimalStr] = iso.split('.');
-  const seconds = Math.floor(new Date(secondsStr + 'Z').getTime() / 1000);
-  const decimal = rightPad(decimalStr.slice(0, -1), 9);
-  return `${seconds}${decimal}`;
+  let [secondsStr, decimalStr] = iso.split('.');
+  if (decimalStr === undefined) {
+    decimalStr = '000000000';
+  } else {
+    decimalStr = rightPad(decimalStr.slice(0, -1), 9);
+    secondsStr += 'Z';
+  }
+
+  const seconds = Math.floor(new Date(secondsStr).getTime() / 1000);
+  return `${seconds}${decimalStr}`;
 }
 
 const nanoDateMethods = {

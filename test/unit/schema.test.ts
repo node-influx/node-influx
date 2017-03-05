@@ -1,6 +1,7 @@
+import { expect } from 'chai';
+
 import { FieldType } from '../../src/grammar';
 import { coerceBadly, Schema } from '../../src/schema';
-import { expect } from 'chai';
 
 describe('schema', () => {
   let schema: Schema;
