@@ -6,7 +6,7 @@ module.exports = (() => {
   const config = {}
 
   config.resolve = {
-    extensions: ['.ts', '.js', '.json', ''],
+    extensions: ['.ts', '.js', '.json'],
     alias: { http, https: http }
   }
 

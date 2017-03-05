@@ -80,6 +80,7 @@ export class ServiceNotAvailableError extends Error {
   constructor(message: string) {
     super();
     this.message = message;
+    Object.setPrototypeOf(this, ServiceNotAvailableError.prototype);
   }
 }
 
@@ -102,6 +103,7 @@ export class RequestError extends Error {
   constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
     super();
     this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
+    Object.setPrototypeOf(this, RequestError.prototype);
   }
 }
 
