@@ -1,4 +1,5 @@
 import * as results from '../../src/results';
+import { INanoDate } from '../../src';
 import { expect } from 'chai';
 
 describe('results', () => {
@@ -44,6 +45,31 @@ describe('results', () => {
     ]);
 
     expect(r.group({ tag: 'a' })).to.deep.equal([]);
+  });
+
+  it('parses a results with second-precision', () => {
+    const r = results.parseSingle<{ time: INanoDate, mean: number }>({
+      results: [{
+        series: [{
+          name: 'test_series',
+          columns: [
+            'time',
+            'mean',
+          ],
+          values: [
+            ['2015-08-18T00:00:00Z', 42],
+            ['2015-08-18T00:06:00Z', 44],
+          ],
+        }],
+      }],
+    });
+
+    expect(r.slice()).to.deep.equal([
+      { time: new Date(1439856000000), mean: 42 },
+      { time: new Date(1439856360000), mean: 44 },
+    ]);
+
+    expect(r[0].time.getNanoTime()).to.equal('1439856000000000000');
   });
 
   it('parses alternate epochs', () => {

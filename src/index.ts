@@ -22,7 +22,7 @@ const defaultOptions: IClusterConfig = Object.freeze({
 });
 
 export * from './builder';
-export { FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from './grammar';
+export { INanoDate, FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from './grammar';
 export { ISchemaOptions } from './schema';
 export { IPingStats, IPoolOptions } from './pool';
 export { IResults, IResponse, ResultError } from './results';
@@ -1026,7 +1026,7 @@ export class InfluxDB {
   public query<T>(query: string, options?: IQueryOptions): Promise<IResults<T>>;
 
   /**
-   * .query() runs a query (or list of queries), and returns the results in a 
+   * .query() runs a query (or list of queries), and returns the results in a
    * friendly format, {@link IResults}. If you run multiple queries, an array of results
    * will be returned, otherwise a single result (array of objects) will be returned.
    *
