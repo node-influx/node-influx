@@ -1,5 +1,12 @@
 # node-influx Changelog
 
+## 2017-03-04, 5.0.5
+
+*	Allow passing custom request options to http(s)?.request ([#262](https://github.com/node-influx/node-influx/issues/262), [#260](https://github.com/node-influx/node-influx/issues/260))
+*	Fix getNanoDate failing for second-precision timestamps ([#261](https://github.com/node-influx/node-influx/issues/261))
+* Update TypeScript to 2.2.x
+* Support multiple queries in queryRaw() ([#254](https://github.com/node-influx/node-influx/pull/254))
+
 ## 2016-11-12, 5.0.1
 
  * bug: `.grantPrivilege` generating invalid queries ([#239](https://github.com/node-influx/node-influx/issues/239))
