@@ -1,16 +1,20 @@
 import { IBackoffStrategy } from './backoff/backoff';
+import { RequestOptions } from 'https';
 import * as urlModule from 'url';
 
 export class Host {
 
-  public url: urlModule.Url;
+  public readonly url: urlModule.Url;
 
   /**
    * Creates a new Host instance.
    * @param {String} url
    * @param {IBackoffStrategy} backoff
    */
-  constructor (url: string, private backoff: IBackoffStrategy) {
+  constructor (url: string,
+    private backoff: IBackoffStrategy,
+    public readonly options: RequestOptions,
+  ) {
     this.url = urlModule.parse(url);
   }
 

@@ -207,8 +207,8 @@ export class Pool {
   /**
    * Inserts a new host to the pool.
    */
-  public addHost(url: string): Host {
-    const host = new Host(url, this.options.backoff.reset());
+  public addHost(url: string, options: https.RequestOptions = {}): Host {
+    const host = new Host(url, this.options.backoff.reset(), options);
     this.hostsAvailable.add(host);
     return host;
   }
@@ -252,7 +252,7 @@ export class Pool {
    * An error is returned on a non-2xx status code.
    */
   public discard(options: IPoolRequestOptions): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.stream(options, (err, res) => {
         if (err) {
           return reject(err);
@@ -269,7 +269,7 @@ export class Pool {
    * their response time and version number.
    */
   public ping(timeout: number, path: string = '/ping'): Promise<IPingStats[]> {
-    const todo: Promise<number>[] = [];
+    const todo: Promise<IPingStats>[] = [];
 
     setToArray(this.hostsAvailable)
       .concat(setToArray(this.hostsDisabled))
@@ -279,14 +279,14 @@ export class Pool {
         const once = doOnce();
 
         return todo.push(new Promise(resolve => {
-          const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
+          const req = request(Object.assign({
             hostname: url.hostname,
             method: 'GET',
             path,
             port: Number(url.port),
             protocol: url.protocol,
             timeout,
-          }, once((res: http.IncomingMessage) => {
+          }, host.options), once((res: http.IncomingMessage) => {
             resolve({
               url,
               res,
@@ -341,14 +341,15 @@ export class Pool {
 
     const once = doOnce();
     const host = this.getHost();
-    const req = request(<any> { // <any> DefinitelyTyped has not update defs yet
+    const req = request(Object.assign({
+      headers: { 'content-length': options.body ? options.body.length : 0 },
       hostname: host.url.hostname,
       method: options.method,
       path,
       port: Number(host.url.port),
       protocol: host.url.protocol,
       timeout: this.timeout,
-    }, once((res: http.IncomingMessage) => {
+    }, host.options), once((res: http.IncomingMessage) => {
       if (res.statusCode >= 500) {
         return this.handleRequestError(
           new ServiceNotAvailableError(res.statusMessage),

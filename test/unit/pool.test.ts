@@ -62,6 +62,16 @@ describe('pool', () => {
     return p.json({ method: 'GET', path: '/get' });
   });
 
+  it('passes through request options', () => {
+    const spy = sinon.spy(http, 'request');
+    const p = createPool();
+    p.addHost('https://httpbin.org/get', { rejectUnauthorized: false });
+
+    return p.json({ method: 'GET', path: '/get' }).then(() => {
+      expect(spy.args[0][0].rejectUnauthorized).to.be.false;
+    });
+  });
+
   describe('request generators', () => {
     it('makes a text request', () => {
       return pool.text({ method: 'GET', path: '/pool/json' })
