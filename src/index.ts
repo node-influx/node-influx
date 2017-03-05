@@ -1069,11 +1069,15 @@ export class InfluxDB {
    *   console.log(rawData)
    * })
    */
-  public queryRaw<T>(query: string, options: IQueryOptions = {}): Promise<any> {
+  public queryRaw<T>(query: string | string[], options: IQueryOptions = {}): Promise<any> {
     const {
       database = this.defaultDB(),
       retentionPolicy,
     } = options;
+
+    if (query instanceof Array) {
+      query = query.join(';');
+    }
 
     return this.pool.json(this.getQueryOpts({
       db: database,
