@@ -1,6 +1,7 @@
-import { IBackoffStrategy } from './backoff/backoff';
 import { RequestOptions } from 'https';
 import * as urlModule from 'url';
+
+import { IBackoffStrategy } from './backoff/backoff';
 
 export class Host {
 

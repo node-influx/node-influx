@@ -1,11 +1,11 @@
-import { IPingStats, IPoolOptions, Pool } from './pool';
-import { assertNoErrors, IResults, parse, parseSingle } from './results';
-import { coerceBadly, ISchemaOptions, Schema } from './schema';
 import { RequestOptions } from 'https';
+import * as url from 'url';
 
 import * as b from './builder';
 import * as grammar from './grammar';
-import * as url from 'url';
+import { IPingStats, IPoolOptions, Pool } from './pool';
+import { assertNoErrors, IResults, parse, parseSingle } from './results';
+import { coerceBadly, ISchemaOptions, Schema } from './schema';
 
 const defaultHost: IHostConfig = Object.freeze({
   host: '127.0.0.1',

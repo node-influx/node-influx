@@ -1,6 +1,7 @@
-import * as results from '../../src/results';
-import { INanoDate } from '../../src';
 import { expect } from 'chai';
+
+import { INanoDate } from '../../src';
+import * as results from '../../src/results';
 
 describe('results', () => {
   it('parses a empty result', () => {

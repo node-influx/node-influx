@@ -1,6 +1,7 @@
+import { expect } from 'chai';
+
 import { InfluxDB } from '../../src';
 import { newClient } from './helpers';
-import { expect } from 'chai';
 
 describe('administrative actions', () => {
   let db: InfluxDB;

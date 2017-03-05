@@ -1,9 +1,9 @@
-import { ExponentialBackoff } from '../../src/backoff/exponential';
-import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
 import { expect } from 'chai';
-
 import * as http from 'http';
 import * as sinon from 'sinon';
+
+import { ExponentialBackoff } from '../../src/backoff/exponential';
+import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
 
 const hosts = 2;
 
