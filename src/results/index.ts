@@ -1,6 +1,7 @@
 import { IncomingMessage } from 'http';
 
 import { TimePrecision } from '../grammar';
+import { parser as csvParser } from './csv';
 import { parser as jsonParser } from './json';
 import { IParser, IResults } from './types';
 
@@ -8,6 +9,8 @@ export { IResults, ResultError } from './types';
 
 function getParserFor(res: IncomingMessage): IParser {
   switch (res.headers['content-type']) {
+    case 'text/csv':
+      return csvParser;
     case 'application/json':
     default:
       return jsonParser;

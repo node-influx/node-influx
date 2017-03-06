@@ -15,7 +15,7 @@
     "test:integrate": "mocha --compilers ts:ts-node/register --timeout 20000 test/integrate/*.test.ts",
     "test:lint": "tslint --type-check --project tsconfig.json '{src,test}/**/*.ts'",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
-    "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
+    "test:travis": "npm-run-all clean test:lint test:unit test:integrate test:sauce build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
     "test:watch": "mocha -R min --watch --compilers ts:ts-node/register test/unit/*.test.ts"
   },
@@ -39,6 +39,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^3.4.34",
+    "@types/csv-parse": "^1.1.6",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.45",
     "@types/sinon": "^1.16.31",
@@ -56,7 +57,6 @@
     "karma-sauce-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.2",
-    "lodash": "^4.16.2",
     "mocha": "^3.1.0",
     "node-fetch": "^1.6.3",
     "npm-run-all": "^4.0.2",
@@ -68,5 +68,8 @@
     "tslint-microsoft-contrib": "^4.0.0",
     "typescript": "^2.2.1",
     "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "csv-parse": "^1.2.0"
   }
 }

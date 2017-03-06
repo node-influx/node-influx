@@ -28,7 +28,8 @@ For browsers, see the [browser setup](https://node-influx.github.io/manual/usage
  * Simple API for nearly all Influx operations
  * Fully supported in Node and the browser
  * Performant, processing millions of rows/sec on modest hardware
- * Zero dependencies
+ * Lightweight: one dependency
+ * Typesafe, with TypeScript support and definitions
 
 ## Compatibility
 

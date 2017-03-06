@@ -40,7 +40,7 @@ export function fakeIncoming(data: any): IncomingMessage {
   const csv = typeof data === 'string';
   return <any> {
     headers: {
-      'content-type': csv ? 'test/csv' : 'application/json',
+      'content-type': csv ? 'text/csv' : 'application/json',
     },
     on: (ev: string, callback: Function) => {
       switch (ev) {

@@ -1,27 +1,10 @@
 'use strict'
 
 const results = require('../../lib/src/results')
-const _ = require('lodash')
+const helpers = require('../../lib/test/unit/helpers')
 const count = 1000
 
-function parseOld (response) {
-  let results = []
-  _.each(response, function (result) {
-    let tmp = []
-    if (result.series) {
-      _.each(result.series, function (series) {
-        let rows = _.map(series.values, function (values) {
-          return _.extend(_.zipObject(series.columns, values), series.tags)
-        })
-        tmp = _.chain(tmp).concat(rows).value()
-      })
-    }
-    results.push(tmp)
-  })
-  return results
-}
-
-suite(`results: ${count} grouped results`, () => {
+suite(`(json) results: ${count} grouped results`, () => {
   const series = []
   const grouped = { results: [{ series }] }
 
@@ -40,17 +23,24 @@ suite(`results: ${count} grouped results`, () => {
     })
   }
 
-  const r = results.parse(grouped)
-  bench('parsing ms', () => results.parse(grouped, 'ms'))
-  bench('parsing ns', () => results.parse(grouped, 'n'))
-  bench('parsing (old)', () => parseOld(grouped.results))
+  let r
+  const incoming = helpers.fakeIncoming(grouped)
+  before(next => {
+    results.parse(incoming).then(data => {
+      r = data
+      next()
+    })
+  })
+
+  bench('parsing ms', next => results.parse(incoming, 'ms').then(next))
+  bench('parsing ns', next => results.parse(incoming, 'n').then(next))
   bench('computing groups', () => r.groups())
   bench('searching for present', () => r.group({ tag: `value${count - 1}` }))
   bench('searching for absent', () => r.group({ tag: 'a' }))
   bench('searching for wrong type', () => r.group({ tag2: 'a' }))
 })
 
-suite(`results: ${count} flat results`, () => {
+suite(`(json) results: ${count} flat results`, () => {
   const grouped = {
     results: [{
       series: [{
@@ -68,7 +58,8 @@ suite(`results: ${count} flat results`, () => {
     grouped.results[0].series[0].values.push([1474819971787272, 42])
   }
 
-  bench('parsing ms', () => results.parse(grouped, 'ms'))
-  bench('parsing ns', () => results.parse(grouped, 'n'))
+  const incoming = helpers.fakeIncoming(grouped)
+  bench('parsing ms', next => results.parse(incoming, 'ms').then(next))
+  bench('parsing ns', next => results.parse(incoming, 'n').then(next))
   bench('parsing (old)', () => parseOld(grouped.results))
 })
