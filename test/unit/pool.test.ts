@@ -7,6 +7,14 @@ import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
 
 const hosts = 2;
 
+function parseJSON(res: http.IncomingMessage) {
+    return new Promise(resolve => {
+      let output = '';
+      res.on('data', str => output = output + str.toString());
+      res.on('end', () => resolve(JSON.parse(output)));
+    });
+}
+
 describe('pool', () => {
   let pool: Pool;
   let clock: sinon.SinonFakeTimers;
@@ -59,7 +67,7 @@ describe('pool', () => {
   it('attempts to make an https request', () => {
     const p = createPool();
     p.addHost('https://httpbin.org/get');
-    return p.json({ method: 'GET', path: '/get' });
+    return p.discard({ method: 'GET', path: '/get' });
   });
 
   it('passes through request options', () => {
@@ -67,59 +75,51 @@ describe('pool', () => {
     const p = createPool();
     p.addHost('https://httpbin.org/get', { rejectUnauthorized: false });
 
-    return p.json({ method: 'GET', path: '/get' }).then(() => {
+    return p.discard({ method: 'GET', path: '/get' }).then(() => {
       expect(spy.args[0][0].rejectUnauthorized).to.be.false;
     });
   });
 
   describe('request generators', () => {
     it('makes a text request', () => {
-      return pool.text({ method: 'GET', path: '/pool/json' })
-        .then(data => expect(data).to.equal('{"ok":true}'));
+      return pool.stream({ method: 'GET', path: '/pool/json' })
+        .then(parseJSON)
+        .then(data => expect(data).to.deep.equal({ ok: true }));
     });
 
     it('includes request query strings and bodies', () => {
-      return pool.json({
+      return pool.stream({
         method: 'POST',
         path: '/pool/echo',
         query: { a: 42 },
         body: 'asdf',
-      }).then(data => {
-        expect(data).to.deep.equal({
-          query: 'a=42',
-          body: 'asdf',
-          method: 'POST',
+      }).then(parseJSON)
+        .then(data => {
+          expect(data).to.deep.equal({
+            query: 'a=42',
+            body: 'asdf',
+            method: 'POST',
+          });
         });
-      });
     });
 
     it('discards responses', () => {
       return pool.discard({ method: 'GET', path: '/pool/204' });
     });
-
-    it('parses JSON responses', () => {
-      return pool.json({ method: 'GET', path: '/pool/json' })
-        .then(data => expect(data).to.deep.equal({ ok: true }));
-    });
-
-    it('errors if JSON parsing fails', () => {
-      return pool.json({ method: 'GET', path: '/pool/badjson' })
-        .then(() => { throw new Error('Expected to have thrown'); })
-        .catch(err => expect(err).to.be.an.instanceof(SyntaxError));
-    });
   });
 
   it('times out requests', () => {
     (<any> pool).timeout = 1;
-    return pool.text({ method: 'GET', path: '/pool/json' })
+    return pool.discard({ method: 'GET', path: '/pool/json' })
       .then(() => { throw new Error('Expected to have thrown'); })
       .catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
       .then(() => (<any> pool).timeout = 10000);
   });
 
   it('retries on a request error', () => {
-    return pool.text({ method: 'GET', path: `/pool/altFail-${sid}/json` })
-      .then(body => expect(body).to.equal('{"ok":true}'));
+    return pool.stream({ method: 'GET', path: `/pool/altFail-${sid}/json` })
+      .then(parseJSON)
+      .then(body => expect(body).to.deep.equal({ ok: true }));
   });
 
   it('fails if too many errors happen', () => {

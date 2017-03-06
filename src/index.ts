@@ -25,7 +25,7 @@ export * from './builder';
 export { INanoDate, FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from './grammar';
 export { ISchemaOptions } from './schema';
 export { IPingStats, IPoolOptions } from './pool';
-export { IResults, IResponse, ResultError } from './results';
+export { IResults, ResultError } from './results';
 
 export interface IHostConfig {
 
@@ -435,7 +435,7 @@ export class InfluxDB {
    * influx.createDatabase('mydb')
    */
   public createDatabase (databaseName: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `create database ${grammar.escape.quoted(databaseName)}`,
     }, 'POST')).then(assertNoErrors);
   }
@@ -448,7 +448,7 @@ export class InfluxDB {
    * influx.createDatabase('mydb')
    */
   public dropDatabase(databaseName: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `drop database ${grammar.escape.quoted(databaseName)}`,
     }, 'POST')).then(assertNoErrors);
   }
@@ -461,8 +461,9 @@ export class InfluxDB {
    *   console.log('My database names are: ' + names.join(', ')));
    */
   public getDatabaseNames(): Promise<string[]> {
-    return this.pool.json(this.getQueryOpts({ q: 'show databases' }))
-      .then(res => parseSingle<{ name: string }>(res).map(r => r.name));
+    return this.pool.stream(this.getQueryOpts({ q: 'show databases' }))
+      .then(res => parseSingle<{ name: string }>(res))
+      .then(res => res.map(r => r.name));
   }
 
   /**
@@ -475,10 +476,11 @@ export class InfluxDB {
    *   console.log('My measurement names are: ' + names.join(', ')));
    */
   public getMeasurements(database: string = this.defaultDB()): Promise<string[]> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       db: database,
       q: 'show measurements',
-    })).then(res => parseSingle<{ name: string }>(res).map(r => r.name));
+    })).then(res => parseSingle<{ name: string }>(res))
+      .then(res => res.map(r => r.name));
   }
 
   /**
@@ -516,10 +518,11 @@ export class InfluxDB {
       query += ` from ${grammar.escape.quoted(measurement)}`;
     }
 
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       db: database,
       q: query,
-    })).then(res => parseSingle<{ key: string }>(res).map(r => r.key));
+    })).then(res => parseSingle<{ key: string }>(res))
+      .then(res => res.map(r => r.key));
   }
 
   /**
@@ -532,7 +535,7 @@ export class InfluxDB {
    * influx.dropMeasurement('my_measurement')
    */
   public dropMeasurement(measurement: string, database: string = this.defaultDB()): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       db: database,
       q: `drop measurement ${grammar.escape.quoted(measurement)}`,
     }, 'POST')).then(assertNoErrors);
@@ -573,7 +576,7 @@ export class InfluxDB {
       q += ' where ' + b.parseWhere(<b.where> options);
     }
 
-    return this.pool.json(this.getQueryOpts({ db, q }, 'POST')).then(assertNoErrors);
+    return this.pool.stream(this.getQueryOpts({ db, q }, 'POST')).then(assertNoErrors);
   }
 
   /**
@@ -590,8 +593,8 @@ export class InfluxDB {
    *   })
    * })
    */
-  public getUsers(): Promise<{ user: string, admin: boolean}[]> {
-    return this.pool.json(this.getQueryOpts({ q: 'show users' })).then(parseSingle);
+  public getUsers(): Promise<IResults<{ user: string, admin: boolean}>> {
+    return this.pool.stream(this.getQueryOpts({ q: 'show users' })).then(parseSingle);
   }
 
   /**
@@ -611,7 +614,7 @@ export class InfluxDB {
     username: string, password: string,
     admin: boolean = false,
   ): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `create user ${grammar.escape.quoted(username)} with password `
         + grammar.escape.stringLit(password)
         + (admin ? ' with all privileges' : ''),
@@ -627,7 +630,7 @@ export class InfluxDB {
    * influx.setPassword('connor', 'pa55w0rd')
    */
   public setPassword(username: string, password: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `set password for ${grammar.escape.quoted(username)} = `
         + grammar.escape.stringLit(password),
     }, 'POST')).then(assertNoErrors);
@@ -645,7 +648,7 @@ export class InfluxDB {
   public grantPrivilege(username: string, privilege: 'READ' | 'WRITE',
                         database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `grant ${privilege} on ${grammar.escape.quoted(database)} `
         + `to ${grammar.escape.quoted(username)}`,
     }, 'POST')).then(assertNoErrors);
@@ -663,7 +666,7 @@ export class InfluxDB {
   public revokePrivilege(username: string, privilege: 'READ' | 'WRITE',
                          database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `revoke ${privilege} from ${grammar.escape.quoted(username)} on `
         + grammar.escape.quoted(database),
     }, 'POST')).then(assertNoErrors);
@@ -677,7 +680,7 @@ export class InfluxDB {
    * influx.grantAdminPrivilege('connor')
    */
   public grantAdminPrivilege(username: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `grant all to ${grammar.escape.quoted(username)}`,
     }, 'POST')).then(assertNoErrors);
   }
@@ -690,7 +693,7 @@ export class InfluxDB {
    * influx.revokeAdminPrivilege('connor')
    */
   public revokeAdminPrivilege(username: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `revoke all from ${grammar.escape.quoted(username)}`,
     }, 'POST')).then(assertNoErrors);
   }
@@ -703,7 +706,7 @@ export class InfluxDB {
    * influx.dropUser('connor')
    */
   public dropUser(username: string): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `drop user ${grammar.escape.quoted(username)}`,
     }, 'POST')).then(assertNoErrors);
   }
@@ -723,7 +726,7 @@ export class InfluxDB {
   public createContinuousQuery(name: string, query: string,
                                database: string = this.defaultDB()): Promise<void> {
 
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `create continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)} begin ${query} end`,
     }, 'POST')).then(assertNoErrors);
@@ -740,7 +743,7 @@ export class InfluxDB {
     name: string,
     query: string,
   }>> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       db: database,
       q: 'show continuous queries',
     })).then(parseSingle);
@@ -755,7 +758,7 @@ export class InfluxDB {
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
   public dropContinuousQuery(name: string, database: string = this.defaultDB()): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `drop continuous query ${grammar.escape.quoted(name)}`
         + ` on ${grammar.escape.quoted(database)}`,
     }, 'POST')).then(assertNoErrors);
@@ -790,7 +793,7 @@ export class InfluxDB {
       + ` duration ${options.duration} replication ${options.replication}`
       + (options.isDefault ? ' default' : '');
 
-    return this.pool.json(this.getQueryOpts({ q }, 'POST')).then(assertNoErrors);
+    return this.pool.stream(this.getQueryOpts({ q }, 'POST')).then(assertNoErrors);
   }
 
   /**
@@ -821,7 +824,7 @@ export class InfluxDB {
       + ` duration ${options.duration} replication ${options.replication}`
       + (options.isDefault ? ' default' : '');
 
-    return this.pool.json(this.getQueryOpts({ q }, 'POST')).then(assertNoErrors);
+    return this.pool.stream(this.getQueryOpts({ q }, 'POST')).then(assertNoErrors);
   }
 
   /**
@@ -837,7 +840,7 @@ export class InfluxDB {
    * influx.dropRetentionPolicy('7d')
    */
   public dropRetentionPolicy(name: string, database: string = this.defaultDB()): Promise<void> {
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       q: `drop retention policy ${grammar.escape.quoted(name)} `
         + `on ${grammar.escape.quoted(database)}`,
     }, 'POST')).then(assertNoErrors);
@@ -875,14 +878,14 @@ export class InfluxDB {
    *   ])
    * })
    */
-  public showRetentionPolicies(database: string = this.defaultDB()): Promise<{
+  public showRetentionPolicies(database: string = this.defaultDB()): Promise<IResults<{
     default: boolean, // tslint:disable-line
     duration: string,
     name: string,
     replicaN: number,
     shardGroupDuration: string,
-  }[]> {
-    return this.pool.json(this.getQueryOpts({
+  }>> {
+    return this.pool.stream(this.getQueryOpts({
       q: `show retention policies on ${grammar.escape.quoted(database)}`,
     }, 'GET')).then(parseSingle);
   }
@@ -1054,7 +1057,17 @@ export class InfluxDB {
       delete options.precision;
     }
 
-    return this.queryRaw(query, options).then(res => parse(res, options.precision));
+    const {
+      database = this.defaultDB(),
+      retentionPolicy,
+    } = options;
+
+    return this.pool.stream(this.getQueryOpts({
+      db: database,
+      epoch: options.precision,
+      q: query,
+      rp: retentionPolicy,
+    })).then(res => parse(res, options.precision));
   }
 
   /**
@@ -1071,21 +1084,27 @@ export class InfluxDB {
    * })
    */
   public queryRaw<T>(query: string | string[], options: IQueryOptions = {}): Promise<any> {
+    if (query instanceof Array) {
+      query = query.join(';');
+    }
+
     const {
       database = this.defaultDB(),
       retentionPolicy,
     } = options;
 
-    if (query instanceof Array) {
-      query = query.join(';');
-    }
-
-    return this.pool.json(this.getQueryOpts({
+    return this.pool.stream(this.getQueryOpts({
       db: database,
       epoch: options.precision,
       q: query,
       rp: retentionPolicy,
-    }));
+    })).then(res => {
+      return new Promise(resolve => {
+        let output = '';
+        res.on('data', str => output = output + str.toString());
+        res.on('end', () => resolve(JSON.parse(output)));
+      });
+    });
   }
 
   /**

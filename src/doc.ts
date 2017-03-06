@@ -1,4 +1,4 @@
-import { Tags } from './results';
+import { Tags } from './results/types';
 
 /**
  * Pool options can be passed into the database to configure the behaviour

@@ -1,4 +1,5 @@
 import { use } from 'chai';
+import { IncomingMessage } from 'http';
 import * as sinonChai from 'sinon-chai';
 
 use(sinonChai);
@@ -29,4 +30,27 @@ const fixtures = {
  */
 export function dbFixture (name: string): any {
   return fixtures[influxVersion][name];
+}
+
+/**
+ * Creates a fake incoming request containing the provided data. If the data
+ * is a string, we assume it's in Influx's csv format.
+ */
+export function fakeIncoming(data: any): IncomingMessage {
+  const csv = typeof data === 'string';
+  return <any> {
+    headers: {
+      'content-type': csv ? 'test/csv' : 'application/json',
+    },
+    on: (ev: string, callback: Function) => {
+      switch (ev) {
+        case 'data':
+          return callback(csv ? data : JSON.stringify(data));
+        case 'end':
+          return callback();
+        default:
+          throw new Error(`unknown event in mock: ${ev}`);
+      }
+    },
+  };
 }

@@ -107,24 +107,6 @@ export class RequestError extends Error {
   }
 }
 
-/**
- * Creates a function generation that returns a wrapper which only allows
- * through the first call of any function that it generated.
- */
-function doOnce(): (<T>(arg: T) => (<T>(arg: T) => any)) {
-  let handled = false;
-
-  return fn => {
-    return arg => {
-      if (handled) {
-        return;
-      }
-      handled = true;
-      fn(arg);
-    };
-  };
-}
-
 export interface IPingStats {
   url: urlModule.Url;
   res: http.ServerResponse;
@@ -152,6 +134,10 @@ const request = (
     return http.request(options, callback);
   }
 };
+
+export interface IPoolResponse<T> extends http.IncomingMessage {
+  body: T;
+}
 
 /**
  *
@@ -224,42 +210,12 @@ export class Pool {
   }
 
   /**
-   * Makes a request and calls back with the response, parsed as JSON.
-   * An error is returned on a non-2xx status code or on a parsing exception.
-   */
-  public json(options: IPoolRequestOptions): Promise<any> {
-    return this.text(options).then(res => JSON.parse(res));
-  }
-
-  /**
-   * Makes a request and resolves with the plain text response,
-   * if possible. An error is raised on a non-2xx status code.
-   */
-  public text(options: IPoolRequestOptions): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.stream(options, (err, res) => {
-        if (err) {
-          return reject(err);
-        }
-
-        let output = '';
-        res.on('data', str => output = output + str.toString());
-        res.on('end', () => resolve(output));
-      });
-    });
-  }
-
-  /**
    * Makes a request and discards any response body it receives.
    * An error is returned on a non-2xx status code.
    */
   public discard(options: IPoolRequestOptions): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.stream(options, (err, res) => {
-        if (err) {
-          return reject(err);
-        }
-
+    return this.stream(options).then(res => {
+      return new Promise<void>(resolve => {
         res.on('data', () => { /* ignore */ });
         res.on('end', () => resolve());
       });
@@ -278,7 +234,7 @@ export class Pool {
       .forEach(host => {
         const start = Date.now();
         const url = host.url;
-        const once = doOnce();
+        let timer: NodeJS.Timer;
 
         return todo.push(new Promise(resolve => {
           const req = request(Object.assign({
@@ -287,7 +243,8 @@ export class Pool {
             path,
             port: Number(url.port),
             protocol: url.protocol,
-          }, host.options), once((res: http.IncomingMessage) => {
+          }, host.options), (res: http.IncomingMessage) => {
+            clearTimeout(timer);
             resolve({
               url,
               res,
@@ -295,9 +252,9 @@ export class Pool {
               rtt: Date.now() - start,
               version: res.headers['x-influxdb-version'],
             });
-          }));
+          });
 
-          const fail = once(() => {
+          const fail = () => {
             resolve({
               online: false,
               res: null,
@@ -305,9 +262,9 @@ export class Pool {
               url,
               version: null,
             });
-          });
+          };
 
-          setTimeout(fail, timeout); // tslint:disable-line
+          timer =setTimeout(fail, timeout); // tslint:disable-line
           req.on('error', fail);
           req.end();
         }));
@@ -320,12 +277,9 @@ export class Pool {
    * Makes a request and calls back with the IncomingMessage stream,
    * if possible. An error is returned on a non-2xx status code.
    */
-  public stream(
-    options: IPoolRequestOptions,
-    callback: (err: Error, res: http.IncomingMessage) => void,
-  ) {
+  public stream(options: IPoolRequestOptions): Promise<http.IncomingMessage> {
     if (!this.hostIsAvailable()) {
-      return callback(new ServiceNotAvailableError('No host available'), null);
+      return Promise.reject(new ServiceNotAvailableError('No host available'));
     }
 
     let path = options.path;
@@ -333,49 +287,60 @@ export class Pool {
       path += '?' + querystring.stringify(options.query);
     }
 
-    const once = doOnce();
-    const host = this.getHost();
-    const req = request(Object.assign({
-      headers: { 'content-length': options.body ? options.body.length : 0 },
-      hostname: host.url.hostname,
-      method: options.method,
-      path,
-      port: Number(host.url.port),
-      protocol: host.url.protocol,
-    }, host.options), once((res: http.IncomingMessage) => {
-      if (res.statusCode >= 500) {
-        return this.handleRequestError(
-          new ServiceNotAvailableError(res.statusMessage),
-          host, options, callback,
-        );
+    return new Promise((resolve, reject) => {
+      let timeout: NodeJS.Timer;
+      const host = this.getHost();
+      const req = request(Object.assign({
+        headers: { 'content-length': options.body ? options.body.length : 0 },
+        hostname: host.url.hostname,
+        method: options.method,
+        path,
+        port: Number(host.url.port),
+        protocol: host.url.protocol,
+      }, host.options), (res: http.IncomingMessage) => {
+        if (res.statusCode >= 500) {
+          return resolve(this.handleRequestError(
+            new ServiceNotAvailableError(res.statusMessage),
+            host,
+            options,
+          ));
+        }
+
+        if (res.statusCode >= 300) {
+          return RequestError.Create(req, res, err => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          });
+        }
+
+        host.success();
+        clearTimeout(timeout);
+        resolve(res);
+      });
+
+      // Handle network or HTTP parsing errors:
+      req.on('error', err => {
+        resolve(this.handleRequestError(err, host, options));
+      });
+
+      // Handle timeouts:
+      timeout = setTimeout(() => {
+        resolve(this.handleRequestError(
+          new ServiceNotAvailableError('Request timed out'),
+          host,
+          options,
+        ));
+      }, this.timeout);
+
+      // Write out the body:
+      if (options.body) {
+        req.write(options.body);
       }
-
-      if (res.statusCode >= 300) {
-        return RequestError.Create(req, res, err => callback(err, res));
-      }
-
-      host.success();
-      return callback(undefined, res);
-    }));
-
-    // Handle network or HTTP parsing errors:
-    req.on('error', once(err => {
-      this.handleRequestError(err, host, options, callback);
-    }));
-
-    // Handle timeouts:
-    setTimeout(once(() => {
-      this.handleRequestError(
-        new ServiceNotAvailableError('Request timed out'),
-        host, options, callback,
-      );
-    }), this.timeout);
-
-    // Write out the body:
-    if (options.body) {
-      req.write(options.body);
-    }
-    req.end();
+      req.end();
+    });
   }
 
   /**
@@ -413,21 +378,20 @@ export class Pool {
   private handleRequestError (
     err: any, host: Host,
     options: IPoolRequestOptions,
-    callback: (err: Error, res: http.IncomingMessage) => void,
-  ) {
+  ): Promise<http.IncomingMessage> {
     if (!(err instanceof ServiceNotAvailableError) &&
         resubmitErrorCodes.indexOf(err.code) === -1) {
-      return callback(err, null);
+      return Promise.reject(err);
     }
 
     this.disableHost(host);
     const retries = options.retries || 0;
     if (retries < this.options.maxRetries && this.hostIsAvailable()) {
       options.retries = retries + 1;
-      return this.stream(options, callback);
+      return this.stream(options);
     }
 
-    callback(err, null);
+    return Promise.reject(err);
   }
 
 }
