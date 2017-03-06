@@ -287,7 +287,6 @@ export class Pool {
             path,
             port: Number(url.port),
             protocol: url.protocol,
-            timeout,
           }, host.options), once((res: http.IncomingMessage) => {
             resolve({
               url,
@@ -308,14 +307,7 @@ export class Pool {
             });
           });
 
-          // Support older Nodes and polyfills which don't allow .timeout() in
-          // the request options, wrapped in a conditional for even worse
-          // polyfills. See: https://github.com/node-influx/node-influx/issues/221
-          if (typeof req.setTimeout === 'function') {
-            req.setTimeout(timeout, fail); // tslint:disable-line
-          }
-
-          req.on('timeout', fail);
+          setTimeout(fail, timeout); // tslint:disable-line
           req.on('error', fail);
           req.end();
         }));
@@ -350,7 +342,6 @@ export class Pool {
       path,
       port: Number(host.url.port),
       protocol: host.url.protocol,
-      timeout: this.timeout,
     }, host.options), once((res: http.IncomingMessage) => {
       if (res.statusCode >= 500) {
         return this.handleRequestError(
@@ -373,19 +364,12 @@ export class Pool {
     }));
 
     // Handle timeouts:
-    req.on('timeout', once(() => {
+    setTimeout(once(() => {
       this.handleRequestError(
         new ServiceNotAvailableError('Request timed out'),
         host, options, callback,
       );
-    }));
-
-    // Support older Nodes and polyfills which don't allow .timeout() in the
-    // request options, wrapped in a conditional for even worse polyfills. See:
-    // https://github.com/node-influx/node-influx/issues/221
-    if (typeof req.setTimeout === 'function') {
-      req.setTimeout(this.timeout); // tslint:disable-line
-    }
+    }), this.timeout);
 
     // Write out the body:
     if (options.body) {

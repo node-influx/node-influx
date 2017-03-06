@@ -1,5 +1,10 @@
 # node-influx Changelog
 
+## 2017-03-04, 5.0.6
+
+* Fixed custom request options not being piped all the way though ([#262](https://github.com/node-influx/node-influx/issues/262))
+* Drop dependency on special stream-http builds / `timeout`-compatible polyfills in browsers ([#221](https://github.com/node-influx/node-influx/issues/221#issuecomment-284275612))
+
 ## 2017-03-04, 5.0.5
 
 *	Allow passing custom request options to http(s)?.request ([#262](https://github.com/node-influx/node-influx/issues/262), [#260](https://github.com/node-influx/node-influx/issues/260))

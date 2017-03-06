@@ -1,13 +1,11 @@
 const webpack = require('webpack')
 const path = require('path')
-const http = path.resolve(__dirname, '../node_modules/stream-http/index.js')
 
 module.exports = (() => {
   const config = {}
 
   config.resolve = {
-    extensions: ['.ts', '.js', '.json'],
-    alias: { http, https: http }
+    extensions: ['.ts', '.js', '.json']
   }
 
   config.module = {
