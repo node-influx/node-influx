@@ -1,0 +1,4 @@
+name,tags,name
+measurements,,series_0
+measurements,,series_1
+measurements,,series_2

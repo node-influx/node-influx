@@ -1,0 +1,7 @@
+name,tags,name
+databases,,_internal
+databases,,beam_test
+databases,,beam
+databases,,test
+databases,,influx_test_db
+databases,,influx_test_gen

@@ -77,8 +77,8 @@ function query (query, params = {}) {
   params.q = query
   return () => fetch(
     `${influxHost}/query?${querystring.stringify(params)}`,
-    { method: 'GET' }
-  ).then(res => res.json())
+    { method: 'GET', headers: { 'accept': 'text/csv' } }
+  ).then(res => res.text())
 }
 
 /**
@@ -111,8 +111,8 @@ function update (query, params = {}) {
  */
 function fixture (fixtureName, body, params = {}) {
   return () => query(body, params)().then(res => {
-    const name = path.join(fixtureDir, `${fixtureName}.json`)
-    fs.writeFileSync(name, JSON.stringify(res, null, 2) + '\n')
+    const name = path.join(fixtureDir, `${fixtureName}.txt`)
+    fs.writeFileSync(name, res)
     console.log(`Created ${name}`)
   })
 }
