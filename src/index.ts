@@ -400,6 +400,7 @@ export class InfluxDB {
         host: host.host,
         port: host.port,
         protocol: host.protocol,
+        options: host.options,
       }, defaultHost);
     });
 

@@ -20,6 +20,7 @@ describe('influxdb', () => {
           host: '127.0.0.1',
           port: 8086,
           protocol: 'http',
+          options: undefined,
         }],
       });
     });
@@ -35,6 +36,7 @@ describe('influxdb', () => {
           host: '192.168.0.1',
           port: 1337,
           protocol: 'https',
+          options: undefined,
         }],
       });
     });
@@ -50,12 +52,16 @@ describe('influxdb', () => {
           host: '192.168.0.1',
           port: 8086,
           protocol: 'http',
+          options: undefined,
         }],
       });
     });
 
     it('parses cluster configs', () => {
-      expect((<any> new InfluxDB({ database: 'foo', hosts: [{ host: '192.168.0.1' }] })).options).to.deep.equal({
+      expect((<any> new InfluxDB({
+        database: 'foo',
+        hosts: [{ host: '192.168.0.1', options: { ca: null } }],
+      })).options).to.deep.equal({
         username: 'root',
         password: 'root',
         database: 'foo',
@@ -64,6 +70,7 @@ describe('influxdb', () => {
           host: '192.168.0.1',
           port: 8086,
           protocol: 'http',
+          options: { ca: null },
         }],
       });
     });
@@ -76,7 +83,7 @@ describe('influxdb', () => {
           fields: {},
           tags: ['my_tag'],
         }],
-        hosts: [{ host: '192.168.0.1' }],
+        hosts: [{ host: '192.168.0.1', options: undefined }],
       }));
 
       expect(client.schema.my_db.my_measurement).to.not.be.undefined;
