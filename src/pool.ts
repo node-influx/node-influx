@@ -344,7 +344,7 @@ export class Pool {
     const once = doOnce();
     const host = this.getHost();
     const req = request(Object.assign({
-      headers: { 'content-length': options.body ? options.body.length : 0 },
+      headers: { 'content-length': options.body ? new Buffer(options.body).length : 0 },
       hostname: host.url.hostname,
       method: options.method,
       path,
