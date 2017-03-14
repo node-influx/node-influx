@@ -76,9 +76,8 @@ describe('pool', () => {
     const p = createPool();
     const body = '\u00FF';
     p.addHost('https://httpbin.org/post');
-    p.json({ method: 'POST', path: '/post', body: body }).then(data => {
-      expect(data['data']).to.equal(body);
-    });
+    p.json({ method: 'POST', path: '/post', body: body })
+      .then(data => expect(data.data).to.equal(body));
   });
 
   describe('request generators', () => {
