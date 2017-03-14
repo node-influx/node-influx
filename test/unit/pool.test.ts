@@ -72,6 +72,15 @@ describe('pool', () => {
     });
   });
 
+  it('valid request data content length', () => {
+    const p = createPool();
+    const body = '\u00FF';
+    p.addHost('https://httpbin.org/post');
+    p.json({ method: 'POST', path: '/post', body: body }).then(data => {
+      expect(data['data']).to.equal(body);
+    });
+  });
+
   describe('request generators', () => {
     it('makes a text request', () => {
       return pool.text({ method: 'GET', path: '/pool/json' })
