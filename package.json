@@ -66,7 +66,7 @@
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
-    "tslint-microsoft-contrib": "^4.0.0",
+    "tslint-microsoft-contrib": "4.0.0",
     "typescript": "^2.2.1",
     "webpack": "^2.2.1"
   }

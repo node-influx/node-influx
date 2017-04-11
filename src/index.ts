@@ -664,8 +664,8 @@ export class InfluxDB {
                          database: string = this.defaultDB()): Promise<void> {
 
     return this.pool.json(this.getQueryOpts({
-      q: "revoke " + privilege + " on " + grammar.escape.quoted(database)
-        + " from " + grammar.escape.quoted(username),
+      q: `revoke ${privilege} on ${grammar.escape.quoted(database)} from `
+        + grammar.escape.quoted(username),
     }, 'POST')).then(assertNoErrors);
   }
 
