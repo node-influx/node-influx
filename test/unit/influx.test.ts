@@ -367,7 +367,7 @@ describe('influxdb', () => {
 
     describe('.revokePrivilege()', () => {
       it('queries correctly', () => {
-        expectQuery('json', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'revoke READ on "my_\\"_db" from "con\\"nor"');
         return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
       });
       it('throws if DB unspecified', () => {
@@ -375,7 +375,7 @@ describe('influxdb', () => {
       });
       it('fills in default DB', () => {
         setDefaultDB('my_\\"_db');
-        expectQuery('json', 'revoke READ from "con\\"nor" on "my_\\"_db"');
+        expectQuery('json', 'revoke READ on "my_\\"_db" from "con\\"nor"');
         return influx.revokePrivilege('con"nor', 'READ', 'my_"_db');
       });
     });
