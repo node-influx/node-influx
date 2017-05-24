@@ -730,13 +730,13 @@ export class InfluxDB {
   }
 
   /**
-   * Returns a list of continous queries in the database.
+   * Returns a list of continuous queries in the database.
    * @param {String} [database] If not provided, uses the default database.
    * @return {Promise<void>}
    * @example
-   * influx.showContinousQueries()
+   * influx.showContinuousQueries()
    */
-  public showContinousQueries(database: string = this.defaultDB()): Promise<IResults<{
+  public showContinuousQueries(database: string = this.defaultDB()): Promise<IResults<{
     name: string,
     query: string,
   }>> {

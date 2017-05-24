@@ -119,7 +119,7 @@ describe('administrative actions', () => {
 
     it('creates continuous queries', () => {
       return db.createContinuousQuery('7d_perf', sampleQuery)
-        .then(() => db.showContinousQueries())
+        .then(() => db.showContinuousQueries())
         .then(queries => {
           expect(queries.slice()).to.deep.equal([
             { name: '7d_perf', query: 'CREATE CONTINUOUS QUERY "7d_perf" ON '
@@ -131,9 +131,9 @@ describe('administrative actions', () => {
 
     it('drops continuous queries', () => {
       return db.createContinuousQuery('7d_perf', sampleQuery)
-        .then(() => db.showContinousQueries())
+        .then(() => db.showContinuousQueries())
         .then(() => db.dropContinuousQuery('7d_perf'))
-        .then(() => db.showContinousQueries())
+        .then(() => db.showContinuousQueries())
         .then(queries => expect(queries).to.have.length(0));
     });
   });
