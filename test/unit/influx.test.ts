@@ -425,18 +425,18 @@ describe('influxdb', () => {
       });
     });
 
-    describe('.showContinousQueries()', () => {
+    describe('.showContinuousQueries()', () => {
       it('queries correctly', () => {
         expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
-        return influx.showContinousQueries('my_db');
+        return influx.showContinuousQueries('my_db');
       });
       it('throws if DB unspecified', () => {
-        expect(() => influx.showContinousQueries()).to.throw(/default database/);
+        expect(() => influx.showContinuousQueries()).to.throw(/default database/);
       });
       it('fills in default DB', () => {
         setDefaultDB('my_db');
         expectQuery('json', { q: 'show continuous queries', db: 'my_db' }, 'GET');
-        return influx.showContinousQueries();
+        return influx.showContinuousQueries();
       });
     });
 
