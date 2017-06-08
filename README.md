@@ -19,7 +19,7 @@
 
 For Node, simply:
 
-    $ npm install --save influx@next
+    $ npm install --save influx
 
 For browsers, see the [browser setup](https://node-influx.github.io/manual/usage.html#browser-setup) instructions.
 
