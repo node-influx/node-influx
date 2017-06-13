@@ -731,6 +731,7 @@ export class InfluxDB {
 
   /**
    * Returns a list of continous queries in the database.
+   * @deprecated Use showContinuousQueries instead.
    * @param {String} [database] If not provided, uses the default database.
    * @return {Promise<void>}
    * @example
@@ -742,6 +743,21 @@ export class InfluxDB {
   }>> {
     return this.pool.json(this.getQueryOpts({
       db: database,
+      q: 'show continuous queries',
+    })).then(parseSingle);
+  }
+
+  /**
+   * Returns a list of continous queries in the database.
+   * @return {Promise<void>}
+   * @example
+   * influx.showContinuousQueries()
+   */
+  public showContinuousQueries(): Promise<IResults<{
+    name: string,
+    query: string,
+  }>> {
+    return this.pool.json(this.getQueryOpts({
       q: 'show continuous queries',
     })).then(parseSingle);
   }
