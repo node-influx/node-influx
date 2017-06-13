@@ -200,8 +200,6 @@ export function assertNoErrors(res: IResponse) {
       throw new ResultError(error);
     }
   }
-
-  return res;
 }
 
 /**

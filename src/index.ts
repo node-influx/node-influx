@@ -590,7 +590,7 @@ export class InfluxDB {
    *   })
    * })
    */
-  public getUsers(): Promise<{ user: string, admin: boolean}[]> {
+  public getUsers(): Promise<IResults<{ user: string, admin: boolean}>> {
     return this.pool.json(this.getQueryOpts({ q: 'show users' })).then(parseSingle);
   }
 
@@ -875,13 +875,13 @@ export class InfluxDB {
    *   ])
    * })
    */
-  public showRetentionPolicies(database: string = this.defaultDB()): Promise<{
+  public showRetentionPolicies(database: string = this.defaultDB()): Promise<IResults<{
     default: boolean, // tslint:disable-line
     duration: string,
     name: string,
     replicaN: number,
     shardGroupDuration: string,
-  }[]> {
+  }>> {
     return this.pool.json(this.getQueryOpts({
       q: `show retention policies on ${grammar.escape.quoted(database)}`,
     }, 'GET')).then(parseSingle);
