@@ -429,8 +429,8 @@ describe('influxdb', () => {
       it('queries correctly', () => {
         expectQuery('json', { q: 'show continuous queries' }, 'GET');
         return influx.showContinuousQueries();
-      })
-    })
+      });
+    });
 
     describe('.showContinousQueries()', () => {
       // This should be removed in the future as the users should use showContinuousQueries instead
