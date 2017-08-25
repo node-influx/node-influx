@@ -396,16 +396,20 @@ describe('influxdb', () => {
     });
 
     describe('.createContinuousQuery()', () => {
-      it('queries correctly', () => {
-        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+      it('queries correctly no resample', () => {
+        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db"  begin foo end');
         return influx.createContinuousQuery('my_"q', 'foo', 'my_"_db');
+      });
+      it('queries correctly with resample', () => {
+        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db" resample for 4m begin foo end');
+        return influx.createContinuousQuery('my_"q', 'foo', 'my_"_db', 'resample for 4m');
       });
       it('throws if DB unspecified', () => {
         expect(() => influx.createContinuousQuery('my_"q', 'foo')).to.throw(/default database/);
       });
       it('fills in default DB', () => {
         setDefaultDB('my_"_db');
-        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db" begin foo end');
+        expectQuery('json', 'create continuous query "my_\\"q" on "my_\\"_db"  begin foo end');
         return influx.createContinuousQuery('my_"q', 'foo');
       });
     });
