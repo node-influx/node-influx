@@ -719,7 +719,7 @@ export class InfluxDB {
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
    *   FROM "1d"."perf" GROUP BY time(1m)
-   * `,,'RESAMPLE FOR 7m')
+   * `, undefined, 'RESAMPLE FOR 7m')
    */
   public createContinuousQuery(name: string, query: string,
                                database: string = this.defaultDB(), resample: string = ''): Promise<void> {
