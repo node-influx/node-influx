@@ -72,7 +72,7 @@ export type TimePrecision = 'n' | 'u' | 'ms' | 's' | 'm' | 'h';
  * console.log(Precision.Seconds); // => 's'
  * console.log(Precision.Milliseconds); // => 'ms'
  * console.log(Precision.Microseconds); // => 'u'
- * console.log(Precision.Nanoseconds); // => 'ns'
+ * console.log(Precision.Nanoseconds); // => 'n'
  */
 export const Precision = Object.freeze({ // tslint:disable-line
   Hours: 'h',
