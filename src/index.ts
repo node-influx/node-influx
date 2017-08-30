@@ -713,19 +713,20 @@ export class InfluxDB {
    * @param {String} name The query name, for later reference
    * @param {String} query The body of the query to run
    * @param {String} [database] If not provided, uses the default database.
+   * @param {String} [resample] If provided, adds resample policy
    * @return {Promise<void>}
    * @example
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
    *   FROM "1d"."perf" GROUP BY time(1m)
-   * `)
+   * `, undefined, 'RESAMPLE FOR 7m')
    */
   public createContinuousQuery(name: string, query: string,
-                               database: string = this.defaultDB()): Promise<void> {
+                               database: string = this.defaultDB(), resample: string = ''): Promise<void> {
 
     return this.pool.json(this.getQueryOpts({
       q: `create continuous query ${grammar.escape.quoted(name)}`
-        + ` on ${grammar.escape.quoted(database)} begin ${query} end`,
+        + ` on ${grammar.escape.quoted(database)} ${resample} begin ${query} end`,
     }, 'POST')).then(assertNoErrors);
   }
 
