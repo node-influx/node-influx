@@ -63,6 +63,8 @@ export interface INanoDate extends Date {
 
 export type TimePrecision = 'n' | 'u' | 'ms' | 's' | 'm' | 'h';
 
+export type TimeFormat = 'ISO' | 'Timestamp';
+
 /**
  * Precision is a map of available Influx time precisions.
  * @type {Object.<String, String>}

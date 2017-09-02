@@ -1055,7 +1055,7 @@ export class InfluxDB {
       delete options.precision;
     }
 
-    return this.queryRaw(query, options).then(res => parse(res, options.precision));
+    return this.queryRaw(query, options).then(res => parse(res, options.precision, options.timeFormat));
   }
 
   /**

@@ -1,4 +1,4 @@
-import { isoOrTimeToDate, TimePrecision } from './grammar';
+import { isoOrTimeToDate, TimePrecision, TimeFormat } from './grammar';
 
 /**
  * A ResultError is thrown when a query generates errorful results from Influx.
@@ -80,7 +80,7 @@ function groupsMethod(): { name: string, tags: Tags, rows: Row[] }[] {
  * subclassed.
  */
 
-function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): IResults<any> {
+function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision, timeFormat?: TimeFormat): IResults<any> {
   const results: any = [];
   const tags
     = results.groupsTagsKeys
@@ -100,7 +100,12 @@ function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): 
       const obj: Row = {};
       for (let j = 0; j < columns.length; j += 1) {
         if (columns[j] === 'time') {
-          obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
+          if (timeFormat == 'ISO')
+            obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
+          else if (timeFormat == 'Timestamp')
+            obj.time = values[k][j];
+          else 
+            obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
         } else {
           obj[columns[j]] = values[k][j];
         }
@@ -213,13 +218,13 @@ export function assertNoErrors(res: IResponse) {
  *  3. Multiple queries of types 1 and 2
  * @private
  */
-export function parse<T>(res: IResponse, precision?: TimePrecision): IResults<T>[] | IResults<T> {
+export function parse<T>(res: IResponse, precision?: TimePrecision, timeFormat?: TimeFormat): IResults<T>[] | IResults<T> {
   assertNoErrors(res);
 
   if (res.results.length === 1) { // normalize case 3
     return parseInner(res.results[0].series, precision);
   } else {
-    return res.results.map(result => parseInner(result.series, precision));
+    return res.results.map(result => parseInner(result.series, precision, timeFormat));
   }
 }
 
