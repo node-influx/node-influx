@@ -22,7 +22,7 @@ const defaultOptions: IClusterConfig = Object.freeze({
 });
 
 export * from './builder';
-export { INanoDate, FieldType, Precision, Raw, TimePrecision, escape, toNanoDate } from './grammar';
+export { INanoDate, FieldType, Precision, Raw, TimePrecision, TimeFormat, escape, toNanoDate } from './grammar';
 export { ISchemaOptions } from './schema';
 export { IPingStats, IPoolOptions } from './pool';
 export { IResults, IResponse, ResultError } from './results';
@@ -1052,11 +1052,11 @@ export class InfluxDB {
     // If the consumer asked explicitly for nanosecond precision parsing,
     // remove that to cause Influx to give us ISO dates that
     // we can parse correctly.
-    if (options.precision === 'n') {
+    if (options.precision === 'n' && options.timeFormat === 'ISO') {
       options = Object.assign({}, options); // avoid mutating
       delete options.precision;
     }
-
+    console.log('timeFormat' + options.timeFormat);
     return this.queryRaw(query, options).then(res => parse(res, options.precision, options.timeFormat));
   }
 
@@ -1082,7 +1082,7 @@ export class InfluxDB {
     if (query instanceof Array) {
       query = query.join(';');
     }
-
+    console.log('timeFormat' + options.timeFormat);
     return this.pool.json(this.getQueryOpts({
       db: database,
       epoch: options.precision,

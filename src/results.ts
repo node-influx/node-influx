@@ -100,12 +100,13 @@ function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision, t
       const obj: Row = {};
       for (let j = 0; j < columns.length; j += 1) {
         if (columns[j] === 'time') {
-          if (timeFormat == 'ISO')
+          if (timeFormat === 'ISO') {
             obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
-          else if (timeFormat == 'Timestamp')
+          } else if (timeFormat === 'Timestamp') { 
             obj.time = values[k][j];
-          else 
+          } else {
             obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
+          }
         } else {
           obj[columns[j]] = values[k][j];
         }
@@ -220,9 +221,9 @@ export function assertNoErrors(res: IResponse) {
  */
 export function parse<T>(res: IResponse, precision?: TimePrecision, timeFormat?: TimeFormat): IResults<T>[] | IResults<T> {
   assertNoErrors(res);
-
+  console.log('timeFormat' + timeFormat);
   if (res.results.length === 1) { // normalize case 3
-    return parseInner(res.results[0].series, precision);
+    return parseInner(res.results[0].series, precision, timeFormat);
   } else {
     return res.results.map(result => parseInner(result.series, precision, timeFormat));
   }
