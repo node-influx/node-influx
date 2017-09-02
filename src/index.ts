@@ -173,6 +173,8 @@ export interface IQueryOptions {
    * database is not provided in Influx.
    */
   database?: string;
+
+  timeFormat?: grammar.TimeFormat;
 }
 
 /**
