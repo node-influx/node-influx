@@ -1056,7 +1056,7 @@ export class InfluxDB {
       options = Object.assign({}, options); // avoid mutating
       delete options.precision;
     }
-    console.log('timeFormat' + options.timeFormat);
+    
     return this.queryRaw(query, options).then(res => parse(res, options.precision, options.timeFormat));
   }
 

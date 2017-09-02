@@ -221,7 +221,7 @@ export function assertNoErrors(res: IResponse) {
  */
 export function parse<T>(res: IResponse, precision?: TimePrecision, timeFormat?: TimeFormat): IResults<T>[] | IResults<T> {
   assertNoErrors(res);
-  console.log('timeFormat' + timeFormat);
+  
   if (res.results.length === 1) { // normalize case 3
     return parseInner(res.results[0].series, precision, timeFormat);
   } else {
