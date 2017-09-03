@@ -1082,7 +1082,7 @@ export class InfluxDB {
     if (query instanceof Array) {
       query = query.join(';');
     }
-    console.log('timeFormat' + options.timeFormat);
+
     return this.pool.json(this.getQueryOpts({
       db: database,
       epoch: options.precision,
