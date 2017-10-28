@@ -748,7 +748,7 @@ export class InfluxDB {
   }
 
   /**
-   * Returns a list of continous queries in the database.
+   * Returns a list of continuous queries in the database.
    * @return {Promise<void>}
    * @example
    * influx.showContinuousQueries()
