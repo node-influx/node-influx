@@ -552,6 +552,37 @@ describe('influxdb', () => {
 				]);
 			});
 
+			it('can accept a schema at runtime', () => {
+				setDefaultDB('my_db');
+				expectWrite('my_runtime_schema_measure,my_tag=1 bool=T,float=43,int=42i', {
+					precision: 'n',
+					rp: undefined,
+					db: 'my_db'
+				});
+
+				influx.addSchema({
+					database: 'my_db',
+					measurement: 'my_runtime_schema_measure',
+					fields: {
+						bool: FieldType.BOOLEAN,
+						float: FieldType.FLOAT,
+						int: FieldType.INTEGER
+					},
+					tags: ['my_tag']
+				});
+				return influx.writePoints([
+					{
+						measurement: 'my_runtime_schema_measure',
+						tags: {my_tag: '1'},
+						fields: {
+							int: 42,
+							float: 43,
+							bool: true
+						}
+					}
+				]);
+			});
+
 			it('throws on schema violations', () => {
 				setDefaultDB('my_db');
 
