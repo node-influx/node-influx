@@ -37,8 +37,7 @@ export interface IResponseSeries {
   values?: Row[];
 }
 
-function groupMethod(matcher: Tags): Row[] {
-
+function groupMethod(this: any, matcher: Tags): Row[] {
   // We do a tiny bit of 'custom' deep equality checking here, taking
   // advantage of the fact that the tag keys are consistent across all
   // series results. This lets us match groupings much more efficiently,
@@ -51,8 +50,7 @@ function groupMethod(matcher: Tags): Row[] {
     return [];
   }
 
-  L:
-  for (let i = 0; i < this.groupRows.length; i += 1) {
+  L: for (let i = 0; i < this.groupRows.length; i += 1) {
     for (let k = 0; k < srcKeys.length; k += 1) {
       if (this.groupRows[i].tags[srcKeys[k]] !== matcher[srcKeys[k]]) {
         continue L;
@@ -65,7 +63,7 @@ function groupMethod(matcher: Tags): Row[] {
   return [];
 }
 
-function groupsMethod(): { name: string, tags: Tags, rows: Row[] }[] {
+function groupsMethod(this: any): { name: string; tags: Tags; rows: Row[] }[] {
   return this.groupRows;
 }
 
@@ -82,25 +80,21 @@ function groupsMethod(): { name: string, tags: Tags, rows: Row[] }[] {
 
 function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): IResults<any> {
   const results: any = [];
-  const tags
-    = results.groupsTagsKeys
-    = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
+  const tags = (results.groupsTagsKeys =
+    series.length && series[0].tags ? Object.keys(series[0].tags) : []);
 
   let nextGroup: Row[] = [];
   results.groupRows = new Array(series.length); // tslint:disable-line
 
   let lastEnd = 0;
   for (let i = 0; i < series.length; i += 1, lastEnd = results.length) {
-    const {
-      columns = [],
-      values = [],
-    } = series[i];
+    const { columns = [], values = [] } = series[i];
 
     for (let k = 0; k < values.length; k += 1) {
       const obj: Row = {};
       for (let j = 0; j < columns.length; j += 1) {
         if (columns[j] === 'time') {
-          obj.time = isoOrTimeToDate(<number | string> values[k][j], precision);
+          obj.time = isoOrTimeToDate(<number | string>values[k][j], precision);
         } else {
           obj[columns[j]] = values[k][j];
         }
@@ -185,7 +179,7 @@ export interface IResults<T> extends Array<T> {
    *   ])
    * })
    */
-  groups(): { name: string, tags: Tags, rows: T[] }[];
+  groups(): { name: string; tags: Tags; rows: T[] }[];
 }
 
 /**
@@ -216,7 +210,8 @@ export function assertNoErrors(res: IResponse) {
 export function parse<T>(res: IResponse, precision?: TimePrecision): IResults<T>[] | IResults<T> {
   assertNoErrors(res);
 
-  if (res.results.length === 1) { // normalize case 3
+  if (res.results.length === 1) {
+    // normalize case 3
     return parseInner(res.results[0].series, precision);
   } else {
     return res.results.map(result => parseInner(result.series, precision));
@@ -233,8 +228,10 @@ export function parseSingle<T>(res: IResponse, precision?: TimePrecision): IResu
   assertNoErrors(res);
 
   if (res.results.length !== 1) {
-    throw new Error('node-influx expected the results length to equal 1, but ' +
-      `it was ${0}. Please report this here: https://git.io/influx-err`);
+    throw new Error(
+      'node-influx expected the results length to equal 1, but ' +
+        `it was ${0}. Please report this here: https://git.io/influx-err`,
+    );
   }
 
   return parseInner(res.results[0].series, precision);

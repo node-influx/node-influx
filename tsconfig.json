@@ -1,16 +1,36 @@
 {
-	"compilerOptions": {
-		"declaration": true,
-		"module": "commonjs",
-		"target": "es5",
-		"outDir": "lib",
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "lib",
     "lib": [
-      "dom",
       "es5",
-      "es6"
-    ]
-	},
+      "es6",
+      "dom"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "src/types/*"
+      ]
+    }
+  },
   "exclude": [
-    "node_modules"
+    "src/doc.ts",
+    "node_modules",
+    "lib"
   ]
 }

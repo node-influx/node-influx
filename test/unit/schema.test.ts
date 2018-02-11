@@ -22,26 +22,26 @@ describe('schema', () => {
 
   describe('coerceBadly', () => {
     it('apparently works', () => {
-      expect(coerceBadly({
-        b: 42,
-        a: true,
-        c: 'hello"world',
-      })).to.deep.equal([
-        ['a', 'true'],
-        ['b', '42'],
-        ['c', '"hello\\"world"'],
-      ]);
+      expect(
+        coerceBadly({
+          b: 42,
+          a: true,
+          c: 'hello"world',
+        }),
+      ).to.deep.equal([['a', 'true'], ['b', '42'], ['c', '"hello\\"world"']]);
     });
   });
 
   describe('basic schema', () => {
     it('coerces data correctly', () => {
-      expect(schema.coerceFields({
-        int: 42,
-        float: 43,
-        string: 'hello"world',
-        bool: true,
-      })).to.deep.equal([
+      expect(
+        schema.coerceFields({
+          int: 42,
+          float: 43,
+          string: 'hello"world',
+          bool: true,
+        }),
+      ).to.deep.equal([
         ['bool', 'T'],
         ['float', '43'],
         ['int', '42i'],
@@ -50,29 +50,29 @@ describe('schema', () => {
     });
 
     it('accepts partial data', () => {
-      expect(schema.coerceFields({
-        int: 42,
-      })).to.deep.equal([
-        ['int', '42i'],
-      ]);
+      expect(
+        schema.coerceFields({
+          int: 42,
+        }),
+      ).to.deep.equal([['int', '42i']]);
     });
 
     it('coerces numeric string data', () => {
-      expect(schema.coerceFields({
-        int: '42',
-      })).to.deep.equal([
-        ['int', '42i'],
-      ]);
+      expect(
+        schema.coerceFields({
+          int: '42',
+        }),
+      ).to.deep.equal([['int', '42i']]);
     });
 
     it('strips null and undefined values', () => {
-      expect(schema.coerceFields({
-        int: 42,
-        float: undefined,
-        bool: null,
-      })).to.deep.equal([
-        ['int', '42i'],
-      ]);
+      expect(
+        schema.coerceFields({
+          int: 42,
+          float: undefined,
+          bool: null,
+        }),
+      ).to.deep.equal([['int', '42i']]);
     });
 
     it('throws if wrong data type provided (bool)', () => {

@@ -1,5 +1,9 @@
 import { escape, formatDate } from './grammar';
 
+export interface IStringable {
+  toString(): string;
+}
+
 export interface IBaseExpression<T> {
   /**
    * Inserts a tag name in the expression.
@@ -99,7 +103,7 @@ function regexHasFlags(re: RegExp): boolean {
   if (typeof re.flags !== 'undefined') {
     return re.flags.length > 0;
   }
-  return !(/\/$/).test(re.toString());
+  return !/\/$/.test(re.toString());
 }
 
 /**
@@ -123,7 +127,6 @@ function regexHasFlags(re: RegExp): boolean {
  * //   ("county" = 'US' AND "state" = 'WA')
  */
 export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
-
   private query: string[] = [];
 
   /**
@@ -200,8 +203,10 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
         if (value instanceof RegExp) {
           if (regexHasFlags(value)) {
-            throw new Error('Attempted to query using a regex with flags, ' +
-              'but Influx doesn\'t support flags in queries.');
+            throw new Error(
+              'Attempted to query using a regex with flags, ' +
+                "but Influx doesn't support flags in queries.",
+            );
           }
           this.query.push('/' + value.source + '/');
           return this;
@@ -212,8 +217,10 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
           return this;
         }
 
-        throw new Error(`node-influx doesn't know how to encode the provided value into a ` +
-          'query. If you think this is a bug, open an issue here: https://git.io/influx-err');
+        throw new Error(
+          `node-influx doesn't know how to encode the provided value into a ` +
+            'query. If you think this is a bug, open an issue here: https://git.io/influx-err',
+        );
     }
   }
   /**
@@ -404,14 +411,15 @@ export class Measurement {
       throw new Error(`You must specify a measurement name to query! Got \`${this.parts[2]}\``);
     }
 
-    return this.parts.filter(p => !!p)
+    return this.parts
+      .filter(p => !!p)
       .map(p => escape.quoted(p))
       .join('.');
   }
 }
 
-export type measurement = { measurement: string | ((m: Measurement) => Measurement) };
-export type where = { where: string | ((e: IExpressionHead) => Expression) };
+export type measurement = { measurement: string | ((m: Measurement) => IStringable) };
+export type where = { where: string | ((e: IExpressionHead) => IStringable) };
 
 export function parseMeasurement(q: measurement): string {
   if (typeof q.measurement === 'function') {

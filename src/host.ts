@@ -4,7 +4,6 @@ import * as urlModule from 'url';
 import { IBackoffStrategy } from './backoff/backoff';
 
 export class Host {
-
   public readonly url: urlModule.Url;
 
   /**
@@ -12,7 +11,8 @@ export class Host {
    * @param {String} url
    * @param {IBackoffStrategy} backoff
    */
-  constructor (url: string,
+  constructor(
+    url: string,
     private backoff: IBackoffStrategy,
     public readonly options: RequestOptions,
   ) {
@@ -37,5 +37,4 @@ export class Host {
   public success(): void {
     this.backoff = this.backoff.reset();
   }
-
 }

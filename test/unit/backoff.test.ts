@@ -12,7 +12,7 @@ describe('backoff strategies', () => {
         random: 1,
       });
 
-      function next () {
+      function next() {
         const value = exp.getDelay();
         exp = exp.next();
         return value;
