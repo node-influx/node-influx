@@ -3,9 +3,10 @@ import * as url from 'url';
 
 import * as b from './builder';
 import * as grammar from './grammar';
+import { ISerializePointOptions, serializePoint } from './line-protocol';
 import { IPingStats, IPoolOptions, Pool } from './pool';
 import { assertNoErrors, IResults, parse, parseSingle } from './results';
-import { coerceBadly, ISchemaOptions, Schema } from './schema';
+import { ISchemaOptions, Schema } from './schema';
 
 const defaultHost: IHostConfig = Object.freeze({
   host: '127.0.0.1',
@@ -1104,28 +1105,14 @@ export class InfluxDB {
       retentionPolicy,
     } = options;
 
+    const serializeOptions: ISerializePointOptions = {
+      precision: precision,
+      schema: this.schema[database],
+    };
+
     let payload = '';
     points.forEach(point => {
-      const { fields = {}, tags = {}, measurement, timestamp } = point;
-
-      const schema = this.schema[database] && this.schema[database][measurement];
-      const fieldsPairs = schema ? schema.coerceFields(fields) : coerceBadly(fields);
-      const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
-
-      payload += (payload.length > 0 ? '\n' : '') + measurement;
-      for (let i = 0; i < tagsNames.length; i += 1) {
-        payload +=
-          ',' + grammar.escape.tag(tagsNames[i]) + '=' + grammar.escape.tag(tags[tagsNames[i]]);
-      }
-
-      for (let i = 0; i < fieldsPairs.length; i += 1) {
-        payload +=
-          (i === 0 ? ' ' : ',') + grammar.escape.tag(fieldsPairs[i][0]) + '=' + fieldsPairs[i][1];
-      }
-
-      if (timestamp !== undefined) {
-        payload += ' ' + grammar.castTimestamp(timestamp, precision);
-      }
+      payload += (payload.length > 0 ? '\n' : '') + serializePoint(point, serializeOptions);
     });
 
     return this.pool.discard({
