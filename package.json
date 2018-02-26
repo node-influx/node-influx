@@ -71,5 +71,10 @@
     "tslint-microsoft-contrib": "^5.0.2",
     "typescript": "^2.7.1",
     "webpack": "^3.11.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100
   }
 }
