@@ -31,7 +31,7 @@ export interface IHostConfig {
   /**
    * Influx host to connect to, defaults to 127.0.0.1.
    */
-  host: string;
+  host?: string;
   /**
    * Influx port to connect to, defaults to 8086.
    */
