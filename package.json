@@ -8,7 +8,7 @@
     "build:dist": "npm run clean && tsc && cp -R test/fixture lib/test",
     "build:doc": "npm run clean && tsc -m es2015 -t es6 --moduleResolution node && esdoc -c esdoc.json",
     "clean": "run-script-os",
-    "clean:darwin:linux": rm -rf coverage doc lib",
+    "clean:darwin:linux": "rm -rf coverage doc lib",
     "clean:win32": "rd /s /q coverage & rd /s /q doc & rd /s /q lib",
     "prepare": "npm run clean && tsc -d",
     "fmt": "prettier --single-quote --trailing-comma all --print-width 100 --write \"{src,test,examples}/**/*.ts\" && npm run test:lint -- --fix",
