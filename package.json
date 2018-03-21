@@ -7,7 +7,9 @@
   "scripts": {
     "build:dist": "npm run clean && tsc && cp -R test/fixture lib/test",
     "build:doc": "npm run clean && tsc -m es2015 -t es6 --moduleResolution node && esdoc -c esdoc.json",
-    "clean": "rm -rf coverage doc lib",
+    "clean": "run-script-os",
+    "clean:darwin:linux": rm -rf coverage doc lib",
+    "clean:win32": "rd /s /q coverage & rd /s /q doc & rd /s /q lib",
     "prepare": "npm run clean && tsc -d",
     "fmt": "prettier --single-quote --trailing-comma all --print-width 100 --write \"{src,test,examples}/**/*.ts\" && npm run test:lint -- --fix",
     "test": "npm-run-all --parallel test:lint test:unit test:integrate",
@@ -63,6 +65,7 @@
     "npm-run-all": "^4.0.2",
     "opn-cli": "^3.1.0",
     "prettier": "^1.4.4",
+		"run-script-os": "^1.0.3",
     "sinon": "^4.3.0",
     "sinon-chai": "^2.8.0",
     "stream-http": "github:node-influx/stream-http",
