@@ -33,7 +33,6 @@ export function isNumeric(value: string): boolean {
  * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
  */
 export class Raw {
-
   /**
    * Wraps a string so that it is not escaped in Influx queries.
    * @param {String} value

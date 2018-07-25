@@ -21,7 +21,6 @@ const resubmitErrorCodes = [
 ];
 
 export interface IPoolOptions {
-
   /**
    * Number of times we should retry running a query
    * before calling back with an error.
@@ -39,11 +38,9 @@ export interface IPoolOptions {
    * to using exponential backoff.
    */
   backoff?: IBackoffStrategy;
-
 }
 
 export interface IPoolRequestOptions {
-
   /**
    * Request method.
    */
@@ -69,7 +66,6 @@ export interface IPoolRequestOptions {
    * running this request.
    */
   retries?: number;
-
 }
 
 /**
@@ -89,15 +85,14 @@ export class ServiceNotAvailableError extends Error {
  * result in a 300 <= error code <= 500.
  */
 export class RequestError extends Error {
-
   public static Create(
     req: http.ClientRequest,
     res: http.IncomingMessage,
     callback: (e: RequestError) => void,
   ) {
-      let body = '';
-      res.on('data', str => body = body + str.toString());
-      res.on('end', () => callback(new RequestError(req, res, body)));
+    let body = '';
+    res.on('data', str => (body = body + str.toString()));
+    res.on('end', () => callback(new RequestError(req, res, body)));
   }
 
   constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
@@ -111,7 +106,7 @@ export class RequestError extends Error {
  * Creates a function generation that returns a wrapper which only allows
  * through the first call of any function that it generated.
  */
-function doOnce(): (<T>(arg: T) => (<T>(arg: T) => any)) {
+function doOnce<T extends Function>(): ((arg: T) => (<T>(arg: T) => any)) {
   let handled = false;
 
   return fn => {
@@ -127,7 +122,7 @@ function doOnce(): (<T>(arg: T) => (<T>(arg: T) => any)) {
 
 export interface IPingStats {
   url: urlModule.Url;
-  res: http.ServerResponse;
+  res: http.IncomingMessage;
   online: boolean;
   rtt: number;
   version: string;
@@ -160,7 +155,6 @@ const request = (
  * host for a period of time.
  */
 export class Pool {
-
   private options: IPoolOptions;
   private index: number;
   private timeout: number;
@@ -172,16 +166,19 @@ export class Pool {
    * Creates a new Pool instance.
    * @param {IPoolOptions} options
    */
-  constructor (options: IPoolOptions) {
-    this.options = Object.assign({
-      backoff: new ExponentialBackoff({
-        initial: 300,
-        max: 10 * 1000,
-        random: 1,
-      }),
-      maxRetries: 2,
-      requestTimeout: 30 * 1000,
-    }, options);
+  constructor(options: IPoolOptions) {
+    this.options = Object.assign(
+      {
+        backoff: new ExponentialBackoff({
+          initial: 300,
+          max: 10 * 1000,
+          random: 1,
+        }),
+        maxRetries: 2,
+        requestTimeout: 30 * 1000,
+      },
+      options,
+    );
 
     this.index = 0;
     this.hostsAvailable = new Set<Host>();
@@ -243,7 +240,7 @@ export class Pool {
         }
 
         let output = '';
-        res.on('data', str => output = output + str.toString());
+        res.on('data', str => (output = output + str.toString()));
         res.on('end', () => resolve(output));
       });
     });
@@ -260,7 +257,9 @@ export class Pool {
           return reject(err);
         }
 
-        res.on('data', () => { /* ignore */ });
+        res.on('data', () => {
+          /* ignore */
+        });
         res.on('end', () => resolve());
       });
     });
@@ -280,45 +279,53 @@ export class Pool {
         const url = host.url;
         const once = doOnce();
 
-        return todo.push(new Promise(resolve => {
-          const req = request(Object.assign({
-            hostname: url.hostname,
-            method: 'GET',
-            path,
-            port: Number(url.port),
-            protocol: url.protocol,
-            timeout,
-          }, host.options), once((res: http.IncomingMessage) => {
-            resolve({
-              url,
-              res,
-              online: res.statusCode < 300,
-              rtt: Date.now() - start,
-              version: res.headers['x-influxdb-version'],
+        return todo.push(
+          new Promise(resolve => {
+            const req = request(
+              Object.assign(
+                {
+                  hostname: url.hostname,
+                  method: 'GET',
+                  path,
+                  port: Number(url.port),
+                  protocol: url.protocol,
+                  timeout,
+                },
+                host.options,
+              ),
+              once((res: http.IncomingMessage) => {
+                resolve(<IPingStats>{
+                  url,
+                  res,
+                  online: res.statusCode < 300,
+                  rtt: Date.now() - start,
+                  version: res.headers['x-influxdb-version'],
+                });
+              }),
+            );
+
+            const fail = once(() => {
+              resolve({
+                online: false,
+                res: null,
+                rtt: Infinity,
+                url,
+                version: null,
+              });
             });
-          }));
 
-          const fail = once(() => {
-            resolve({
-              online: false,
-              res: null,
-              rtt: Infinity,
-              url,
-              version: null,
-            });
-          });
+            // Support older Nodes and polyfills which don't allow .timeout() in
+            // the request options, wrapped in a conditional for even worse
+            // polyfills. See: https://github.com/node-influx/node-influx/issues/221
+            if (typeof req.setTimeout === 'function') {
+              req.setTimeout(timeout, fail); // tslint:disable-line
+            }
 
-          // Support older Nodes and polyfills which don't allow .timeout() in
-          // the request options, wrapped in a conditional for even worse
-          // polyfills. See: https://github.com/node-influx/node-influx/issues/221
-          if (typeof req.setTimeout === 'function') {
-            req.setTimeout(timeout, fail); // tslint:disable-line
-          }
-
-          req.on('timeout', fail);
-          req.on('error', fail);
-          req.end();
-        }));
+            req.on('timeout', fail);
+            req.on('error', fail);
+            req.end();
+          }),
+        );
       });
 
     return Promise.all(todo);
@@ -343,42 +350,58 @@ export class Pool {
 
     const once = doOnce();
     const host = this.getHost();
-    const req = request(Object.assign({
-      headers: { 'content-length': options.body ? new Buffer(options.body).length : 0 },
-      hostname: host.url.hostname,
-      method: options.method,
-      path,
-      port: Number(host.url.port),
-      protocol: host.url.protocol,
-      timeout: this.timeout,
-    }, host.options), once((res: http.IncomingMessage) => {
-      if (res.statusCode >= 500) {
-        return this.handleRequestError(
-          new ServiceNotAvailableError(res.statusMessage),
-          host, options, callback,
-        );
-      }
+    const req = request(
+      Object.assign(
+        {
+          headers: { 'content-length': options.body ? new Buffer(options.body).length : 0 },
+          hostname: host.url.hostname,
+          method: options.method,
+          path,
+          port: Number(host.url.port),
+          protocol: host.url.protocol,
+          timeout: this.timeout,
+        },
+        host.options,
+      ),
+      once((res: http.IncomingMessage) => {
+        if (res.statusCode >= 500) {
+          return this.handleRequestError(
+            new ServiceNotAvailableError(res.statusMessage),
+            host,
+            options,
+            callback,
+          );
+        }
 
-      if (res.statusCode >= 300) {
-        return RequestError.Create(req, res, err => callback(err, res));
-      }
+        if (res.statusCode >= 300) {
+          return RequestError.Create(req, res, err => callback(err, res));
+        }
 
-      host.success();
-      return callback(undefined, res);
-    }));
+        host.success();
+        return callback(undefined, res);
+      }),
+    );
 
     // Handle network or HTTP parsing errors:
-    req.on('error', once(err => {
-      this.handleRequestError(err, host, options, callback);
-    }));
+    req.on(
+      'error',
+      once((err: Error) => {
+        this.handleRequestError(err, host, options, callback);
+      }),
+    );
 
     // Handle timeouts:
-    req.on('timeout', once(() => {
-      this.handleRequestError(
-        new ServiceNotAvailableError('Request timed out'),
-        host, options, callback,
-      );
-    }));
+    req.on(
+      'timeout',
+      once(() => {
+        this.handleRequestError(
+          new ServiceNotAvailableError('Request timed out'),
+          host,
+          options,
+          callback,
+        );
+      }),
+    );
 
     // Support older Nodes and polyfills which don't allow .timeout() in the
     // request options, wrapped in a conditional for even worse polyfills. See:
@@ -426,13 +449,13 @@ export class Pool {
     setTimeout(() => this.enableHost(host), host.fail());
   }
 
-  private handleRequestError (
-    err: any, host: Host,
+  private handleRequestError(
+    err: any,
+    host: Host,
     options: IPoolRequestOptions,
     callback: (err: Error, res: http.IncomingMessage) => void,
   ) {
-    if (!(err instanceof ServiceNotAvailableError) &&
-        resubmitErrorCodes.indexOf(err.code) === -1) {
+    if (!(err instanceof ServiceNotAvailableError) && resubmitErrorCodes.indexOf(err.code) === -1) {
       return callback(err, null);
     }
 
@@ -445,5 +468,4 @@ export class Pool {
 
     callback(err, null);
   }
-
 }

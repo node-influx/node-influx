@@ -152,7 +152,8 @@ import { Tags } from './results';
  *   ])
  * })
  */
-export class IResults<T> extends Array { // for doc only, implementation in src/results.ts
+export class IResults<T> extends Array {
+  // for doc only, implementation in src/results.ts
 
   /**
    * Looks for and returns the first group in the results
@@ -179,7 +180,9 @@ export class IResults<T> extends Array { // for doc only, implementation in src/
    *   ])
    * })
    */
-  public group(matcher: Tags): T[] { return null; }
+  public group(matcher: Tags): T[] {
+    return null;
+  }
 
   /**
    * Returns the data grouped into nested arrays, similarly to how it was
@@ -209,7 +212,9 @@ export class IResults<T> extends Array { // for doc only, implementation in src/
    *   ])
    * })
    */
-  public groups(): { name: string, tags: Tags, rows: T[] }[] { return null; }
+  public groups(): { name: string; tags: Tags; rows: T[] }[] {
+    return null;
+  }
 }
 
 /**
@@ -281,26 +286,33 @@ export class IResults<T> extends Array { // for doc only, implementation in src/
  * backoff = backoff.reset();
  * console.log(backoff.getDelay()); // => 10
  */
-export class IBackoffStrategy { // for doc only, implementation in src/pool/backoff.ts
+export class IBackoffStrategy {
+  // for doc only, implementation in src/pool/backoff.ts
 
   /**
    * getDelay returns the amount of delay of the current backoff.
    * @return {Number}
    */
-  public getDelay(): number { return 0; }
+  public getDelay(): number {
+    return 0;
+  }
 
   /**
    * Next is called when a failure occurs on a host to
    * return the next backoff amount.
    * @return {IBackoffStrategy}
    */
-  public next(): IBackoffStrategy { return this; }
+  public next(): IBackoffStrategy {
+    return this;
+  }
 
   /**
    * Returns a strategy with a reset backoff counter.
    * @return {IBackoffStrategy}
    */
-  public reset(): IBackoffStrategy { return this; }
+  public reset(): IBackoffStrategy {
+    return this;
+  }
 }
 
 /**
@@ -309,14 +321,17 @@ export class IBackoffStrategy { // for doc only, implementation in src/pool/back
  * can be created manually using {@link toNanoDate}.
  * @interface
  */
-export class INanoDate extends Date { // for doc only, implementations in src/grammar/times.ts
+export class INanoDate extends Date {
+  // for doc only, implementations in src/grammar/times.ts
   /**
    * Returns the unix nanoseconds timestamp as a string.
    * @example
    * const date = toNanoDate('1475985480231035677')
    * expect(date.getNanoTime()).to.equal('1475985480231035677')
    */
-  public getNanoTime(): string { return ''; };
+  public getNanoTime(): string {
+    return '';
+  }
 
   /**
    * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
@@ -324,5 +339,7 @@ export class INanoDate extends Date { // for doc only, implementations in src/gr
    * const date = toNanoDate('1475985480231035677')
    * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
    */
-  public toNanoISOString(): string { return ''; };
+  public toNanoISOString(): string {
+    return '';
+  }
 }

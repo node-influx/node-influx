@@ -28,7 +28,8 @@ export function newClient(): Promise<InfluxDB> {
     ],
   });
 
-  return client.dropDatabase(db)
+  return client
+    .dropDatabase(db)
     .then(() => client.createDatabase(db))
     .then(() => client);
 }

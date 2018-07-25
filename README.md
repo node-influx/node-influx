@@ -43,4 +43,4 @@ Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have update
  * [API Documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html)
  * [Tutorials & Examples](https://node-influx.github.io/manual/tutorial.html)
  * [Changelog](https://node-influx.github.io/manual/changelog.html)
- * [Contributing](https://node-influx.github.io/manual/changelog.html)
+ * [Contributing](CONTRIBUTING.md)

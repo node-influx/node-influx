@@ -12,7 +12,6 @@ import { IBackoffStrategy } from './backoff';
  * @property {Number} max Max is the maximum value of the delay.
  */
 export interface IExponentialOptions {
-
   /**
    * The initial delay passed to the equation.
    */
@@ -27,7 +26,6 @@ export interface IExponentialOptions {
    * max is the maximum value of the delay.
    */
   max: number;
-
 }
 
 /**
@@ -35,7 +33,6 @@ export interface IExponentialOptions {
  * @implements {IBackoffStrategy}
  */
 export class ExponentialBackoff implements IBackoffStrategy {
-
   private counter: number;
 
   /**
@@ -43,7 +40,7 @@ export class ExponentialBackoff implements IBackoffStrategy {
    * @see https://en.wikipedia.org/wiki/Exponential_backoff
    * @param {IExponentialOptions} options
    */
-  constructor (protected options: IExponentialOptions) {
+  constructor(protected options: IExponentialOptions) {
     this.counter = 0;
   }
 
@@ -70,5 +67,4 @@ export class ExponentialBackoff implements IBackoffStrategy {
   public reset(): IBackoffStrategy {
     return new ExponentialBackoff(this.options);
   }
-
 }

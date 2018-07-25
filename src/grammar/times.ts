@@ -74,7 +74,8 @@ export type TimePrecision = 'n' | 'u' | 'ms' | 's' | 'm' | 'h';
  * console.log(Precision.Microseconds); // => 'u'
  * console.log(Precision.Nanoseconds); // => 'n'
  */
-export const Precision = Object.freeze({ // tslint:disable-line
+export const Precision = Object.freeze({
+  // tslint:disable-line
   Hours: 'h',
   Microseconds: 'u',
   Milliseconds: 'ms',
@@ -113,38 +114,47 @@ interface IDateManipulator<T> {
 }
 
 class MillisecondDateManipulator implements IDateManipulator<Date> {
-
   public format(date: Date): string {
-    return '"' + leftPad(date.getUTCFullYear(), 2)
-       + '-' + leftPad(date.getUTCMonth() + 1, 2)
-       + '-' + leftPad(date.getUTCDate(), 2)
-       + ' ' + leftPad(date.getUTCHours(), 2)
-       + ':' + leftPad(date.getUTCMinutes(), 2)
-       + ':' + leftPad(date.getUTCSeconds(), 2)
-       + '.' + leftPad(date.getUTCMilliseconds(), 3) + '"';
+    return (
+      '"' +
+      leftPad(date.getUTCFullYear(), 2) +
+      '-' +
+      leftPad(date.getUTCMonth() + 1, 2) +
+      '-' +
+      leftPad(date.getUTCDate(), 2) +
+      ' ' +
+      leftPad(date.getUTCHours(), 2) +
+      ':' +
+      leftPad(date.getUTCMinutes(), 2) +
+      ':' +
+      leftPad(date.getUTCSeconds(), 2) +
+      '.' +
+      leftPad(date.getUTCMilliseconds(), 3) +
+      '"'
+    );
   }
 
   public toTime(date: Date, precision: TimePrecision): string {
     let ms = date.getTime();
 
     switch (precision) {
-    case 'n':
-      ms *= 1000;
-    case 'u':
-      ms *= 1000;
-    case 'ms':
-      return String(ms);
+      case 'n':
+        ms *= 1000;
+      case 'u':
+        ms *= 1000;
+      case 'ms':
+        return String(ms);
 
-    case 'h':
-      ms /= 60;
-    case 'm':
-      ms /= 60;
-    case 's':
-      ms /= 1000;
-      return String(Math.floor(ms));
+      case 'h':
+        ms /= 60;
+      case 'm':
+        ms /= 60;
+      case 's':
+        ms /= 1000;
+        return String(Math.floor(ms));
 
-    default:
-      throw new Error(`Unknown precision '${precision}'!`);
+      default:
+        throw new Error(`Unknown precision '${precision}'!`);
     }
   }
 
@@ -154,23 +164,23 @@ class MillisecondDateManipulator implements IDateManipulator<Date> {
 
   public timetoDate(timestamp: number, precision: TimePrecision): Date {
     switch (precision) {
-    case 'n':
-      timestamp /= 1000;
-    case 'u':
-      timestamp /= 1000;
-    case 'ms':
-      return new Date(timestamp);
+      case 'n':
+        timestamp /= 1000;
+      case 'u':
+        timestamp /= 1000;
+      case 'ms':
+        return new Date(timestamp);
 
-    case 'h':
-      timestamp *= 60;
-    case 'm':
-      timestamp *= 60;
-    case 's':
-      timestamp *= 1000;
-      return new Date(timestamp);
+      case 'h':
+        timestamp *= 60;
+      case 'm':
+        timestamp *= 60;
+      case 's':
+        timestamp *= 1000;
+        return new Date(timestamp);
 
-    default:
-      throw new Error(`Unknown precision '${precision}'!`);
+      default:
+        throw new Error(`Unknown precision '${precision}'!`);
     }
   }
 }
@@ -193,15 +203,22 @@ function nanoIsoToTime(iso: string): string {
   return `${seconds}${decimalStr}`;
 }
 
+interface INanoDateInternal extends INanoDate {
+  _nanoISO?: string;
+  _nanoTime?: string;
+  _cachedNanoISO?: boolean;
+  _cachedNanoTime?: string;
+}
+
 const nanoDateMethods = {
-  getNanoTimeFromISO(): string {
+  getNanoTimeFromISO(this: INanoDateInternal): string {
     if (!this._cachedNanoISO) {
       this._cachedNanoTime = nanoIsoToTime(this._nanoISO);
     }
 
     return this._cachedNanoTime;
   },
-  toNanoISOStringFromISO(): string {
+  toNanoISOStringFromISO(this: INanoDateInternal): string {
     if (!this._cachedNanoISO) {
       this._cachedNanoTime = nanoIsoToTime(this._nanoISO);
     }
@@ -210,10 +227,10 @@ const nanoDateMethods = {
     return `${base}${this._cachedNanoTime.slice(-9)}Z`;
   },
 
-  getNanoTimeFromStamp(): string {
+  getNanoTimeFromStamp(this: INanoDateInternal): string {
     return this._nanoTime;
   },
-  toNanoISOStringFromStamp(): string {
+  toNanoISOStringFromStamp(this: INanoDateInternal): string {
     const base = this.toISOString().slice(0, -4); // slice of `123Z` milliseconds
     return `${base}${this._nanoTime.slice(-9)}Z`;
   },
@@ -241,7 +258,7 @@ const nanoDateMethods = {
  * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
  */
 export function toNanoDate(timestamp: string): INanoDate {
-  const date = <any> new Date(Math.floor(Number(timestamp) / nsPer.ms));
+  const date = <any>new Date(Math.floor(Number(timestamp) / nsPer.ms));
   date._nanoTime = timestamp;
   date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
   date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
@@ -249,7 +266,7 @@ export function toNanoDate(timestamp: string): INanoDate {
 }
 
 function asNanoDate(date: Date): INanoDate {
-  const d = <any> date;
+  const d = <any>date;
   if (d.getNanoTime) {
     return d;
   }
@@ -258,42 +275,51 @@ function asNanoDate(date: Date): INanoDate {
 }
 
 class NanosecondsDateManipulator implements IDateManipulator<INanoDate> {
-
   public format(date: INanoDate): string {
-    return '"' + leftPad(date.getUTCFullYear(), 2)
-       + '-' + leftPad(date.getUTCMonth() + 1, 2)
-       + '-' + leftPad(date.getUTCDate(), 2)
-       + ' ' + leftPad(date.getUTCHours(), 2)
-       + ':' + leftPad(date.getUTCMinutes(), 2)
-       + ':' + leftPad(date.getUTCSeconds(), 2)
-       + '.' + date.getNanoTime().slice(-9) + '"';
+    return (
+      '"' +
+      leftPad(date.getUTCFullYear(), 2) +
+      '-' +
+      leftPad(date.getUTCMonth() + 1, 2) +
+      '-' +
+      leftPad(date.getUTCDate(), 2) +
+      ' ' +
+      leftPad(date.getUTCHours(), 2) +
+      ':' +
+      leftPad(date.getUTCMinutes(), 2) +
+      ':' +
+      leftPad(date.getUTCSeconds(), 2) +
+      '.' +
+      date.getNanoTime().slice(-9) +
+      '"'
+    );
   }
 
   public toTime(date: INanoDate, precision: TimePrecision): string {
     let ms = date.getTime();
 
     switch (precision) {
-    case 'u':
-      return date.getNanoTime().slice(0, -3);
-    case 'n':
-      return date.getNanoTime();
+      case 'u':
+        return date.getNanoTime().slice(0, -3);
+      case 'n':
+        return date.getNanoTime();
 
-    case 'h':
-      ms /= 60;
-    case 'm':
-      ms /= 60;
-    case 's':
-      ms /= 1000;
-    case 'ms':
-      return String(Math.floor(ms));
+      case 'h':
+        ms /= 60;
+      case 'm':
+        ms /= 60;
+      case 's':
+        ms /= 1000;
+      case 'ms':
+        return String(Math.floor(ms));
 
-    default:
-      throw new Error(`Unknown precision '${precision}'!`);
+      default:
+        throw new Error(`Unknown precision '${precision}'!`);
     }
   }
 
   public isoToDate(timestamp: string): INanoDate {
-    const date = <any> new Date(timestamp);
+    const date = <any>new Date(timestamp);
     date._nanoISO = timestamp;
     date.getNanoTime = nanoDateMethods.getNanoTimeFromISO;
     date.toNanoISOString = nanoDateMethods.toNanoISOStringFromISO;
@@ -302,25 +328,25 @@ class NanosecondsDateManipulator implements IDateManipulator<INanoDate> {
 
   public timetoDate(timestamp: number, precision: TimePrecision): INanoDate {
     switch (precision) {
-    case 'h':
-      timestamp *= 60;
-    case 'm':
-      timestamp *= 60;
-    case 's':
-      timestamp *= 1000;
-    case 'ms':
-      timestamp *= 1000;
-    case 'u':
-      timestamp *= 1000;
-    case 'n':
-      const date = <any> new Date(timestamp / nsPer.ms);
-      date._nanoTime = String(timestamp);
-      date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
-      date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
-      return date;
+      case 'h':
+        timestamp *= 60;
+      case 'm':
+        timestamp *= 60;
+      case 's':
+        timestamp *= 1000;
+      case 'ms':
+        timestamp *= 1000;
+      case 'u':
+        timestamp *= 1000;
+      case 'n':
+        const date = <any>new Date(timestamp / nsPer.ms);
+        date._nanoTime = String(timestamp);
+        date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
+        date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
+        return date;
 
-    default:
-      throw new Error(`Unknown precision '${precision}'!`);
+      default:
+        throw new Error(`Unknown precision '${precision}'!`);
     }
   }
 }
@@ -359,10 +385,7 @@ export function dateToTime(date: Date | INanoDate, precision: TimePrecision): st
  * the precision is finer than 'ms' the returned value will be a INanoDate.
  * @private
  */
-export function isoOrTimeToDate(
-  stamp: string | number,
-  precision: TimePrecision = 'n',
-): INanoDate {
+export function isoOrTimeToDate(stamp: string | number, precision: TimePrecision = 'n'): INanoDate {
   if (typeof stamp === 'string') {
     return nanoManipulator.isoToDate(stamp);
   } else {
@@ -375,13 +398,10 @@ export function isoOrTimeToDate(
  * that raw number and string instances are already in the correct precision.
  * @private
  */
-export function castTimestamp(timestamp: string | number | Date,
-                              precision: TimePrecision): string {
+export function castTimestamp(timestamp: string | number | Date, precision: TimePrecision): string {
   if (typeof timestamp === 'string') {
     if (!isNumeric(timestamp)) {
-      throw new Error(
-        `Expected numeric value for, timestamp, but got '${timestamp}'!`,
-      );
+      throw new Error(`Expected numeric value for, timestamp, but got '${timestamp}'!`);
     }
     return timestamp;
   }

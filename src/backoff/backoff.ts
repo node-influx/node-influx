@@ -1,5 +1,4 @@
 export interface IBackoffStrategy {
-
   /**
    * getDelay returns the amount of delay of the current backoff.
    */
@@ -15,5 +14,4 @@ export interface IBackoffStrategy {
    * Returns a strategy with a reset backoff counter.
    */
   reset(): IBackoffStrategy;
-
 }

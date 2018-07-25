@@ -6,7 +6,7 @@ use(sinonChai);
 const influxVersion = process.env.INFLUX_VERSION || 'v1.0.0';
 
 // This tree is created statically rather than dynamically required for Webpack.
-const fixtures = {
+const fixtures: { [version: string]: { [fixture: string]: object } } = {
   'v1.0.0': {
     error: require('../fixture/v1.0.0/error.json'),
     selectFromEmpty: require('../fixture/v1.0.0/selectFromEmpty.json'),
@@ -27,6 +27,6 @@ const fixtures = {
  * @param  {String} name
  * @return {Object}
  */
-export function dbFixture (name: string): any {
+export function dbFixture(name: string): any {
   return fixtures[influxVersion][name];
 }

@@ -5,9 +5,9 @@ import * as grammar from '../../src/grammar';
 const escapeTables = require('../fixture/escapeTables.json');
 
 describe('grammar', () => {
-  Object.keys(escapeTables).forEach(escaper => {
+  Object.keys(escapeTables).forEach((escaper: keyof typeof grammar.escape) => {
     describe(escaper, () => {
-      escapeTables[escaper].forEach(test => {
+      escapeTables[escaper].forEach((test: [string, string]) => {
         it(`escapes \`${test[0]}\` as \`${test[1]}\``, () => {
           expect(grammar.escape[escaper](test[0])).to.equal(test[1]);
         });
@@ -16,20 +16,21 @@ describe('grammar', () => {
   });
 
   it('does not escape raw values', () => {
-    expect(grammar.escape.quoted(<any> new grammar.Raw('don"t escape'))).to.equal('don"t escape');
+    expect(grammar.escape.quoted(<any>new grammar.Raw('don"t escape'))).to.equal('don"t escape');
   });
 
   it('escapes complex values (issue #242)', () => {
-    const original = JSON.stringify({a: JSON.stringify({b: 'c c'})});
-    expect(grammar.escape.quoted(original))
-      .to.equal('"{\\"a\\":\\"{\\\\\\"b\\\\\\":\\\\\\"c c\\\\\\"}\\"}"');
+    const original = JSON.stringify({ a: JSON.stringify({ b: 'c c' }) });
+    expect(grammar.escape.quoted(original)).to.equal(
+      '"{\\"a\\":\\"{\\\\\\"b\\\\\\":\\\\\\"c c\\\\\\"}\\"}"',
+    );
   });
 
   let nanoDate: grammar.INanoDate;
   let milliDate: Date;
 
   beforeEach(() => {
-    nanoDate = <grammar.INanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
+    nanoDate = <grammar.INanoDate>grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
     milliDate = new Date(1475985480231);
   });
 
@@ -51,21 +52,24 @@ describe('grammar', () => {
 
   describe('parsing', () => {
     it('parses ISO dates correctly', () => {
-      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
+      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(
+        '2016-10-09T03:58:00.231035677Z',
+        'n',
+      );
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035677');
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z');
     });
 
     it('parses numeric `ns` timestamps', () => {
-      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate(1475985480231035677, 'n');
+      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(1475985480231035677, 'n');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035600'); // precision is lost
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
     });
 
     it('parses numeric `u` timestamps', () => {
-      const parsed = <grammar.INanoDate> grammar.isoOrTimeToDate(1475985480231035, 'u');
+      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(1475985480231035, 'u');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035000');
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035000Z');

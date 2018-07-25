@@ -34,7 +34,6 @@ const reEscape = /[-|\\{()[\]^$+*?.]/g;
  *
  */
 class Escaper {
-
   private re: RegExp;
 
   constructor(chars: string[], private wrap: string = '', private escaper: string = '\\') {
@@ -47,11 +46,11 @@ class Escaper {
    * string with the necessary escape codes.
    */
   public escape(val: string): string {
-    if ((<any> val) instanceof Raw) {
-      return (<any> val).getValue();
+    if (<any>val instanceof Raw) {
+      return (<any>val).getValue();
     }
 
-    let chunkIndex = this.re.lastIndex = 0;
+    let chunkIndex = (this.re.lastIndex = 0);
     let escapedVal = '';
     let match = this.re.exec(val);
 
@@ -108,7 +107,7 @@ export const escape = {
   /**
    * stringLitEscaper escapes single quotes in string literals.
    */
-  stringLit: bindEsc(new Escaper(['\''], '\'')),
+  stringLit: bindEsc(new Escaper(["'"], "'")),
   /**
    * tagEscaper escapes tag keys, tag values, and field keys.
    */
