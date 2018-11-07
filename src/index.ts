@@ -597,10 +597,10 @@ export class InfluxDB {
 
     let q = 'drop series';
     if ('measurement' in options) {
-      q += ' from ' + b.parseMeasurement(<b.measurement>options);
+      q += ' from ' + b.parseMeasurement(options);
     }
     if ('where' in options) {
-      q += ' where ' + b.parseWhere(<b.where>options);
+      q += ' where ' + b.parseWhere(options);
     }
 
     return this.pool
@@ -626,7 +626,7 @@ export class InfluxDB {
   public getUsers(): Promise<IResults<{ user: string; admin: boolean }>> {
     return this.pool
       .json(this.getQueryOpts({ q: 'show users' }))
-      .then(result => parseSingle<{ user: string; admin: boolean }>(result));
+      .then(parseSingle);
   }
 
   /**
@@ -853,11 +853,7 @@ export class InfluxDB {
           q: 'show continuous queries',
         }),
       )
-      .then(result =>
-        parseSingle<{
-          name: string;
-          query: string;
-        }>(result),
+      .then(parseSingle,
       );
   }
 
@@ -1112,7 +1108,7 @@ export class InfluxDB {
       const fieldsPairs = schema ? schema.coerceFields(fields) : coerceBadly(fields);
       const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
 
-      payload += (payload.length > 0 ? '\n' : '') + measurement;
+      payload += (payload.length > 0 ? '\n' : '') + grammar.escape.measurement(measurement);
       for (let i = 0; i < tagsNames.length; i += 1) {
         payload +=
           ',' + grammar.escape.tag(tagsNames[i]) + '=' + grammar.escape.tag(tags[tagsNames[i]]);
@@ -1132,13 +1128,12 @@ export class InfluxDB {
       body: payload,
       method: 'POST',
       path: '/write',
-      query: Object.assign({
+      query: {
         db: database,
         p: this.options.password,
         precision,
         rp: retentionPolicy,
-        u: this.options.username,
-      }),
+        u: this.options.username},
     });
   }
 
@@ -1163,7 +1158,7 @@ export class InfluxDB {
     points: IPoint[],
     options: IWriteOptions = {},
   ): Promise<void> {
-    points = points.map(p => Object.assign({ measurement }, p));
+    points = points.map(p => ({ measurement, ...p}));
     return this.writePoints(points, options);
   }
 
@@ -1194,7 +1189,7 @@ export class InfluxDB {
     // remove that to cause Influx to give us ISO dates that
     // we can parse correctly.
     if (options.precision === 'n') {
-      options = Object.assign({}, options); // avoid mutating
+      options = {...options}; // avoid mutating
       delete options.precision;
     }
 
@@ -1274,13 +1269,11 @@ export class InfluxDB {
     return {
       method,
       path: '/query',
-      query: Object.assign(
-        {
+      query: {
           p: this.options.password,
           u: this.options.username,
-        },
-        params,
-      ),
+        ...params,
+      },
     };
   }
 }

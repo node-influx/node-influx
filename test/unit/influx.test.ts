@@ -183,13 +183,11 @@ describe('influxdb', () => {
         expect(pool[method]).to.have.been.calledWith({
           method: httpMethod,
           path: '/query',
-          query: Object.assign(
-            {
+          query: {
               u: 'root',
               p: 'root',
-            },
-            options,
-          ),
+            ...options,
+          },
         });
       });
     };
@@ -205,13 +203,11 @@ describe('influxdb', () => {
           method: 'POST',
           path: '/write',
           body,
-          query: Object.assign(
-            {
+          query: {
               u: 'root',
               p: 'root',
-            },
-            options,
-          ),
+            ...options,
+          },
         });
       });
     };
@@ -683,6 +679,48 @@ describe('influxdb', () => {
 
         return influx.writeMeasurement(
           'mymeas',
+          [
+            {
+              tags: { my_tag: '1' },
+              fields: { myfield: 90 },
+              timestamp: toNanoDate('1463683075000000000'),
+            },
+          ],
+          { precision: 'ms' },
+        );
+      });
+
+      it('escapes spaces in measurement', () => {
+        setDefaultDB('my_db');
+        expectWrite('my\\ meas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
+          rp: undefined,
+          db: 'my_db',
+        });
+
+        return influx.writeMeasurement(
+          'my meas',
+          [
+            {
+              tags: { my_tag: '1' },
+              fields: { myfield: 90 },
+              timestamp: toNanoDate('1463683075000000000'),
+            },
+          ],
+          { precision: 'ms' },
+        );
+      });
+
+      it('escapes commans in measurement', () => {
+        setDefaultDB('my_db');
+        expectWrite('my\\,meas,my_tag=1 myfield=90 1463683075000', {
+          precision: 'ms',
+          rp: undefined,
+          db: 'my_db',
+        });
+
+        return influx.writeMeasurement(
+          'my,meas',
           [
             {
               tags: { my_tag: '1' },
