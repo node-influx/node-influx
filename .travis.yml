@@ -1,8 +1,8 @@
 sudo: required
 language: node_js
 node_js:
-  - 6
-  - 4
+  - "8"
+  - "10"
 services:
   - docker
 before_install:
