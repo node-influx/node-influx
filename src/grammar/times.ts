@@ -211,28 +211,28 @@ interface INanoDateInternal extends INanoDate {
 }
 
 const nanoDateMethods = {
-  getNanoTimeFromISO(this: INanoDateInternal): string {
-    if (!this._cachedNanoISO) {
-      this._cachedNanoTime = nanoIsoToTime(this._nanoISO);
+  getNanoTimeFromISO(that: INanoDateInternal): string {
+    if (!that._cachedNanoISO) {
+      that._cachedNanoTime = nanoIsoToTime(that._nanoISO);
     }
 
-    return this._cachedNanoTime;
+    return that._cachedNanoTime;
   },
-  toNanoISOStringFromISO(this: INanoDateInternal): string {
-    if (!this._cachedNanoISO) {
-      this._cachedNanoTime = nanoIsoToTime(this._nanoISO);
+  toNanoISOStringFromISO(that: INanoDateInternal): string {
+    if (!that._cachedNanoISO) {
+      that._cachedNanoTime = nanoIsoToTime(that._nanoISO);
     }
 
-    const base = this.toISOString().slice(0, -4); // slice of `123Z` milliseconds
-    return `${base}${this._cachedNanoTime.slice(-9)}Z`;
+    const base = that.toISOString().slice(0, -4); // slice of `123Z` milliseconds
+    return `${base}${that._cachedNanoTime.slice(-9)}Z`;
   },
 
-  getNanoTimeFromStamp(this: INanoDateInternal): string {
-    return this._nanoTime;
+  getNanoTimeFromStamp(that: INanoDateInternal): string {
+    return that._nanoTime;
   },
-  toNanoISOStringFromStamp(this: INanoDateInternal): string {
-    const base = this.toISOString().slice(0, -4); // slice of `123Z` milliseconds
-    return `${base}${this._nanoTime.slice(-9)}Z`;
+  toNanoISOStringFromStamp(that: INanoDateInternal): string {
+    const base = that.toISOString().slice(0, -4); // slice of `123Z` milliseconds
+    return `${base}${that._nanoTime.slice(-9)}Z`;
   },
 };
 
