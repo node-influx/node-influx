@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as http from 'http';
+import * as https from 'https';
 import * as sinon from 'sinon';
 
 import { ExponentialBackoff } from '../../src/backoff/exponential';
@@ -63,7 +64,7 @@ describe('pool', () => {
   });
 
   it('passes through request options', () => {
-    const spy = sinon.spy(http, 'request');
+    const spy = sinon.spy(https, 'request');
     const p = createPool();
     p.addHost('https://httpbin.org/get', { rejectUnauthorized: false });
 
