@@ -106,7 +106,7 @@ export class RequestError extends Error {
  * Creates a function generation that returns a wrapper which only allows
  * through the first call of any function that it generated.
  */
-function doOnce<T extends Function>(): ((arg: T) => (<T>(arg: T) => any)) {
+function doOnce<T extends Function>(): ((arg?: T) => (<T>(arg?: T) => any)) {
   let handled = false;
 
   return fn => {
