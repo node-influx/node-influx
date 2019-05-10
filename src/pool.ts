@@ -353,7 +353,7 @@ export class Pool {
     const req = request(
       Object.assign(
         {
-          headers: { 'content-length': options.body ? new Buffer(options.body).length : 0 },
+          headers: { 'content-length': options.body ? Buffer.from(options.body).length : 0 },
           hostname: host.url.hostname,
           method: options.method,
           path,
