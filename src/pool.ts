@@ -138,7 +138,7 @@ function setToArray<T>(itemSet: Set<T>): T[] {
 }
 
 const request = (
-  options: http.RequestOptions,
+  options: https.RequestOptions,
   callback: (res: http.IncomingMessage) => void,
 ): http.ClientRequest => {
   if (options.protocol === 'https:') {
