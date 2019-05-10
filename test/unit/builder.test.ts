@@ -100,27 +100,29 @@ describe('query builder', () => {
       );
     });
 
-    const operationsTable = [
-      { method: 'equals', yields: '=' },
-      { method: 'notEqual', yields: '!=' },
-      { method: 'gt', yields: '>' },
-      { method: 'gte', yields: '>=' },
-      { method: 'lt', yields: '<' },
-      { method: 'lte', yields: '<=' },
-      { method: 'plus', yields: '+' },
-      { method: 'minus', yields: '-' },
-      { method: 'times', yields: '*' },
-      { method: 'div', yields: '/' },
-      { method: 'and', yields: 'AND' },
-      { method: 'or', yields: 'OR' },
-      { method: 'matches', yields: '=~' },
-      { method: 'doesntMatch', yields: '!~' },
-    ];
+    it('should map operation methods to operators', () => {
+      const operationsTable = [
+        { method: 'equals', yields: '=' },
+        { method: 'notEqual', yields: '!=' },
+        { method: 'gt', yields: '>' },
+        { method: 'gte', yields: '>=' },
+        { method: 'lt', yields: '<' },
+        { method: 'lte', yields: '<=' },
+        { method: 'plus', yields: '+' },
+        { method: 'minus', yields: '-' },
+        { method: 'times', yields: '*' },
+        { method: 'div', yields: '/' },
+        { method: 'and', yields: 'AND' },
+        { method: 'or', yields: 'OR' },
+        { method: 'matches', yields: '=~' },
+        { method: 'doesntMatch', yields: '!~' },
+      ];
 
-    operationsTable.forEach(({ method, yields }) => {
-      it(`yields ${yields} from .${method}`, () => {
-        const expr: any = new Expression().field('f');
-        expect(expr[method].value(true).toString()).to.equal(`"f" ${yields} TRUE`);
+      operationsTable.forEach(({ method, yields }) => {
+        it(`yields ${yields} from .${method}`, () => {
+          const expr: any = new Expression().field('f');
+          expect(expr[method].value(true).toString()).to.equal(`"f" ${yields} TRUE`);
+        });
       });
     });
   });

@@ -2,14 +2,15 @@ import { expect } from 'chai';
 
 import * as grammar from '../../src/grammar';
 
-const escapeTables = require('../fixture/escapeTables.json');
-
 describe('grammar', () => {
-  Object.keys(escapeTables).forEach((escaper: keyof typeof grammar.escape) => {
-    describe(escaper, () => {
-      escapeTables[escaper].forEach((test: [string, string]) => {
-        it(`escapes \`${test[0]}\` as \`${test[1]}\``, () => {
-          expect(grammar.escape[escaper](test[0])).to.equal(test[1]);
+  it('should escape strings', () => {
+    const escapeTables = require('../fixture/escapeTables.json');
+    Object.keys(escapeTables).forEach((escaper: keyof typeof grammar.escape) => {
+      describe(escaper, () => {
+        escapeTables[escaper].forEach((test: [string, string]) => {
+          it(`escapes \`${test[0]}\` as \`${test[1]}\``, () => {
+            expect(grammar.escape[escaper](test[0])).to.equal(test[1]);
+          });
         });
       });
     });
@@ -30,7 +31,7 @@ describe('grammar', () => {
   let milliDate: Date;
 
   beforeEach(() => {
-    nanoDate = <grammar.INanoDate>grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
+    nanoDate = grammar.isoOrTimeToDate('2016-10-09T03:58:00.231035677Z', 'n');
     milliDate = new Date(1475985480231);
   });
 
@@ -52,7 +53,7 @@ describe('grammar', () => {
 
   describe('parsing', () => {
     it('parses ISO dates correctly', () => {
-      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(
+      const parsed = grammar.isoOrTimeToDate(
         '2016-10-09T03:58:00.231035677Z',
         'n',
       );
@@ -62,14 +63,14 @@ describe('grammar', () => {
     });
 
     it('parses numeric `ns` timestamps', () => {
-      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(1475985480231035677, 'n');
+      const parsed = grammar.isoOrTimeToDate(1475985480231035677, 'n');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035600'); // precision is lost
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
     });
 
     it('parses numeric `u` timestamps', () => {
-      const parsed = <grammar.INanoDate>grammar.isoOrTimeToDate(1475985480231035, 'u');
+      const parsed = grammar.isoOrTimeToDate(1475985480231035, 'u');
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal('1475985480231035000');
       expect(parsed.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035000Z');

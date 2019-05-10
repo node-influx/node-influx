@@ -85,7 +85,13 @@ export class ServiceNotAvailableError extends Error {
  * result in a 300 <= error code <= 500.
  */
 export class RequestError extends Error {
-  public static Create(
+  constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
+    super();
+    this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
+    Object.setPrototypeOf(this, RequestError.prototype);
+  }
+
+  public static create(
     req: http.ClientRequest,
     res: http.IncomingMessage,
     callback: (e: RequestError) => void,
@@ -94,19 +100,13 @@ export class RequestError extends Error {
     res.on('data', str => (body = body + str.toString()));
     res.on('end', () => callback(new RequestError(req, res, body)));
   }
-
-  constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
-    super();
-    this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
-    Object.setPrototypeOf(this, RequestError.prototype);
-  }
 }
 
 /**
  * Creates a function generation that returns a wrapper which only allows
  * through the first call of any function that it generated.
  */
-function doOnce<T extends Function>(): ((arg?: T) => (<T>(arg?: T) => any)) {
+function doOnce<T extends Function>(): ((arg?: T) => (<V>(arg?: V) => any)) {
   let handled = false;
 
   return fn => {
@@ -167,18 +167,16 @@ export class Pool {
    * @param {IPoolOptions} options
    */
   constructor(options: IPoolOptions) {
-    this.options = Object.assign(
-      {
-        backoff: new ExponentialBackoff({
-          initial: 300,
-          max: 10 * 1000,
-          random: 1,
-        }),
-        maxRetries: 2,
-        requestTimeout: 30 * 1000,
-      },
-      options,
-    );
+    this.options = {
+      backoff: new ExponentialBackoff({
+        initial: 300,
+        max: 10 * 1000,
+        random: 1,
+      }),
+      maxRetries: 2,
+      requestTimeout: 30 * 1000,
+      ...options,
+    };
 
     this.index = 0;
     this.hostsAvailable = new Set<Host>();
@@ -260,7 +258,7 @@ export class Pool {
         res.on('data', () => {
           /* ignore */
         });
-        res.on('end', () => resolve());
+        res.on('end', resolve);
       });
     });
   }
@@ -282,24 +280,22 @@ export class Pool {
         return todo.push(
           new Promise(resolve => {
             const req = request(
-              Object.assign(
-                {
-                  hostname: url.hostname,
-                  method: 'GET',
-                  path,
-                  port: Number(url.port),
-                  protocol: url.protocol,
-                  timeout,
-                },
-                host.options,
-              ),
+              {
+                hostname: url.hostname,
+                method: 'GET',
+                path,
+                port: Number(url.port),
+                protocol: url.protocol,
+                timeout,
+                ...host.options,
+              },
               once((res: http.IncomingMessage) => {
-                resolve(<IPingStats>{
+                resolve({
                   url,
                   res,
                   online: res.statusCode < 300,
                   rtt: Date.now() - start,
-                  version: res.headers['x-influxdb-version'],
+                  version: <string>res.headers['x-influxdb-version'],
                 });
               }),
             );
@@ -345,24 +341,22 @@ export class Pool {
 
     let path = options.path;
     if (options.query) {
-      path += '?' + querystring.stringify(options.query);
+      path += `?${querystring.stringify(options.query)}`;
     }
 
     const once = doOnce();
     const host = this.getHost();
     const req = request(
-      Object.assign(
-        {
-          headers: { 'content-length': options.body ? Buffer.from(options.body).length : 0 },
-          hostname: host.url.hostname,
-          method: options.method,
-          path,
-          port: Number(host.url.port),
-          protocol: host.url.protocol,
-          timeout: this.timeout,
-        },
-        host.options,
-      ),
+      {
+        headers: { 'content-length': options.body ? Buffer.from(options.body).length : 0 },
+        hostname: host.url.hostname,
+        method: options.method,
+        path,
+        port: Number(host.url.port),
+        protocol: host.url.protocol,
+        timeout: this.timeout,
+        ...host.options
+      },
       once((res: http.IncomingMessage) => {
         if (res.statusCode >= 500) {
           return this.handleRequestError(
@@ -374,7 +368,7 @@ export class Pool {
         }
 
         if (res.statusCode >= 300) {
-          return RequestError.Create(req, res, err => callback(err, res));
+          return RequestError.create(req, res, err => callback(err, res));
         }
 
         host.success();

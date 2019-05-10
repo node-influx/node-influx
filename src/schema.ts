@@ -73,7 +73,7 @@ export class Schema {
           if (typ !== 'number' && !isNumeric(String(value))) {
             throw new Error(`Expected numeric value for ${this.ref(field)}, but got '${value}'!`);
           }
-          coerced = String(Math.floor(<number>value)) + 'i';
+          coerced = `${Math.floor(<number>value)}i`;
           break;
 
         case FieldType.FLOAT:
@@ -134,9 +134,9 @@ export class Schema {
    * Returns the 'db'.'measurement'[.'field'] referencing the current schema.
    */
   private ref(field?: string): string {
-    let out = this.options.database + '.' + this.options.measurement;
+    let out = `${this.options.database}.${this.options.measurement}`;
     if (field) {
-      out += '.' + field;
+      out += `.${field}`;
     }
     return out;
   }

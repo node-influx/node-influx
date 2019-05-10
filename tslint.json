@@ -1,5 +1,8 @@
 {
-  "extends": "tslint-microsoft-contrib",
+  "extends": [
+    "tslint-microsoft-contrib",
+    "tslint-no-unused-expression-chai"
+  ],
   "rulesDirectory": [
     "node_modules/tslint-microsoft-contrib"
   ],
@@ -24,6 +27,8 @@
     "no-void-expression": false,
     "no-use-before-declare": false,
     "unified-signatures": false,
+    "no-implicit-dependencies": [true, "dev"],
+    "no-redundant-jsdoc": false,
 
     // Prettier-incompatible or prettier-handled rules
     "align": false,

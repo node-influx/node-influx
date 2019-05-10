@@ -174,8 +174,9 @@ describe('influxdb', () => {
       httpMethod: string = 'POST',
       yields: any = { results: [{}] },
     ) => {
+      let localOptions = options;
       if (typeof options === 'string') {
-        options = { q: options };
+        localOptions = { q: options };
       }
 
       (<any>pool[method]).returns(Promise.resolve(yields));
@@ -183,20 +184,19 @@ describe('influxdb', () => {
         expect(pool[method]).to.have.been.calledWith({
           method: httpMethod,
           path: '/query',
-          query: Object.assign(
-            {
-              u: 'root',
-              p: 'root',
-            },
-            options,
-          ),
+          query: {
+            u: 'root',
+            p: 'root',
+          ...localOptions,
+          },
         });
       });
     };
 
     const expectWrite = (body: string, options: any) => {
+      let localOptions = options;
       if (typeof options === 'string') {
-        options = { q: options };
+        localOptions = { q: options };
       }
 
       (<any>pool.discard).returns(Promise.resolve());
@@ -205,29 +205,27 @@ describe('influxdb', () => {
           method: 'POST',
           path: '/write',
           body,
-          query: Object.assign(
-            {
-              u: 'root',
-              p: 'root',
-            },
-            options,
-          ),
+          query: {
+            u: 'root',
+            p: 'root',
+            ...localOptions,
+          }
         });
       });
     };
 
-    it('.createDatabase()', () => {
+    it('.createDatabase()', async () => {
       expectQuery('json', 'create database "foo"');
-      influx.createDatabase('foo');
+      await influx.createDatabase('foo');
       expectQuery('json', 'create database "f\\"oo"');
-      influx.createDatabase('f"oo');
+      await influx.createDatabase('f"oo');
     });
 
-    it('.dropDatabase()', () => {
+    it('.dropDatabase()', async () => {
       expectQuery('json', 'drop database "foo"');
-      influx.dropDatabase('foo');
+      await influx.dropDatabase('foo');
       expectQuery('json', 'drop database "f\\"oo"');
-      influx.dropDatabase('f"oo');
+      await influx.dropDatabase('f"oo');
     });
 
     it('.getDatabaseNames()', () => {
@@ -336,29 +334,29 @@ describe('influxdb', () => {
     describe('.dropSeries()', () => {
       beforeEach(() => setDefaultDB('my_db'));
 
-      it('drops with only from clause by string', () => {
+      it('drops with only from clause by string', async () => {
         expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
-        influx.dropSeries({ measurement: '"series_0"' });
+        await influx.dropSeries({ measurement: '"series_0"' });
       });
 
-      it('drops with only from clause by builder', () => {
+      it('drops with only from clause by builder', async () => {
         expectQuery('json', { db: 'my_db', q: 'drop series from "series_0"' });
-        influx.dropSeries({ measurement: m => m.name('series_0') });
+        await influx.dropSeries({ measurement: m => m.name('series_0') });
       });
 
-      it('drops with only where clause by string', () => {
+      it('drops with only where clause by string', async () => {
         expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
-        influx.dropSeries({ where: '"my_tag" = 1' });
+        await influx.dropSeries({ where: '"my_tag" = 1' });
       });
 
-      it('drops with only where clause by builder', () => {
+      it('drops with only where clause by builder', async () => {
         expectQuery('json', { db: 'my_db', q: 'drop series where "my_tag" = 1' });
-        influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) });
+        await influx.dropSeries({ where: e => e.tag('my_tag').equals.value(1) });
       });
 
-      it('drops with both', () => {
+      it('drops with both', async () => {
         expectQuery('json', { db: 'my_db', q: 'drop series from "series_0" where "my_tag" = 1' });
-        influx.dropSeries({
+        await influx.dropSeries({
           measurement: m => m.name('series_0'),
           where: e => e.tag('my_tag').equals.value(1),
         });
@@ -558,7 +556,7 @@ describe('influxdb', () => {
         setDefaultDB('my_db');
 
         expect(() => {
-          influx.writePoints([
+          return influx.writePoints([
             {
               measurement: 'my_schemed_measure',
               tags: { not_a_tag: '1' },
@@ -567,7 +565,7 @@ describe('influxdb', () => {
         }).to.throw(/extraneous tags/i);
 
         expect(() => {
-          influx.writePoints([
+          return influx.writePoints([
             {
               measurement: 'my_schemed_measure',
               fields: { not_a_field: '1' },
@@ -576,7 +574,7 @@ describe('influxdb', () => {
         }).to.throw(/extraneous fields/i);
 
         expect(() => {
-          influx.writePoints([
+          return influx.writePoints([
             {
               measurement: 'my_schemed_measure',
               fields: { bool: 'lol, not a bool' },
@@ -858,10 +856,10 @@ describe('influxdb', () => {
       return influx.dropRetentionPolicy('7d"');
     });
 
-    it('shows retention policies', () => {
+    it('shows retention policies', async () => {
       const data = dbFixture('showRetentionPolicies');
       expectQuery('json', 'show retention policies on "my\\"db"', 'GET', data);
-      influx.showRetentionPolicies('my"db');
+      await influx.showRetentionPolicies('my"db');
       setDefaultDB('my_db');
       expectQuery('json', 'show retention policies on "my_db"', 'GET', data);
 

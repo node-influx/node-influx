@@ -370,26 +370,27 @@ export class InfluxDB {
    *
    */
   constructor(options?: any) {
+    let localOptions = options;
     // Figure out how to parse whatever we were passed in into a IClusterConfig.
     if (typeof options === 'string') {
       // plain URI => ISingleHostConfig
-      options = parseOptionsUrl(options);
+      localOptions = parseOptionsUrl(options);
     } else if (!options) {
-      options = defaultHost;
+      localOptions = defaultHost;
     }
-    if (!options.hasOwnProperty('hosts')) {
+    if (!localOptions.hasOwnProperty('hosts')) {
       // ISingleHostConfig => IClusterConfig
-      options = {
-        database: options.database,
-        hosts: [options],
-        password: options.password,
-        pool: options.pool,
-        schema: options.schema,
-        username: options.username,
+      localOptions = {
+        database: localOptions.database,
+        hosts: [localOptions],
+        password: localOptions.password,
+        pool: localOptions.pool,
+        schema: localOptions.schema,
+        username: localOptions.username,
       };
     }
 
-    const resolved = <IClusterConfig>options;
+    const resolved = <IClusterConfig>localOptions;
     resolved.hosts = resolved.hosts.map(host => {
       return defaults(
         {
@@ -597,10 +598,10 @@ export class InfluxDB {
 
     let q = 'drop series';
     if ('measurement' in options) {
-      q += ' from ' + b.parseMeasurement(<b.measurement>options);
+      q += ` from ${b.parseMeasurement(options)}`;
     }
     if ('where' in options) {
-      q += ' where ' + b.parseWhere(<b.where>options);
+      q += `' where ${b.parseWhere(options)}`;
     }
 
     return this.pool
@@ -648,9 +649,9 @@ export class InfluxDB {
         this.getQueryOpts(
           {
             q:
-              `create user ${grammar.escape.quoted(username)} with password ` +
-              grammar.escape.stringLit(password) +
-              (admin ? ' with all privileges' : ''),
+              `create user ${grammar.escape.quoted(username)} with password
+              ${grammar.escape.stringLit(password)}
+              ${(admin ? ' with all privileges' : '')}`,
           },
           'POST',
         ),
