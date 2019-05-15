@@ -86,8 +86,7 @@ function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): 
   let nextGroup: Row[] = [];
   results.groupRows = new Array(series.length); // tslint:disable-line
 
-  let lastEnd = 0;
-  for (let i = 0; i < series.length; i += 1, lastEnd = results.length) {
+  for (let i = 0; i < series.length; i += 1, results.length) {
     const { columns = [], values = [] } = series[i];
 
     for (let k = 0; k < values.length; k += 1) {

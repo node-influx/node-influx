@@ -211,7 +211,7 @@ function parseOptionsUrl(addr: string): ISingleHostConfig {
  */
 function defaults<T>(target: T, ...srcs: T[]): T {
   srcs.forEach(src => {
-    Object.keys(src).forEach((key: keyof T) => {
+    Object.keys(src).forEach((key: Extract<keyof T, string>) => {
       if (target[key] === undefined) {
         target[key] = src[key];
       }

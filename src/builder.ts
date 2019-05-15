@@ -187,7 +187,7 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
   public value(value: any): this {
     switch (typeof value) {
       case 'number':
-        this.query.push(value);
+        this.query.push(value.toString());
         return this;
       case 'string':
         this.query.push(escape.stringLit(value));
