@@ -244,8 +244,7 @@ const nanoDateMethods = {
  * usage.html#a-moment-for-times) for a more complete and eloquent explanation
  * of time handling in this module.
  *
- * @param {String} timestamp
- * @returns {INanoDate}
+ * @param timestamp
  * @example
  * const date = toNanoDate('1475985480231035600')
  *

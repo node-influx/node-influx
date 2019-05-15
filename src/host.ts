@@ -8,8 +8,8 @@ export class Host {
 
   /**
    * Creates a new Host instance.
-   * @param {String} url
-   * @param {IBackoffStrategy} backoff
+   * @param url
+   * @param backoff
    */
   constructor(
     url: string,
@@ -22,7 +22,7 @@ export class Host {
   /**
    * Marks a failure on the host and returns the length of time it
    * should be removed from the pool
-   * @return {Number} removal time in milliseconds
+   * @return removal time in milliseconds
    */
   public fail(): number {
     const value = this.backoff.getDelay();

@@ -132,8 +132,8 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
   /**
    * Inserts a tag reference into the expression; the name will be
    * automatically escaped.
-   * @param  {String} name
-   * @return {Expression}
+   * @param name
+   * @return
    */
   public tag(name: string): this {
     this.field(name);
@@ -143,8 +143,8 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
   /**
    * Inserts a field reference into the expression; the name will be
    * automatically escaped.
-   * @param  {String} name
-   * @return {Expression}
+   * @param name
+   * @return
    */
   public field(name: string): this {
     this.query.push(escape.quoted(name));
@@ -154,8 +154,8 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
   /**
    * Inserts a subexpression; invokes the function with a new expression
    * that can be chained on.
-   * @param  {function(e: Expression): Expression}  fn
-   * @return {Expression}
+   * @param fn
+   * @return
    * @example
    * e.field('a').equals.value('b')
    *   .or.expr(e =>
@@ -181,8 +181,8 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
    *  - Otherwise we'll try to call `.toString()` on the value, throwing
    *    if we cannot do so.
    *
-   * @param  {*}  value
-   * @return {Expression}
+   * @param value
+   * @return
    */
   public value(value: any): this {
     switch (typeof value) {
@@ -225,7 +225,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
   }
   /**
    * Chains on an AND clause to the expression.
-   * @type {Expression}
    */
   get and(): this {
     this.query.push('AND');
@@ -234,7 +233,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on an OR clause to the expression.
-   * @type {Expression}
    */
   get or(): this {
     this.query.push('OR');
@@ -243,7 +241,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `+` operator to the expression.
-   * @type {Expression}
    */
   get plus(): this {
     this.query.push('+');
@@ -252,7 +249,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `*` operator to the expression.
-   * @type {Expression}
    */
   get times(): this {
     this.query.push('*');
@@ -261,7 +257,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `-` operator to the expression.
-   * @type {Expression}
    */
   get minus(): this {
     this.query.push('-');
@@ -270,7 +265,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `/` operator to the expression.
-   * @type {Expression}
    */
   get div(): this {
     this.query.push('/');
@@ -279,7 +273,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `=` conditional to the expression.
-   * @type {Expression}
    */
   get equals(): this {
     this.query.push('=');
@@ -288,7 +281,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `=~` conditional to the expression to match regexes.
-   * @type {Expression}
    */
   get matches(): this {
     this.query.push('=~');
@@ -297,7 +289,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `!`` conditional to the expression to match regexes.
-   * @type {Expression}
    */
   get doesntMatch(): this {
     this.query.push('!~');
@@ -306,7 +297,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `!=` conditional to the expression.
-   * @type {Expression}
    */
   get notEqual(): this {
     this.query.push('!=');
@@ -315,7 +305,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `>` conditional to the expression.
-   * @type {Expression}
    */
   get gt(): this {
     this.query.push('>');
@@ -324,7 +313,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `>=` conditional to the expression.
-   * @type {Expression}
    */
   get gte(): this {
     this.query.push('>=');
@@ -333,7 +321,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `<` conditional to the expression.
-   * @type {Expression}
    */
   get lt(): this {
     this.query.push('<');
@@ -342,7 +329,6 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Chains on a `<=` conditional to the expression.
-   * @type {Expression}
    */
   get lte(): this {
     this.query.push('<=');
@@ -351,7 +337,7 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
   /**
    * Converts the expression into its InfluxQL representation.
-   * @return {String}
+   * @return
    */
   public toString(): string {
     return this.query.join(' ');
@@ -373,8 +359,8 @@ export class Measurement {
 
   /**
    * Sets the measurement name.
-   * @param  {String} name
-   * @return {Measurement}
+   * @param name
+   * @return
    */
   public name(name: string): this {
     this.parts[2] = name;
@@ -383,8 +369,8 @@ export class Measurement {
 
   /**
    * Sets the retention policy name.
-   * @param  {String} retentionPolicy
-   * @return {Measurement}
+   * @param retentionPolicy
+   * @return
    */
   public policy(retentionPolicy: string): this {
     this.parts[1] = retentionPolicy;
@@ -393,8 +379,8 @@ export class Measurement {
 
   /**
    * Sets the database name.
-   * @param  {String} db
-   * @return {Measurement}
+   * @param db
+   * @return
    */
   public db(db: string): this {
     this.parts[0] = db;
@@ -403,7 +389,7 @@ export class Measurement {
 
   /**
    * Converts the measurement into its InfluxQL representation.
-   * @return {String}
+   * @return
    * @throws {Error} if a measurement name is not provided
    */
   public toString(): string {

@@ -307,7 +307,7 @@ export class InfluxDB {
   /**
    * Connect to a single InfluxDB instance by specifying
    * a set of connection options.
-   * @param {IClusterConfig|ISingleHostConfig|string} [options='http://root:root@127.0.0.1:8086']
+   * @param [options='http://root:root@127.0.0.1:8086']
    *
    * @example
    * const Influx = require('influx')
@@ -427,8 +427,8 @@ export class InfluxDB {
 
   /**
    * Creates a new database with the provided name.
-   * @param {string} databaseName
-   * @return {Promise.<void>}
+   * @param databaseName
+   * @return
    * @example
    * influx.createDatabase('mydb')
    */
@@ -448,8 +448,8 @@ export class InfluxDB {
 
   /**
    * Deletes a database with the provided name.
-   * @param {string} databaseName
-   * @return {Promise.<void>}
+   * @param databaseName
+   * @return
    * @example
    * influx.createDatabase('mydb')
    */
@@ -469,7 +469,7 @@ export class InfluxDB {
 
   /**
    * Returns array of database names. Requires cluster admin privileges.
-   * @returns {Promise<String[]>} a list of database names
+   * @returns a list of database names
    * @example
    * influx.getDatabaseNames().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
@@ -482,8 +482,8 @@ export class InfluxDB {
 
   /**
    * Returns array of measurements.
-   * @returns {Promise<String[]>} a list of measurement names
-   * @param {String} [database] the database the measurement lives in, optional
+   * @returns a list of measurement names
+   * @param [database] the database the measurement lives in, optional
    *     if a default database is provided.
    * @example
    * influx.getMeasurements().then(names =>
@@ -503,12 +503,12 @@ export class InfluxDB {
   /**
    * Returns a list of all series within the target measurement, or from the
    * entire database if a measurement isn't provided.
-   * @param {Object} [options]
-   * @param {String} [options.measurement] if provided, we'll only get series
+   * @param [options]
+   * @param [options.measurement] if provided, we'll only get series
    *     from within that measurement.
-   * @param {String} [options.database] the database the series lives in,
+   * @param [options.database] the database the series lives in,
    *     optional if a default database is provided.
-   * @returns {Promise<String[]>} a list of series names
+   * @returns a list of series names
    * @example
    * influx.getSeries().then(names => {
    *   console.log('My series names in my_measurement are: ' + names.join(', '))
@@ -546,10 +546,10 @@ export class InfluxDB {
 
   /**
    * Removes a measurement from the database.
-   * @param {String} measurement
-   * @param {String} [database] the database the measurement lives in, optional
+   * @param measurement
+   * @param [database] the database the measurement lives in, optional
    *     if a default database is provided.
-   * @return {Promise.<void>}
+   * @return
    * @example
    * influx.dropMeasurement('my_measurement')
    */
@@ -571,7 +571,7 @@ export class InfluxDB {
   /**
    * Removes a one or more series from InfluxDB.
    *
-   * @returns {Promise<void>}
+   * @returns
    * @example
    * // The following pairs of queries are equivalent: you can chose either to
    * // use our builder or pass in string directly. The builder takes care
@@ -611,7 +611,7 @@ export class InfluxDB {
 
   /**
    * Returns a list of users on the Influx database.
-   * @return {Promise<Array<{ user: String, admin: Boolean }>>}
+   * @return
    * @example
    * influx.getUsers().then(users => {
    *   users.forEach(user => {
@@ -631,11 +631,11 @@ export class InfluxDB {
 
   /**
    * Creates a new InfluxDB user.
-   * @param {String} username
-   * @param {String} password
-   * @param {Boolean} [admin=false] If true, the user will be given all
+   * @param username
+   * @param password
+   * @param [admin=false] If true, the user will be given all
    *     privileges on all databases.
-   * @return {Promise<void>}
+   * @return
    * @example
    * influx.createUser('connor', 'pa55w0rd', true) // make 'connor' an admin
    *
@@ -661,9 +661,9 @@ export class InfluxDB {
 
   /**
    * Sets a password for an Influx user.
-   * @param {String} username
-   * @param {String} password
-   * @return {Promise<void>}
+   * @param username
+   * @param password
+   * @return
    * @example
    * influx.setPassword('connor', 'pa55w0rd')
    */
@@ -685,10 +685,10 @@ export class InfluxDB {
 
   /**
    * Grants a privilege to a specified user.
-   * @param {String} username
-   * @param {String} privilege Should be one of 'READ' or 'WRITE'
-   * @param {String} [database] If not provided, uses the default database.
-   * @return {Promise<void>}
+   * @param username
+   * @param privilege Should be one of 'READ' or 'WRITE'
+   * @param [database] If not provided, uses the default database.
+   * @return
    * @example
    * influx.grantPrivilege('connor', 'READ', 'my_db') // grants read access on my_db to connor
    */
@@ -714,10 +714,10 @@ export class InfluxDB {
 
   /**
    * Removes a privilege from a specified user.
-   * @param {String} username
-   * @param {String} privilege Should be one of 'READ' or 'WRITE'
-   * @param {String} [database] If not provided, uses the default database.
-   * @return {Promise<void>}
+   * @param username
+   * @param privilege Should be one of 'READ' or 'WRITE'
+   * @param [database] If not provided, uses the default database.
+   * @return
    * @example
    * influx.revokePrivilege('connor', 'READ', 'my_db') // removes read access on my_db from connor
    */
@@ -743,8 +743,8 @@ export class InfluxDB {
 
   /**
    * Grants admin privileges to a specified user.
-   * @param {String} username
-   * @return {Promise<void>}
+   * @param username
+   * @return
    * @example
    * influx.grantAdminPrivilege('connor')
    */
@@ -764,8 +764,8 @@ export class InfluxDB {
 
   /**
    * Removes a admin privilege from a specified user.
-   * @param {String} username
-   * @return {Promise<void>}
+   * @param username
+   * @return
    * @example
    * influx.revokeAdminPrivilege('connor')
    */
@@ -785,8 +785,8 @@ export class InfluxDB {
 
   /**
    * Removes a user from the database.
-   * @param {String} username
-   * @return {Promise<void>}
+   * @param username
+   * @return
    * @example
    * influx.dropUser('connor')
    */
@@ -806,11 +806,11 @@ export class InfluxDB {
 
   /**
    * Creates a continuous query in a database
-   * @param {String} name The query name, for later reference
-   * @param {String} query The body of the query to run
-   * @param {String} [database] If not provided, uses the default database.
-   * @param {String} [resample] If provided, adds resample policy
-   * @return {Promise<void>}
+   * @param name The query name, for later reference
+   * @param query The body of the query to run
+   * @param [database] If not provided, uses the default database.
+   * @param [resample] If provided, adds resample policy
+   * @return
    * @example
    * influx.createContinuousQuery('downsample_cpu_1h', `
    *   SELECT MEAN(cpu) INTO "7d"."perf"
@@ -840,8 +840,8 @@ export class InfluxDB {
 
   /**
    * Returns a list of continous queries in the database.
-   * @param {String} [database] If not provided, uses the default database.
-   * @return {Promise<void>}
+   * @param [database] If not provided, uses the default database.
+   * @return
    * @example
    * influx.showContinousQueries()
    */
@@ -863,9 +863,9 @@ export class InfluxDB {
 
   /**
    * Creates a continuous query in a database
-   * @param {String} name The query name
-   * @param {String} [database] If not provided, uses the default database.
-   * @return {Promise<void>}
+   * @param name The query name
+   * @param [database] If not provided, uses the default database.
+   * @return
    * @example
    * influx.dropContinuousQuery('downsample_cpu_1h')
    */
@@ -890,18 +890,18 @@ export class InfluxDB {
    * [Downsampling and Retention](https://docs.influxdata.com/influxdb/v1.0/
    * guides/downsampling_and_retention/) on the InfluxDB website.
    *
-   * @param {String} name The retention policy name
-   * @param {Object} options
-   * @param {String} [options.database] Database to create the policy on,
+   * @param name The retention policy name
+   * @param options
+   * @param [options.database] Database to create the policy on,
    *     uses the default database if not provided.
-   * @param {String} options.duration How long data in the retention policy
+   * @param options.duration How long data in the retention policy
    *     should be stored for, should be in a format like `7d`. See details
    *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
-   * @param {Number} options.replication How many servers data in the series
+   * @param options.replication How many servers data in the series
    *     should be replicated to.
-   * @param {Boolean} [options.isDefault] Whether the retention policy should
+   * @param [options.isDefault] Whether the retention policy should
    *     be the default policy on the database.
-   * @return {Promise<void>}
+   * @return
    * @example
    * influx.createRetentionPolicy('7d', {
    *  duration: '7d',
@@ -924,18 +924,18 @@ export class InfluxDB {
   /**
    * Alters an existing retention policy on a database.
    *
-   * @param {String} name The retention policy name
-   * @param {Object} options
-   * @param {String} [options.database] Database to create the policy on,
+   * @param name The retention policy name
+   * @param options
+   * @param [options.database] Database to create the policy on,
    *     uses the default database if not provided.
-   * @param {String} options.duration How long data in the retention policy
+   * @param options.duration How long data in the retention policy
    *     should be stored for, should be in a format like `7d`. See details
    *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
-   * @param {Number} options.replication How many servers data in the series
+   * @param options.replication How many servers data in the series
    *     should be replicated to.
-   * @param {Boolean} [options.default] Whether the retention policy should
+   * @param [options.default] Whether the retention policy should
    *     be the default policy on the database.
-   * @return {Promise<void>}
+   * @return
    * @example
    * influx.alterRetentionPolicy('7d', {
    *  duration: '7d',
@@ -961,10 +961,10 @@ export class InfluxDB {
    * not be immediately destroyed, and will hang around until Influx's
    * bi-hourly cron.
    *
-   * @param {String} name The retention policy name
-   * @param {String} [database] Database name that the policy lives in,
+   * @param name The retention policy name
+   * @param [database] Database name that the policy lives in,
    *     uses the default database if not provided.
-   * @return {Promise<void>}
+   * @return
    * @example
    * influx.dropRetentionPolicy('7d')
    */
@@ -987,15 +987,9 @@ export class InfluxDB {
   /**
    * Shows retention policies on the database
    *
-   * @param {String} [database] The database to list policies on, uses the
+   * @param [database] The database to list policies on, uses the
    *     default database if not provided.
-   * @return {Promise<Array<{
-   *     name: String,
-   *     duration: String,
-   *     shardGroupDuration: String,
-   *     replicaN: Number,
-   *     default: Boolean
-   * }>>}
+   * @return
    * @example
    * influx.showRetentionPolicies().then(policies => {
    *   expect(policies.slice()).to.deep.equal([
@@ -1068,9 +1062,9 @@ export class InfluxDB {
    * Please see the IPoint and IWriteOptions types for a
    * full list of possible options.
    *
-   * @param {IPoint[]} points
-   * @param {IWriteOptions} [options]
-   * @return {Promise<void>}
+   * @param points
+   * @param [options]
+   * @return
    * @example
    * // write a point into the default database with
    * // the default retention policy.
@@ -1146,10 +1140,10 @@ export class InfluxDB {
    * writeMeasurement functions similarly to {@link InfluxDB#writePoints}, but
    * it automatically fills in the `measurement` value for all points for you.
    *
-   * @param {String} measurement
-   * @param {IPoint[]} points
-   * @param {IWriteOptions} [options]
-   * @return {Promise<void>}
+   * @param measurement
+   * @param points
+   * @param [options]
+   * @return
    * @example
    * influx.writeMeasurement('perf', [
    *   {
@@ -1175,9 +1169,9 @@ export class InfluxDB {
    * friendly format, {@link IResults}. If you run multiple queries, an array of results
    * will be returned, otherwise a single result (array of objects) will be returned.
    *
-   * @param {String|String[]} query
-   * @param {IQueryOptions} [options]
-   * @return {Promise<IResults|Results[]>} result(s)
+   * @param query
+   * @param [options]
+   * @return result(s)
    * @example
    * influx.query('select * from perf').then(results => {
    *   console.log(results)
@@ -1206,9 +1200,9 @@ export class InfluxDB {
    * transformations on the returned data; it calls `JSON.parse` and returns
    * those results verbatim.
    *
-   * @param {String|String[]} query
-   * @param {IQueryOptions} [options]
-   * @return {Promise<*>}
+   * @param query
+   * @param [options]
+   * @return
    * @example
    * influx.queryRaw('select * from perf').then(rawData => {
    *   console.log(rawData)
@@ -1233,8 +1227,8 @@ export class InfluxDB {
 
   /**
    * Pings all available hosts, collecting online status and version info.
-   * @param  {Number}               timeout Given in milliseconds
-   * @return {Promise<IPingStats[]>}
+   * @param timeout Given in milliseconds
+   * @return
    * @example
    * influx.ping(5000).then(hosts => {
    *   hosts.forEach(host => {

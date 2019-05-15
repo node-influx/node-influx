@@ -164,7 +164,7 @@ export class Pool {
 
   /**
    * Creates a new Pool instance.
-   * @param {IPoolOptions} options
+   * @param options
    */
   constructor(options: IPoolOptions) {
     this.options = Object.assign(
@@ -188,7 +188,7 @@ export class Pool {
 
   /**
    * Returns a list of currently active hosts.
-   * @return {Host[]}
+   * @return
    */
   public getHostsAvailable(): Host[] {
     return setToArray(this.hostsAvailable);
@@ -197,7 +197,7 @@ export class Pool {
   /**
    * Returns a list of hosts that are currently disabled due to network
    * errors.
-   * @return {Host[]}
+   * @return
    */
   public getHostsDisabled(): Host[] {
     return setToArray(this.hostsDisabled);
@@ -214,7 +214,7 @@ export class Pool {
 
   /**
    * Returns true if there's any host available to by queried.
-   * @return {Boolean}
+   * @return
    */
   public hostIsAvailable(): boolean {
     return this.hostsAvailable.size > 0;
@@ -419,7 +419,7 @@ export class Pool {
 
   /**
    * Returns the next available host for querying.
-   * @return {Host}
+   * @return
    */
   private getHost(): Host {
     const available = setToArray(this.hostsAvailable);
@@ -430,7 +430,7 @@ export class Pool {
 
   /**
    * Re-enables the provided host, returning it to the pool to query.
-   * @param  {Host} host
+   * @param host
    */
   private enableHost(host: Host) {
     this.hostsDisabled.delete(host);

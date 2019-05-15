@@ -24,8 +24,8 @@ const fixtures: { [version: string]: { [fixture: string]: object } } = {
 /**
  * dbFixture synchronously loads and returns a fixture for the current
  * influx version.
- * @param  {String} name
- * @return {Object}
+ * @param name
+ * @return
  */
 export function dbFixture(name: string): any {
   return fixtures[influxVersion][name];
