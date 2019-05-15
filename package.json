@@ -50,7 +50,7 @@
     "esdoc": "^1.0.4",
     "istanbul": "^0.4.3",
     "json-loader": "^0.5.4",
-    "karma": "^2.0.0",
+    "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.0.0",
     "karma-mocha": "^1.2.0",
     "karma-mocha-reporter": "^2.2.0",
