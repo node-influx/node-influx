@@ -13,12 +13,12 @@
     "test": "npm-run-all --parallel test:lint test:unit test:integrate",
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && opn coverage/lcov-report/index.html",
-    "test:integrate": "mocha --compilers ts:ts-node/register --timeout 20000 test/integrate/*.test.ts",
+    "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
     "test:lint": "tslint --project tsconfig.json '{src,test}/**/*.ts'",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
-    "test:unit": "mocha --compilers ts:ts-node/register test/unit/*.test.ts",
-    "test:watch": "mocha -R min --watch --compilers ts:ts-node/register test/unit/*.test.ts"
+    "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
+    "test:watch": "mocha -R min --watch --require ts-node/register test/unit/*.test.ts"
   },
   "repository": {
     "type": "git",
