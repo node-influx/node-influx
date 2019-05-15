@@ -318,7 +318,7 @@ export class Pool {
             // the request options, wrapped in a conditional for even worse
             // polyfills. See: https://github.com/node-influx/node-influx/issues/221
             if (typeof req.setTimeout === 'function') {
-              req.setTimeout(timeout, fail); // tslint:disable-line
+              req.setTimeout(timeout, () => {fail.call(this, arguments)}); // tslint:disable-line
             }
 
             req.on('timeout', fail);
