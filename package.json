@@ -65,7 +65,7 @@
     "prettier": "^1.4.4",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0",
-    "stream-http": "github:node-influx/stream-http",
+    "stream-http": "^3.0.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",
     "tslint-microsoft-contrib": "^6.1.1",
