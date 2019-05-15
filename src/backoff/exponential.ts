@@ -6,10 +6,6 @@ import { IBackoffStrategy } from './backoff';
  * an incremented backoff factor. The result of the equation is a delay
  * given in milliseconds.
  *
- * @typedef {Object} IExponentialOptions
- * @property {Number} initial The initial delay passed to the equation.
- * @property {Number} random Random factor to subtract from the `n` count.
- * @property {Number} max Max is the maximum value of the delay.
  */
 export interface IExponentialOptions {
   /**
@@ -29,8 +25,8 @@ export interface IExponentialOptions {
 }
 
 /**
- * @class
- * @implements {IBackoffStrategy}
+ * Exponential Backoff
+ * @see https://en.wikipedia.org/wiki/Exponential_backoff
  */
 export class ExponentialBackoff implements IBackoffStrategy {
   private counter: number;
@@ -38,7 +34,7 @@ export class ExponentialBackoff implements IBackoffStrategy {
   /**
    * Creates a new exponential backoff strategy.
    * @see https://en.wikipedia.org/wiki/Exponential_backoff
-   * @param {IExponentialOptions} options
+   * @param options
    */
   constructor(protected options: IExponentialOptions) {
     this.counter = 0;

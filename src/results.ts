@@ -132,8 +132,8 @@ export interface IResults<T> extends Array<T> {
    * their object matching: for every row in the results, if it contains tag
    * values matching the requested object, we return it.
    *
-   * @param  {Object.<String, String>} matcher
-   * @return {T[]}
+   * @param matcher
+   * @return
    * @example
    * // Matching tags sets in queries:
    * influx.query('select * from perf group by host').then(results => {
@@ -155,7 +155,7 @@ export interface IResults<T> extends Array<T> {
    * Returns the data grouped into nested arrays, similarly to how it was
    * returned from Influx originally.
    *
-   * @returns {Array<{ name: String, tags: Object.<String, String>, rows: T[] }>
+   * @returns
    * @example
    * influx.query('select * from perf group by host').then(results => {
    *   expect(results.groups()).to.deep.equal([
