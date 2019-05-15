@@ -58,7 +58,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.2",
     "lodash": "^4.16.2",
-    "mocha": "^5.0.0",
+    "mocha": "^6.1.4",
     "node-fetch": "^2.0.0",
     "npm-run-all": "^4.0.2",
     "open-cli": "^5.0.0",
