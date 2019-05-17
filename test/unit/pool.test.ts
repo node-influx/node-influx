@@ -144,7 +144,9 @@ describe('pool', () => {
 				throw new Error('Expected to have thrown');
 			})
 			.catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
-			.then(() => ((pool as any).timeout = 10000));
+			.then(() => {
+				(pool as any).timeout = 10000;
+			});
 	});
 
 	it('retries on a request error', () => {

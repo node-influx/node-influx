@@ -1,4 +1,5 @@
 /* eslint-env node, mocha */
+/* eslint-disable no-unused-expressions */
 
 import {expect} from 'chai';
 import * as sinon from 'sinon';
@@ -117,8 +118,7 @@ describe('influxdb', () => {
 			expect(client.schema.my_db.my_measurement).to.not.be.undefined;
 
 			expect(() => {
-				new InfluxDB({
-					// Tslint:disable-line
+				new InfluxDB({ // eslint-disable-line no-new
 					schema: [
 						{
 							measurement: 'my_measurement',
@@ -166,7 +166,7 @@ describe('influxdb', () => {
 			}
 		});
 
-		const setDefaultDB = (db: string) => {
+		const setDefaultDB = (db: string): void => {
 			(influx as any).options.database = db;
 		};
 
@@ -175,7 +175,7 @@ describe('influxdb', () => {
 			options: string | any,
 			httpMethod: string = 'POST',
 			yields: any = {results: [{}]},
-		) => {
+		): void => {
 			if (typeof options === 'string') {
 				options = {q: options};
 			}
@@ -194,7 +194,7 @@ describe('influxdb', () => {
 			});
 		};
 
-		const expectWrite = (body: string, options: any) => {
+		const expectWrite = (body: string, options: any): void => {
 			if (typeof options === 'string') {
 				options = {q: options};
 			}
@@ -796,7 +796,7 @@ describe('influxdb', () => {
 			it('creates non-default policies', () => {
 				expectQuery(
 					'json',
-					'create retention policy "7d\\"" on "test" ' + 'duration 7d replication 1',
+					'create retention policy "7d\\"" on "test" duration 7d replication 1',
 				);
 
 				return influx.createRetentionPolicy('7d"', {
@@ -809,7 +809,7 @@ describe('influxdb', () => {
 			it('creates default policies', () => {
 				expectQuery(
 					'json',
-					'create retention policy "7d\\"" on "my_db" ' + 'duration 7d replication 1 default',
+					'create retention policy "7d\\"" on "my_db" duration 7d replication 1 default',
 				);
 
 				return influx.createRetentionPolicy('7d"', {
@@ -826,7 +826,7 @@ describe('influxdb', () => {
 			it('creates non-default policies', () => {
 				expectQuery(
 					'json',
-					'alter retention policy "7d\\"" on "test" ' + 'duration 7d replication 1',
+					'alter retention policy "7d\\"" on "test" duration 7d replication 1',
 				);
 
 				return influx.alterRetentionPolicy('7d"', {
@@ -839,7 +839,7 @@ describe('influxdb', () => {
 			it('creates default policies', () => {
 				expectQuery(
 					'json',
-					'alter retention policy "7d\\"" on "my_db" ' + 'duration 7d replication 1 default',
+					'alter retention policy "7d\\"" on "my_db" duration 7d replication 1 default',
 				);
 
 				return influx.alterRetentionPolicy('7d"', {
