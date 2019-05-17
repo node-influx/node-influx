@@ -8,7 +8,9 @@ import {newClient} from './helpers';
 describe('administrative actions', () => {
 	let db: InfluxDB;
 	beforeEach(() => {
-		return newClient().then(client => (db = client));
+		return newClient().then(client => {
+			db = client;
+		});
 	});
 
 	describe('users', () => {

@@ -50,14 +50,14 @@ function groupMethod(this: any, matcher: Tags): Row[] {
 		return [];
 	}
 
-	L: for (let i = 0; i < this.groupRows.length; i += 1) {
-		for (let k = 0; k < srcKeys.length; k += 1) {
-			if (this.groupRows[i].tags[srcKeys[k]] !== matcher[srcKeys[k]]) {
-				continue L;
+	L: for (let row of this.groupRows) { // eslint-disable-line no-labels
+		for (let src of srcKeys) {
+			if (row.tags[src] !== matcher[src]) {
+				continue L; // eslint-disable-line no-labels
 			}
 		}
 
-		return this.groupRows[i].rows;
+		return row.rows;
 	}
 
 	return [];
@@ -80,8 +80,8 @@ function groupsMethod(this: any): Array<{ name: string; tags: Tags; rows: Row[] 
 
 function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): IResults<any> {
 	const results: any = [];
-	const tags = (results.groupsTagsKeys =
-    series.length && series[0].tags ? Object.keys(series[0].tags) : []);
+	results.groupsTagsKeys = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
+	const tags = results.groupsTagsKeys;
 
 	let nextGroup: Row[] = [];
 	results.groupRows = new Array(series.length); // Tslint:disable-line
@@ -89,18 +89,18 @@ function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): 
 	for (let i = 0; i < series.length; i += 1, results.length) {
 		const {columns = [], values = []} = series[i];
 
-		for (let k = 0; k < values.length; k += 1) {
+		for (let value of values) {
 			const obj: Row = {};
 			for (let j = 0; j < columns.length; j += 1) {
 				if (columns[j] === 'time') {
-					obj.time = isoOrTimeToDate(<number | string>values[k][j], precision);
+					obj.time = isoOrTimeToDate(value[j] as number | string, precision);
 				} else {
-					obj[columns[j]] = values[k][j];
+					obj[columns[j]] = value[j];
 				}
 			}
 
-			for (let j = 0; j < tags.length; j += 1) {
-				obj[tags[j]] = series[i].tags[tags[j]];
+			for (let tag of tags) {
+				obj[tag] = series[i].tags[tag];
 			}
 
 			results.push(obj);
@@ -187,9 +187,9 @@ export interface IResults<T> extends Array<T> {
  * @private
  * @throws {ResultError}
  */
-export function assertNoErrors(res: IResponse) {
-	for (let i = 0; i < res.results.length; i += 1) {
-		const {error} = res.results[i];
+export function assertNoErrors(res: IResponse): IResponse {
+	for (let result of res.results) {
+		const {error} = result;
 		if (error) {
 			throw new ResultError(error);
 		}

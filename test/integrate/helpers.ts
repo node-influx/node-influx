@@ -1,4 +1,6 @@
 /* eslint-env node, mocha */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 import {FieldType, IHostConfig, InfluxDB} from '../../src';
 

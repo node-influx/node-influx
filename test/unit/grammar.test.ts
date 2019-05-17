@@ -1,4 +1,6 @@
 /* eslint-env node, mocha */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 import {expect} from 'chai';
 
@@ -18,7 +20,7 @@ describe('grammar', () => {
 	});
 
 	it('does not escape raw values', () => {
-		expect(grammar.escape.quoted(<any> new grammar.Raw('don"t escape'))).to.equal('don"t escape');
+		expect(grammar.escape.quoted(new grammar.Raw('don"t escape') as any)).to.equal('don"t escape');
 	});
 
 	it('escapes complex values (issue #242)', () => {

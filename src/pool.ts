@@ -85,20 +85,22 @@ export class ServiceNotAvailableError extends Error {
  * result in a 300 <= error code <= 500.
  */
 export class RequestError extends Error {
-	public static Create(
-		req: http.ClientRequest,
-		res: http.IncomingMessage,
-		callback: (e: RequestError) => void,
-	) {
-		let body = '';
-		res.on('data', str => (body += str.toString()));
-		res.on('end', () => callback(new RequestError(req, res, body)));
-	}
-
 	constructor(public req: http.ClientRequest, public res: http.IncomingMessage, body: string) {
 		super();
 		this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
 		Object.setPrototypeOf(this, RequestError.prototype);
+	}
+
+	public static Create( // eslint-disable-line new-cap
+		req: http.ClientRequest,
+		res: http.IncomingMessage,
+		callback: (e: RequestError) => void,
+	): void {
+		let body = '';
+		res.on('data', str => {
+			body += str.toString();
+		});
+		res.on('end', () => callback(new RequestError(req, res, body)));
 	}
 }
 
@@ -106,7 +108,7 @@ export class RequestError extends Error {
  * Creates a function generation that returns a wrapper which only allows
  * through the first call of any function that it generated.
  */
-function doOnce<T extends Function>(): ((arg: T) => (<T>(arg: T) => any)) {
+function doOnce<T extends Function>(): ((arg: T) => (<T>(arg: T) => any)) { // eslint-disable-line @typescript-eslint/ban-types
 	let handled = false;
 
 	return fn => {
@@ -156,22 +158,22 @@ const request = (
  * host for a period of time.
  */
 export class Pool {
-	private options: IPoolOptions;
+	private _options: IPoolOptions;
 
-	private index: number;
+	private _index: number;
 
-	private timeout: number;
+	private _timeout: number;
 
-	private hostsAvailable: Set<Host>;
+	private _hostsAvailable: Set<Host>;
 
-	private hostsDisabled: Set<Host>;
+	private _hostsDisabled: Set<Host>;
 
 	/**
    * Creates a new Pool instance.
    * @param options
    */
 	constructor(options: IPoolOptions) {
-		this.options = {
+		this._options = {
 			backoff: new ExponentialBackoff({
 				initial: 300,
 				max: 10 * 1000,
@@ -182,10 +184,10 @@ export class Pool {
 			...options
 		};
 
-		this.index = 0;
-		this.hostsAvailable = new Set<Host>();
-		this.hostsDisabled = new Set<Host>();
-		this.timeout = this.options.requestTimeout;
+		this._index = 0;
+		this._hostsAvailable = new Set<Host>();
+		this._hostsDisabled = new Set<Host>();
+		this._timeout = this._options.requestTimeout;
 	}
 
 	/**
@@ -193,7 +195,7 @@ export class Pool {
    * @return
    */
 	public getHostsAvailable(): Host[] {
-		return setToArray(this.hostsAvailable);
+		return setToArray(this._hostsAvailable);
 	}
 
 	/**
@@ -202,15 +204,15 @@ export class Pool {
    * @return
    */
 	public getHostsDisabled(): Host[] {
-		return setToArray(this.hostsDisabled);
+		return setToArray(this._hostsDisabled);
 	}
 
 	/**
    * Inserts a new host to the pool.
    */
 	public addHost(url: string, options: https.RequestOptions = {}): Host {
-		const host = new Host(url, this.options.backoff.reset(), options);
-		this.hostsAvailable.add(host);
+		const host = new Host(url, this._options.backoff.reset(), options);
+		this._hostsAvailable.add(host);
 		return host;
 	}
 
@@ -219,7 +221,7 @@ export class Pool {
    * @return
    */
 	public hostIsAvailable(): boolean {
-		return this.hostsAvailable.size > 0;
+		return this._hostsAvailable.size > 0;
 	}
 
 	/**
@@ -242,7 +244,9 @@ export class Pool {
 				}
 
 				let output = '';
-				res.on('data', str => (output += str.toString()));
+				res.on('data', str => {
+					output += str.toString();
+				});
 				res.on('end', () => resolve(output));
 			});
 		});
@@ -274,8 +278,8 @@ export class Pool {
 	public ping(timeout: number, path: string = '/ping'): Promise<IPingStats[]> {
 		const todo: Array<Promise<IPingStats>> = [];
 
-		setToArray(this.hostsAvailable)
-			.concat(setToArray(this.hostsDisabled))
+		setToArray(this._hostsAvailable)
+			.concat(setToArray(this._hostsDisabled))
 			.forEach(host => {
 				const start = Date.now();
 				const url = host.url;
@@ -294,13 +298,13 @@ export class Pool {
 								...host.options
 							},
 							once((res: http.IncomingMessage) => {
-								resolve(<IPingStats>{
+								resolve({
 									url,
 									res,
 									online: res.statusCode < 300,
 									rtt: Date.now() - start,
 									version: res.headers['x-influxdb-version']
-								});
+								} as IPingStats);
 							}),
 						);
 
@@ -340,7 +344,7 @@ export class Pool {
 	public stream(
 		options: IPoolRequestOptions,
 		callback: (err: Error, res: http.IncomingMessage) => void,
-	) {
+	): void {
 		if (!this.hostIsAvailable()) {
 			return callback(new ServiceNotAvailableError('No host available'), null);
 		}
@@ -351,21 +355,21 @@ export class Pool {
 		}
 
 		const once = doOnce();
-		const host = this.getHost();
+		const host = this._getHost();
 		const req = request(
 			{
-				headers: {'content-length': options.body ? new Buffer(options.body).length : 0},
+				headers: {'content-length': options.body ? Buffer.from(options.body).length : 0},
 				hostname: host.url.hostname,
 				method: options.method,
 				path,
 				port: Number(host.url.port),
 				protocol: host.url.protocol,
-				timeout: this.timeout,
+				timeout: this._timeout,
 				...host.options
 			},
 			once((res: http.IncomingMessage) => {
 				if (res.statusCode >= 500) {
-					return this.handleRequestError(
+					return this._handleRequestError(
 						new ServiceNotAvailableError(res.statusMessage),
 						host,
 						options,
@@ -374,7 +378,7 @@ export class Pool {
 				}
 
 				if (res.statusCode >= 300) {
-					return RequestError.Create(req, res, err => callback(err, res));
+					return RequestError.Create(req, res, err => callback(err, res)); // eslint-disable-line new-cap
 				}
 
 				host.success();
@@ -386,7 +390,7 @@ export class Pool {
 		req.on(
 			'error',
 			once((err: Error) => {
-				this.handleRequestError(err, host, options, callback);
+				this._handleRequestError(err, host, options, callback);
 			}),
 		);
 
@@ -394,7 +398,7 @@ export class Pool {
 		req.on(
 			'timeout',
 			once(() => {
-				this.handleRequestError(
+				this._handleRequestError(
 					new ServiceNotAvailableError('Request timed out'),
 					host,
 					options,
@@ -407,7 +411,7 @@ export class Pool {
 		// request options, wrapped in a conditional for even worse polyfills. See:
 		// https://github.com/node-influx/node-influx/issues/221
 		if (typeof req.setTimeout === 'function') {
-			req.setTimeout(this.timeout); // Tslint:disable-line
+			req.setTimeout(this._timeout); // Tslint:disable-line
 		}
 
 		// Write out the body:
@@ -422,10 +426,10 @@ export class Pool {
    * Returns the next available host for querying.
    * @return
    */
-	private getHost(): Host {
-		const available = setToArray(this.hostsAvailable);
-		const host = available[this.index];
-		this.index = (this.index + 1) % available.length;
+	private _getHost(): Host {
+		const available = setToArray(this._hostsAvailable);
+		const host = available[this._index];
+		this._index = (this._index + 1) % available.length;
 		return host;
 	}
 
@@ -433,36 +437,36 @@ export class Pool {
    * Re-enables the provided host, returning it to the pool to query.
    * @param host
    */
-	private enableHost(host: Host) {
-		this.hostsDisabled.delete(host);
-		this.hostsAvailable.add(host);
+	private _enableHost(host: Host): void {
+		this._hostsDisabled.delete(host);
+		this._hostsAvailable.add(host);
 	}
 
 	/**
    * Disables the provided host, removing it from the query pool. It will be
    * re-enabled after a backoff interval
    */
-	private disableHost(host: Host) {
-		this.hostsAvailable.delete(host);
-		this.hostsDisabled.add(host);
-		this.index %= Math.max(1, this.hostsAvailable.size);
+	private _disableHost(host: Host): void {
+		this._hostsDisabled.add(host);
+		this._hostsAvailable.delete(host);
+		this._index %= Math.max(1, this._hostsAvailable.size);
 
-		setTimeout(() => this.enableHost(host), host.fail());
+		setTimeout(() => this._enableHost(host), host.fail());
 	}
 
-	private handleRequestError(
+	private _handleRequestError(
 		err: any,
 		host: Host,
 		options: IPoolRequestOptions,
 		callback: (err: Error, res: http.IncomingMessage) => void,
-	) {
+	): void {
 		if (!(err instanceof ServiceNotAvailableError) && !resubmitErrorCodes.includes(err.code)) {
 			return callback(err, null);
 		}
 
-		this.disableHost(host);
+		this._disableHost(host);
 		const retries = options.retries || 0;
-		if (retries < this.options.maxRetries && this.hostIsAvailable()) {
+		if (retries < this._options.maxRetries && this.hostIsAvailable()) {
 			options.retries = retries + 1;
 			return this.stream(options, callback);
 		}

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/require-array-sort-compare */
+
 import {escape, FieldType, isNumeric} from './grammar';
 
 export interface ISchemaOptions {
@@ -30,16 +32,16 @@ export type FieldMap = { [name: string]: string | number | boolean };
  * @private
  */
 export class Schema {
-	private fieldNames: string[];
+	private _fieldNames: string[];
 
-	private tagHash: { [tag: string]: true } = {};
+	private _tagHash: { [tag: string]: true } = {};
 
 	constructor(private options: ISchemaOptions) {
 		// FieldNames are sorted for performance: when coerceFields is run the
 		// fields will be added to the output in order.
-		this.fieldNames = Object.keys(options.fields).sort();
+		this._fieldNames = Object.keys(options.fields).sort();
 		options.tags.forEach(tag => {
-			this.tagHash[tag] = true;
+			this._tagHash[tag] = true;
 		});
 	}
 
@@ -52,15 +54,15 @@ export class Schema {
 		let consumed = 0;
 		const output: Array<[string, string]> = [];
 
-		this.fieldNames.forEach(field => {
-			if (!fields.hasOwnProperty(field)) {
+		this._fieldNames.forEach(field => {
+			if (!fields.hasOwnProperty(field)) { // eslint-disable-line no-prototype-builtins
 				return;
 			}
 
 			const value = fields[field];
 			const typ = typeof value;
 			consumed += 1;
-			if (value == null) {
+			if (value === null) {
 				return;
 			}
 
@@ -72,15 +74,15 @@ export class Schema {
 
 				case FieldType.INTEGER:
 					if (typ !== 'number' && !isNumeric(String(value))) {
-						throw new Error(`Expected numeric value for ${this.ref(field)}, but got '${value}'!`);
+						throw new Error(`Expected numeric value for ${this._ref(field)}, but got '${value}'!`);
 					}
 
-					coerced = String(Math.floor(<number>value)) + 'i';
+					coerced = String(Math.floor(value as number)) + 'i';
 					break;
 
 				case FieldType.FLOAT:
 					if (typ !== 'number' && !isNumeric(String(value))) {
-						throw new Error(`Expected numeric value for ${this.ref(field)}, but got '${value}'!`);
+						throw new Error(`Expected numeric value for ${this._ref(field)}, but got '${value}'!`);
 					}
 
 					coerced = String(value);
@@ -88,7 +90,7 @@ export class Schema {
 
 				case FieldType.BOOLEAN:
 					if (typ !== 'boolean') {
-						throw new Error(`Expected boolean value for ${this.ref(field)}, but got a ${typ}!`);
+						throw new Error(`Expected boolean value for ${this._ref(field)}, but got a ${typ}!`);
 					}
 
 					coerced = value ? 'T' : 'F';
@@ -97,7 +99,7 @@ export class Schema {
 				default:
 					throw new Error(
 						`Unknown field type ${this.options.fields[field]} for ${field} in ` +
-              `${this.ref()}. Please ensure that your configuration is correct.`,
+              `${this._ref()}. Please ensure that your configuration is correct.`,
 					);
 			}
 
@@ -106,11 +108,11 @@ export class Schema {
 
 		const keys = Object.keys(fields);
 		if (consumed !== keys.length) {
-			const extraneous = keys.filter(f => !this.fieldNames.includes(f));
+			const extraneous = keys.filter(f => !this._fieldNames.includes(f));
 
 			throw new Error(
 				'Extraneous fields detected for writing InfluxDB point in ' +
-          `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
+          `${this._ref()}: \`${extraneous.join('`, `')}\`.`,
 			);
 		}
 
@@ -123,11 +125,11 @@ export class Schema {
    */
 	public checkTags(tags: { [tag: string]: string }): string[] {
 		const names = Object.keys(tags);
-		const extraneous = names.filter(tag => !this.tagHash[tag]);
+		const extraneous = names.filter(tag => !this._tagHash[tag]);
 		if (extraneous.length > 0) {
 			throw new Error(
 				'Extraneous tags detected for writing InfluxDB point in ' +
-          `${this.ref()}: \`${extraneous.join('`, `')}\`.`,
+          `${this._ref()}: \`${extraneous.join('`, `')}\`.`,
 			);
 		}
 
@@ -137,7 +139,7 @@ export class Schema {
 	/**
    * Returns the 'db'.'measurement'[.'field'] referencing the current schema.
    */
-	private ref(field?: string): string {
+	private _ref(field?: string): string {
 		let out = this.options.database + '.' + this.options.measurement;
 		if (field) {
 			out += '.' + field;
@@ -158,9 +160,9 @@ export function coerceBadly(fields: FieldMap): Array<[string, string]> {
 		.map(field => {
 			const value = fields[field];
 			if (typeof value === 'string') {
-				return <[string, string]>[field, escape.quoted(value)];
+				return [field, escape.quoted(value)] as [string, string];
 			}
 
-			return <[string, string]>[field, String(value)];
+			return [field, String(value)] as [string, string];
 		});
 }

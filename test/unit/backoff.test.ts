@@ -14,13 +14,13 @@ describe('backoff strategies', () => {
 				random: 1
 			});
 
-			function next() {
+			function next(): number {
 				const value = exp.getDelay();
 				exp = exp.next();
 				return value;
 			}
 
-			const checkSequence = () => {
+			const checkSequence = (): void => {
 				expect(next()).to.equal(500);
 				expect(next()).to.be.oneOf([500, 1000]);
 				expect(next()).to.be.oneOf([1000, 2000]);

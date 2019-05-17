@@ -50,7 +50,8 @@ class Escaper {
 			return (val as any).getValue();
 		}
 
-		let chunkIndex = (this._re.lastIndex = 0);
+		this._re.lastIndex = 0;
+		let chunkIndex = this._re.lastIndex;
 		let escapedVal = '';
 		let match = this._re.exec(val);
 
