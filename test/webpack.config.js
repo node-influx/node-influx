@@ -11,7 +11,7 @@ module.exports = (() => {
   }
 
   config.module = {
-    loaders: [
+    rules: [
       {
         test: /\.ts$/,
         loader: 'awesome-typescript-loader',
@@ -19,10 +19,6 @@ module.exports = (() => {
           useForkChecker: true,
           tsconfig: path.resolve(__dirname, '../tsconfig.json')
         }
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
       }
     ]
   }
