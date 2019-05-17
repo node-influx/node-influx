@@ -343,12 +343,13 @@ class NanosecondsDateManipulator implements IDateManipulator<INanoDate> {
 				timestamp *= 1000;
 			case 'u':
 				timestamp *= 1000;
-			case 'n':
+			case 'n': {
 				const date = new Date(timestamp / nsPer.ms) as any;
 				date._nanoTime = String(timestamp);
 				date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
 				date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
 				return date;
+			}
 
 			default:
 				throw new Error(`Unknown precision '${precision}'!`);

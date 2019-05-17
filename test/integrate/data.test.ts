@@ -10,7 +10,9 @@ describe('data operations', () => {
 
 	beforeEach(() => {
 		return newClient()
-			.then(client => (db = client))
+			.then(client => {
+				db = client;
+			})
 			.then(() => writeSampleData(db));
 	});
 
