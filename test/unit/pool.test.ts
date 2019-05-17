@@ -1,263 +1,268 @@
-import { expect } from 'chai';
+/* eslint-env node, browser, mocha */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+import {expect} from 'chai';
 import * as http from 'http';
-// import * as https from 'https';
+// Import * as https from 'https';
 import * as sinon from 'sinon';
 import * as freeport from 'freeport';
 
-import { ExponentialBackoff } from '../../src/backoff/exponential';
-import { Pool, RequestError, ServiceNotAvailableError } from '../../src/pool';
+import {ExponentialBackoff} from '../../src/backoff/exponential';
+import {Pool, RequestError, ServiceNotAvailableError} from '../../src/pool';
 
 const hosts = 2;
 
 describe('pool', () => {
-  let pool: Pool;
-  let clock: sinon.SinonFakeTimers;
-  let server: http.Server;
-  let sid: string; // random string to avoid conflicts with other running tests
+	let pool: Pool;
+	let clock: sinon.SinonFakeTimers;
+	let server: http.Server;
+	let sid: string; // Random string to avoid conflicts with other running tests
 
-  const createPool = () => {
-    return new Pool({
-      backoff: new ExponentialBackoff({
-        initial: 300,
-        random: 0,
-        max: 10 * 1000,
-      }),
-    });
-  };
+	const createPool = (): Pool => {
+		return new Pool({
+			backoff: new ExponentialBackoff({
+				initial: 300,
+				random: 0,
+				max: 10 * 1000
+			})
+		});
+	};
 
-  beforeEach(done => {
-    pool = createPool();
+	beforeEach(done => {
+		pool = createPool();
 
-    sid = `${Date.now()}${Math.random()}`; // tslint:disable-line
-    if (!process.env.WEBPACK) {
-      const handler = require('../fixture/pool-middleware');
-      server = http.createServer(handler());
+		sid = `${Date.now()}${Math.random()}`;
+		if (Boolean(process.env.WEBPACK) === false) {
+			const handler = require('../fixture/pool-middleware'); // eslint-disable-line @typescript-eslint/no-require-imports
+			server = http.createServer(handler());
 
-      freeport((_: Error, port: Number) => {
-        server.listen(port, () => {
-          for (let i = 0; i < hosts; i += 1) {
-            pool.addHost(`http://http://127.0.0.1:${port}`);
-          }
-          done();
-        });
-      })
-      
-    } else {
-      for (let i = 0; i < hosts; i += 1) {
-        pool.addHost(location.origin);
-      }
-      done();
-    }
-  });
+			freeport((_: Error, port: number) => {
+				server.listen(port, () => {
+					for (let i = 0; i < hosts; i += 1) {
+						pool.addHost(`http://http://127.0.0.1:${port}`);
+					}
 
-  afterEach(done => {
-    if (clock) {
-      clock.restore();
-    }
+					done();
+				});
+			});
+		} else {
+			for (let i = 0; i < hosts; i += 1) {
+				pool.addHost(location.origin);
+			}
 
-    if (!process.env.WEBPACK) {
-      server.close(() => done());
-    } else {
-      done();
-    }
-  });
+			done();
+		}
+	});
 
-  it('attempts to make an https request', () => {
-    const p = createPool();
-    p.addHost('https://httpbin.org/get');
-    return p.json({ method: 'GET', path: '/get' });
-  });
+	afterEach(done => {
+		if (clock) {
+			clock.restore();
+		}
 
-  it('passes through request options', () => {
-    // const spy = sinon.spy(https, 'request');
-    const p = createPool();
-    p.addHost('https://httpbin.org/get', { rejectUnauthorized: false });
+		if (Boolean(process.env.WEBPACK) === false) {
+			server.close(() => done());
+		} else {
+			done();
+		}
+	});
 
-    return p.json({ method: 'GET', path: '/get' }).then(() => {
-      // expect(spy.args[0]0].rejectUnauthorized).to.be.false;
-    });
-  });
+	it('attempts to make an https request', () => {
+		const p = createPool();
+		p.addHost('https://httpbin.org/get');
+		return p.json({method: 'GET', path: '/get'});
+	});
 
-  it('valid request data content length', () => {
-    const p = createPool();
-    const body = '\u00FF';
-    p.addHost('https://httpbin.org/post');
-    p
-      .json({ method: 'POST', path: '/post', body: body })
-      .then(data => expect(data.data).to.equal(body));
-  });
+	it('passes through request options', () => {
+		// Const spy = sinon.spy(https, 'request');
+		const p = createPool();
+		p.addHost('https://httpbin.org/get', {rejectUnauthorized: false});
 
-  describe('request generators', () => {
-    it('makes a text request', () => {
-      return pool
-        .text({ method: 'GET', path: '/pool/json' })
-        .then(data => expect(data).to.equal('{"ok":true}'));
-    });
+		return p.json({method: 'GET', path: '/get'}).then(() => {
+			// Expect(spy.args[0]0].rejectUnauthorized).to.be.false;
+		});
+	});
 
-    it('includes request query strings and bodies', () => {
-      return pool
-        .json({
-          method: 'POST',
-          path: '/pool/echo',
-          query: { a: 42 },
-          body: 'asdf',
-        })
-        .then(data => {
-          expect(data).to.deep.equal({
-            query: 'a=42',
-            body: 'asdf',
-            method: 'POST',
-          });
-        });
-    });
+	it('valid request data content length', () => {
+		const p = createPool();
+		const body = '\u00FF';
+		p.addHost('https://httpbin.org/post');
+		p
+			.json({method: 'POST', path: '/post', body: body})
+			.then(data => expect(data.data).to.equal(body));
+	});
 
-    it('discards responses', () => {
-      return pool.discard({ method: 'GET', path: '/pool/204' });
-    });
+	describe('request generators', () => {
+		it('makes a text request', () => {
+			return pool
+				.text({method: 'GET', path: '/pool/json'})
+				.then(data => expect(data).to.equal('{"ok":true}'));
+		});
 
-    it('parses JSON responses', () => {
-      return pool
-        .json({ method: 'GET', path: '/pool/json' })
-        .then(data => expect(data).to.deep.equal({ ok: true }));
-    });
+		it('includes request query strings and bodies', () => {
+			return pool
+				.json({
+					method: 'POST',
+					path: '/pool/echo',
+					query: {a: 42},
+					body: 'asdf'
+				})
+				.then(data => {
+					expect(data).to.deep.equal({
+						query: 'a=42',
+						body: 'asdf',
+						method: 'POST'
+					});
+				});
+		});
 
-    it('errors if JSON parsing fails', () => {
-      return pool
-        .json({ method: 'GET', path: '/pool/badjson' })
-        .then(() => {
-          throw new Error('Expected to have thrown');
-        })
-        .catch(err => expect(err).to.be.an.instanceof(SyntaxError));
-    });
-  });
+		it('discards responses', () => {
+			return pool.discard({method: 'GET', path: '/pool/204'});
+		});
 
-  it('times out requests', () => {
-    (<any>pool).timeout = 1;
-    return pool
-      .text({ method: 'GET', path: '/pool/json' })
-      .then(() => {
-        throw new Error('Expected to have thrown');
-      })
-      .catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
-      .then(() => ((<any>pool).timeout = 10000));
-  });
+		it('parses JSON responses', () => {
+			return pool
+				.json({method: 'GET', path: '/pool/json'})
+				.then(data => expect(data).to.deep.equal({ok: true}));
+		});
 
-  it('retries on a request error', () => {
-    return pool
-      .text({ method: 'GET', path: `/pool/altFail-${sid}/json` })
-      .then(body => expect(body).to.equal('{"ok":true}'));
-  });
+		it('errors if JSON parsing fails', () => {
+			return pool
+				.json({method: 'GET', path: '/pool/badjson'})
+				.then(() => {
+					throw new Error('Expected to have thrown');
+				})
+				.catch(err => expect(err).to.be.an.instanceof(SyntaxError));
+		});
+	});
 
-  it('fails if too many errors happen', () => {
-    expect(pool.hostIsAvailable()).to.be.true;
+	it('times out requests', () => {
+		(pool as any).timeout = 1;
+		return pool
+			.text({method: 'GET', path: '/pool/json'})
+			.then(() => {
+				throw new Error('Expected to have thrown');
+			})
+			.catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
+			.then(() => ((pool as any).timeout = 10000));
+	});
 
-    return pool
-      .discard({ method: 'GET', path: '/pool/502' })
-      .then(() => {
-        throw new Error('Expected to have thrown');
-      })
-      .catch(err => {
-        expect(err).to.be.an.instanceof(ServiceNotAvailableError);
-        expect(pool.hostIsAvailable()).to.be.false;
-      });
-  });
+	it('retries on a request error', () => {
+		return pool
+			.text({method: 'GET', path: `/pool/altFail-${sid}/json`})
+			.then(body => expect(body).to.equal('{"ok":true}'));
+	});
 
-  it('calls back immediately on un-retryable error', () => {
-    return pool
-      .discard({ method: 'GET', path: '/pool/400' })
-      .then(() => {
-        throw new Error('Expected to have thrown');
-      })
-      .catch(err => {
-        expect(err).to.be.an.instanceof(RequestError);
-        expect((<RequestError>err).res.statusCode).to.equal(400);
-        expect(pool.hostIsAvailable()).to.be.true;
-      });
-  });
+	it('fails if too many errors happen', () => {
+		expect(pool.hostIsAvailable()).to.be.true;
 
-  it('pings servers', () => {
-    return pool.ping(1000, `/pool/altFail-${sid}/ping`).then(results => {
-      if (results[0].online) {
-        [results[0], results[1]] = [results[1], results[0]];
-      }
+		return pool
+			.discard({method: 'GET', path: '/pool/502'})
+			.then(() => {
+				throw new Error('Expected to have thrown');
+			})
+			.catch(err => {
+				expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+				expect(pool.hostIsAvailable()).to.be.false;
+			});
+	});
 
-      expect(results[0].online).to.be.false;
-      expect(results[1].online).to.be.true;
-      expect(results[1].version).to.equal('v1.0.0');
-    });
-  });
+	it('calls back immediately on un-retryable error', () => {
+		return pool
+			.discard({method: 'GET', path: '/pool/400'})
+			.then(() => {
+				throw new Error('Expected to have thrown');
+			})
+			.catch(err => {
+				expect(err).to.be.an.instanceof(RequestError);
+				expect((err as RequestError).res.statusCode).to.equal(400);
+				expect(pool.hostIsAvailable()).to.be.true;
+			});
+	});
 
-  it('times out in pings', () => {
-    return pool.ping(1).then(results => {
-      expect(results[0].online).to.be.false;
-      expect(results[1].online).to.be.false;
-    });
-  });
+	it('pings servers', () => {
+		return pool.ping(1000, `/pool/altFail-${sid}/ping`).then(results => {
+			if (results[0].online) {
+				[results[0], results[1]] = [results[1], results[0]];
+			}
 
-  describe('backoff', () => {
-    beforeEach(() => {
-      clock = sinon.useFakeTimers();
-      return pool.discard({ method: 'GET', path: '/pool/502' }).catch(() => {
-        /* ignore */
-      });
-    });
+			expect(results[0].online).to.be.false;
+			expect(results[1].online).to.be.true;
+			expect(results[1].version).to.equal('v1.0.0');
+		});
+	});
 
-    it('should error if there are no available hosts', () => {
-      return pool
-        .discard({ method: 'GET', path: '/pool/json' })
-        .then(() => {
-          throw new Error('Expected to have thrown');
-        })
-        .catch(err => {
-          expect(err).to.be.an.instanceof(ServiceNotAvailableError);
-          expect(err.message).to.equal('No host available');
-        });
-    });
+	it('times out in pings', () => {
+		return pool.ping(1).then(results => {
+			expect(results[0].online).to.be.false;
+			expect(results[1].online).to.be.false;
+		});
+	});
 
-    it('should reenable hosts after the backoff expires', () => {
-      expect(pool.hostIsAvailable()).to.be.false;
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
-    });
+	describe('backoff', () => {
+		beforeEach(() => {
+			clock = sinon.useFakeTimers();
+			return pool.discard({method: 'GET', path: '/pool/502'}).catch(() => {
+				/* ignore */
+			});
+		});
 
-    it('should back off if failures continue', () => {
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
+		it('should error if there are no available hosts', () => {
+			return pool
+				.discard({method: 'GET', path: '/pool/json'})
+				.then(() => {
+					throw new Error('Expected to have thrown');
+				})
+				.catch(err => {
+					expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+					expect(err.message).to.equal('No host available');
+				});
+		});
 
-      return pool
-        .discard({ method: 'GET', path: '/pool/502' })
-        .then(() => {
-          throw new Error('Expected to have thrown');
-        })
-        .catch(err => {
-          expect(err).to.be.an.instanceof(ServiceNotAvailableError);
-          expect(pool.hostIsAvailable()).to.be.false;
+		it('should reenable hosts after the backoff expires', () => {
+			expect(pool.hostIsAvailable()).to.be.false;
+			clock.tick(300);
+			expect(pool.hostIsAvailable()).to.be.true;
+		});
 
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.false;
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.true;
-        });
-    });
+		it('should back off if failures continue', () => {
+			clock.tick(300);
+			expect(pool.hostIsAvailable()).to.be.true;
 
-    it('should reset backoff after success', () => {
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
+			return pool
+				.discard({method: 'GET', path: '/pool/502'})
+				.then(() => {
+					throw new Error('Expected to have thrown');
+				})
+				.catch(err => {
+					expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+					expect(pool.hostIsAvailable()).to.be.false;
 
-      return pool
-        .discard({ method: 'GET', path: '/pool/204' })
-        .then(() => {
-          return pool.discard({ method: 'GET', path: '/pool/502' });
-        })
-        .then(() => {
-          throw new Error('Expected to have thrown');
-        })
-        .catch(err => {
-          expect(err).not.to.be.undefined;
-          expect(pool.hostIsAvailable()).to.be.false;
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.true;
-        });
-    });
-  });
+					clock.tick(300);
+					expect(pool.hostIsAvailable()).to.be.false;
+					clock.tick(300);
+					expect(pool.hostIsAvailable()).to.be.true;
+				});
+		});
+
+		it('should reset backoff after success', () => {
+			clock.tick(300);
+			expect(pool.hostIsAvailable()).to.be.true;
+
+			return pool
+				.discard({method: 'GET', path: '/pool/204'})
+				.then(() => {
+					return pool.discard({method: 'GET', path: '/pool/502'});
+				})
+				.then(() => {
+					throw new Error('Expected to have thrown');
+				})
+				.catch(err => {
+					expect(err).not.to.be.undefined;
+					expect(pool.hostIsAvailable()).to.be.false;
+					clock.tick(300);
+					expect(pool.hostIsAvailable()).to.be.true;
+				});
+		});
+	});
 });
