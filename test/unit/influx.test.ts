@@ -11,7 +11,7 @@ import {dbFixture} from './helpers';
 describe('influxdb', () => {
 	describe('constructor', () => {
 		it('uses default options', () => {
-			expect((new InfluxDB() as any).options).to.deep.equal({
+			expect((new InfluxDB() as any)._options).to.deep.equal({
 				username: 'root',
 				password: 'root',
 				database: null,
@@ -30,7 +30,7 @@ describe('influxdb', () => {
 
 		it('parses dsns', () => {
 			expect(
-				(new InfluxDB('https://connor:password@192.168.0.1:1337/foo') as any).options,
+				(new InfluxDB('https://connor:password@192.168.0.1:1337/foo') as any)._options,
 			).to.deep.equal({
 				username: 'connor',
 				password: 'password',
@@ -49,7 +49,7 @@ describe('influxdb', () => {
 		});
 
 		it('parses single configs', () => {
-			expect((new InfluxDB({database: 'foo', host: '192.168.0.1'}) as any).options).to.deep.equal({
+			expect((new InfluxDB({database: 'foo', host: '192.168.0.1'}) as any)._options).to.deep.equal({
 				username: 'root',
 				password: 'root',
 				database: 'foo',
@@ -71,7 +71,7 @@ describe('influxdb', () => {
 				(new InfluxDB({
 					database: 'foo',
 					hosts: [{host: '192.168.0.1', options: {ca: null}}]
-				}) as any).options,
+				}) as any)._options,
 			).to.deep.equal({
 				username: 'root',
 				password: 'root',
@@ -101,7 +101,7 @@ describe('influxdb', () => {
 				hosts: [{host: '192.168.0.1', options: undefined}]
 			}) as any;
 
-			expect(client.schema.my_db.my_measurement).to.not.be.undefined;
+			expect(client._schema.my_db.my_measurement).to.not.be.undefined;
 
 			client = new InfluxDB({
 				schema: [
@@ -115,7 +115,7 @@ describe('influxdb', () => {
 				hosts: [{host: '192.168.0.1'}]
 			}) as any;
 
-			expect(client.schema.my_db.my_measurement).to.not.be.undefined;
+			expect(client._schema.my_db.my_measurement).to.not.be.undefined;
 
 			expect(() => {
 				new InfluxDB({ // eslint-disable-line no-new
@@ -153,7 +153,7 @@ describe('influxdb', () => {
 					}
 				]
 			});
-			pool = (influx as any).pool;
+			pool = (influx as any)._pool;
 
 			sinon.stub(pool, 'discard');
 			sinon.stub(pool, 'json');
@@ -167,7 +167,7 @@ describe('influxdb', () => {
 		});
 
 		const setDefaultDB = (db: string): void => {
-			(influx as any).options.database = db;
+			(influx as any)._options.database = db;
 		};
 
 		const expectQuery = (

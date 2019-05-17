@@ -4,9 +4,8 @@
 
 import {expect} from 'chai';
 import * as http from 'http';
-// Import * as https from 'https';
 import * as sinon from 'sinon';
-import * as freeport from 'freeport';
+import * as https from 'https';
 
 import {ExponentialBackoff} from '../../src/backoff/exponential';
 import {Pool, RequestError, ServiceNotAvailableError} from '../../src/pool';
@@ -33,25 +32,22 @@ describe('pool', () => {
 		pool = createPool();
 
 		sid = `${Date.now()}${Math.random()}`;
-		if (Boolean(process.env.WEBPACK) === false) {
-			const handler = require('../fixture/pool-middleware'); // eslint-disable-line @typescript-eslint/no-require-imports
-			server = http.createServer(handler());
-
-			freeport((_: Error, port: number) => {
-				server.listen(port, () => {
-					for (let i = 0; i < hosts; i += 1) {
-						pool.addHost(`http://http://127.0.0.1:${port}`);
-					}
-
-					done();
-				});
-			});
-		} else {
+		if (process.env.WEBPACK) {
 			for (let i = 0; i < hosts; i += 1) {
 				pool.addHost(location.origin);
 			}
 
 			done();
+		} else {
+			const handler = require('../fixture/pool-middleware'); // eslint-disable-line @typescript-eslint/no-require-imports
+			server = http.createServer(handler());
+			server.listen(3005, () => {
+				for (let i = 0; i < hosts; i += 1) {
+					pool.addHost(`http://127.0.0.1:${3005}`);
+				}
+
+				done();
+			});
 		}
 	});
 
@@ -60,10 +56,10 @@ describe('pool', () => {
 			clock.restore();
 		}
 
-		if (Boolean(process.env.WEBPACK) === false) {
-			server.close(() => done());
-		} else {
+		if (process.env.WEBPACK) {
 			done();
+		} else {
+			server.close(() => done());
 		}
 	});
 
@@ -74,12 +70,12 @@ describe('pool', () => {
 	});
 
 	it('passes through request options', () => {
-		// Const spy = sinon.spy(https, 'request');
+		const spy = sinon.spy(https, 'request');
 		const p = createPool();
 		p.addHost('https://httpbin.org/get', {rejectUnauthorized: false});
 
 		return p.json({method: 'GET', path: '/get'}).then(() => {
-			// Expect(spy.args[0]0].rejectUnauthorized).to.be.false;
+			expect((spy.args[0][0] as any).rejectUnauthorized).to.be.false;
 		});
 	});
 
@@ -137,7 +133,7 @@ describe('pool', () => {
 	});
 
 	it('times out requests', () => {
-		(pool as any).timeout = 1;
+		(pool as any)._timeout = 1;
 		return pool
 			.text({method: 'GET', path: '/pool/json'})
 			.then(() => {
@@ -145,7 +141,7 @@ describe('pool', () => {
 			})
 			.catch(err => expect(err).be.an.instanceof(ServiceNotAvailableError))
 			.then(() => {
-				(pool as any).timeout = 10000;
+				(pool as any)._timeout = 10000;
 			});
 	});
 

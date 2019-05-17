@@ -91,7 +91,7 @@ export class RequestError extends Error {
 		Object.setPrototypeOf(this, RequestError.prototype);
 	}
 
-	public static Create( // eslint-disable-line new-cap
+	public static Create(
 		req: http.ClientRequest,
 		res: http.IncomingMessage,
 		callback: (e: RequestError) => void,
@@ -170,7 +170,7 @@ export class Pool {
 
 	/**
    * Creates a new Pool instance.
-   * @param options
+   * @param {IPoolOptions} options
    */
 	constructor(options: IPoolOptions) {
 		this._options = {
@@ -192,7 +192,7 @@ export class Pool {
 
 	/**
    * Returns a list of currently active hosts.
-   * @return
+   * @return {Host[]}
    */
 	public getHostsAvailable(): Host[] {
 		return setToArray(this._hostsAvailable);
@@ -201,7 +201,7 @@ export class Pool {
 	/**
    * Returns a list of hosts that are currently disabled due to network
    * errors.
-   * @return
+   * @return {Host[]}
    */
 	public getHostsDisabled(): Host[] {
 		return setToArray(this._hostsDisabled);
@@ -218,7 +218,7 @@ export class Pool {
 
 	/**
    * Returns true if there's any host available to by queried.
-   * @return
+   * @return {Boolean}
    */
 	public hostIsAvailable(): boolean {
 		return this._hostsAvailable.size > 0;
@@ -323,7 +323,7 @@ export class Pool {
 						// polyfills. See: https://github.com/node-influx/node-influx/issues/221
 						if (typeof req.setTimeout === 'function') {
 							req.setTimeout(timeout, () => {
-								fail.call(this, arguments);
+								fail.call(fail, arguments);
 							}); // Tslint:disable-line
 						}
 
@@ -424,7 +424,7 @@ export class Pool {
 
 	/**
    * Returns the next available host for querying.
-   * @return
+   * @return {Host}
    */
 	private _getHost(): Host {
 		const available = setToArray(this._hostsAvailable);
@@ -435,7 +435,7 @@ export class Pool {
 
 	/**
    * Re-enables the provided host, returning it to the pool to query.
-   * @param host
+   * @param  {Host} host
    */
 	private _enableHost(host: Host): void {
 		this._hostsDisabled.delete(host);
@@ -447,8 +447,8 @@ export class Pool {
    * re-enabled after a backoff interval
    */
 	private _disableHost(host: Host): void {
-		this._hostsDisabled.add(host);
 		this._hostsAvailable.delete(host);
+		this._hostsDisabled.add(host);
 		this._index %= Math.max(1, this._hostsAvailable.size);
 
 		setTimeout(() => this._enableHost(host), host.fail());

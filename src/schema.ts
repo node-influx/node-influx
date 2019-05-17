@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/require-array-sort-compare */
+/* eslint-disable no-prototype-builtins */
 
 import {escape, FieldType, isNumeric} from './grammar';
 
@@ -55,14 +56,14 @@ export class Schema {
 		const output: Array<[string, string]> = [];
 
 		this._fieldNames.forEach(field => {
-			if (!fields.hasOwnProperty(field)) { // eslint-disable-line no-prototype-builtins
+			if (!fields.hasOwnProperty(field)) {
 				return;
 			}
 
 			const value = fields[field];
 			const typ = typeof value;
 			consumed += 1;
-			if (value === null) {
+			if (value === null || value === undefined) {
 				return;
 			}
 
