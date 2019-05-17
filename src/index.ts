@@ -453,7 +453,7 @@ export class InfluxDB {
    * @param databaseName
    * @return
    * @example
-   * influx.createDatabase('mydb')
+   * influx.dropDatabase('mydb')
    */
 	public dropDatabase(databaseName: string): Promise<void> {
 		return this._pool
