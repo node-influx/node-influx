@@ -39,7 +39,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/chai": "4.1.2",
+    "@types/chai": "4.1.7",
     "@types/freeport": "1.0.21",
     "@types/mocha": "5.2.6",
     "@types/node": "12.0.2",
@@ -47,7 +47,7 @@
     "@types/sinon-chai": "3.2.2",
     "@typescript-eslint/eslint-plugin": "1.9.0",
     "awesome-typescript-loader": "5.2.1",
-    "chai": "4.1.2",
+    "chai": "4.2.0",
     "coveralls": "3.0.3",
     "esdoc": "1.1.0",
     "eslint": "5.16.0",
