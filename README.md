@@ -1,19 +1,37 @@
 <p align="center">
   <img src="https://raw.github.com/node-influx/node-influx/master/logo.png?v3" alt="node-influx, an InfluxDB client for Node.js and Browsers">
-
-  <br>
-
-  <a href="https://www.npmjs.org/package/influx"><img src="http://img.shields.io/npm/v/influx.svg" alt="NPM Version"></a>
-  <a href="https://travis-ci.org/node-influx/node-influx"><img src="http://img.shields.io/travis/node-influx/node-influx/master.svg" alt="Build Status"></a>
-  <a href="https://coveralls.io/github/node-influx/node-influx?branch=master"><img src="https://coveralls.io/repos/github/node-influx/node-influx/badge.svg?branch=master" alt="Coverage Status"></a>
-  <a href="https://david-dm.org/node-influx/node-influx"><img src="https://david-dm.org/node-influx/node-influx/status.svg" alt="Dependencies Status"></a>
-  <a href="https://gitter.im/node-influx/node-influx?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/node-influx/node-influx.svg"></a>
-
-  <br>
-
-
-  <a href="https://saucelabs.com/u/influx"><img src="https://saucelabs.com/browser-matrix/influx.svg" alt="Browser Test Status"></a>
 </p>
+
+<hr/>
+
+<p align="center">
+  <b><!--An InfluxDB Client for Node.js and Browsers--></b>
+</p>
+
+<p align="center">
+ <a href="https://travis-ci.org/node-influx/node-influx">
+    <img src="https://img.shields.io/travis/node-influx/node-influx/master.svg?style=flat-square"
+         alt="Travis Build">
+  </a>
+  <a href="">
+    <img alt="Coveralls github branch" src="https://img.shields.io/coveralls/github/node-influx/node-influx/master.svg?style=flat-square">
+  </a>
+  <a href="https://www.npmjs.com/package/influx">
+    <img src="https://img.shields.io/npm/v/influx.svg?style=flat-square"
+          alt="NPM Version">
+  </a>
+  <a href="https://www.npmjs.com/package/influx">
+    <img src="https://img.shields.io/npm/dm/influx.svg?style=flat-square"
+         alt="NPM Downloads">
+
+  </a>
+  <a href="https://gitter.im/node-influx/node-influx">
+    <img alt="Gitter" src="https://img.shields.io/gitter/room/node-influx/node-influx.svg?style=flat-square">
+  </a>
+</p>
+
+<hr/>
+
 
 ## Installation
 
