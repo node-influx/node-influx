@@ -69,6 +69,12 @@ module.exports = function () {
         res.end(JSON.stringify({ ok: true }))
         break
 
+      case 'wait-json':
+        setTimeout(() => {
+          res.end(JSON.stringify({ ok: true }))
+        }, 1500)
+        break
+
       case 'badjson':
         res.end('{')
         break
