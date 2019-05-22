@@ -1,26 +1,30 @@
 {
   "source": "./lib/src",
   "destination": "./doc",
-  "test": {
-    "type": "mocha",
-    "source": "./lib/test/unit",
-    "includes": ["\\.test\\.js$"]
-  },
   "plugins": [
-    { "name": "./examples/esdoc-plugin.js" }
-  ],
-  "undocumentIdentifier": false,
-  "title": "node-influx",
-  "manual": {
-    "tutorial": [
-      "./examples/express_response_times/readme.md"
-    ],
-    "usage": [
-      "./examples/times.md",
-      "./examples/browser-setup.md",
-      "./examples/testing.md",
-      "./CONTRIBUTING.md"
-    ],
-    "changelog": ["./CHANGELOG.md"]
-  }
+    {
+      "name": "esdoc-standard-plugin",
+      "option": {
+        "brand": {
+          "title": "node-influx"
+        },
+        "undocumentIdentifier": {"enable": false},
+        "manual": {
+          "files": [
+            "./examples/express_response_times/readme.md",
+            "./examples/times.md",
+            "./examples/browser-setup.md",
+            "./examples/testing.md",
+            "./CONTRIBUTING.md"
+          ],
+          "changelog": ["./CHANGELOG.md"]
+        },
+        "test": {
+          "type": "mocha",
+          "source": "./lib/test/unit",
+          "includes": ["\\.test\\.js$"]
+        }
+      }
+    }
+  ]
 }
