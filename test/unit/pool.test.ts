@@ -135,7 +135,7 @@ describe('pool', () => {
 	it('times out requests', () => {
 		(pool as any)._timeout = 1;
 		return pool
-			.text({method: 'GET', path: '/pool/json'})
+			.text({method: 'GET', path: '/pool/wait-json'})
 			.then(() => {
 				throw new Error('Expected to have thrown');
 			})
