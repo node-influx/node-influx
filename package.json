@@ -50,7 +50,7 @@
     "chai": "4.2.0",
     "coveralls": "3.0.3",
     "esdoc": "1.1.0",
-    "esdoc-standard-plugin": "^1.0.0",
+    "esdoc-standard-plugin": "1.0.0",
     "eslint": "5.16.0",
     "eslint-config-xo": "0.26.0",
     "eslint-config-xo-typescript": "0.12.0",
