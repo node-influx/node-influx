@@ -1,6 +1,6 @@
 {
   "name": "influx",
-  "version": "5.0.8",
+  "version": "0.0.0-development",
   "description": "InfluxDB Client",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index",
@@ -18,11 +18,12 @@
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
-    "test:watch": "mocha -R min --watch --require ts-node/register test/unit/*.test.ts"
+    "test:watch": "mocha -R min --watch --require ts-node/register test/unit/*.test.ts",
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/node-influx/node-influx.git"
+    "url": "https://github.com/node-influx/node-influx.git"
   },
   "keywords": [
     "influx",
@@ -75,7 +76,8 @@
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "8.2.0",
     "typescript": "3.5.1",
-    "webpack": "4.32.2"
+    "webpack": "4.32.2",
+    "semantic-release": "^15.13.12"
   },
   "eslintConfig": {
     "extends": [
