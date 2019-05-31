@@ -28,6 +28,4 @@ jobs:
         provider: script
         skip_cleanup: true
         script:
-          - npm run clean
-          - npm run build:dist
-          - npx semantic-release
+          - npm run clean && npm run build:dist && npx semantic-release
