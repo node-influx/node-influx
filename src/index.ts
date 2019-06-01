@@ -252,6 +252,28 @@ function defaults<T>(target: T, ...srcs: T[]): T {
  *  ]
  * })
  *
+ * @example
+ * // Connect over HTTPS
+ * const Influx = require('influx');
+ * const influx = new Influx.InfluxDB({
+ *  host: 'myinfluxdbhost',
+ *  port: 443,
+ *  protocol: 'https'
+ *  database: 'express_response_db',
+ *  schema: [
+ *    {
+ *      measurement: 'response_times',
+ *      fields: {
+ *        path: Influx.FieldType.STRING,
+ *        duration: Influx.FieldType.INTEGER
+ *      },
+ *      tags: [
+ *        'host'
+ *      ]
+ *    }
+ *  ]
+ * })
+ *
  * influx.writePoints([
  *   {
  *     measurement: 'response_times',
