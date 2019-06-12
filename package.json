@@ -77,7 +77,7 @@
     "ts-node": "8.2.0",
     "typescript": "3.5.1",
     "webpack": "4.33.0",
-    "semantic-release": "15.13.12"
+    "semantic-release": "15.13.16"
   },
   "eslintConfig": {
     "extends": [
