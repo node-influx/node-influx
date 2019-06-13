@@ -18,6 +18,7 @@ const fixtures: { [version: string]: { [fixture: string]: object } } = {
 		showDatabases: require('../fixture/v1.0.0/showDatabases.json'),
 		showMeasurements: require('../fixture/v1.0.0/showMeasurements.json'),
 		showRetentionPolicies: require('../fixture/v1.0.0/showRetentionPolicies.json'),
+		showShards: require('../fixture/v1.0.0/showShards.json'),
 		showSeries: require('../fixture/v1.0.0/showSeries.json'),
 		showSeriesFromOne: require('../fixture/v1.0.0/showSeriesFromOne.json'),
 		showUsers: require('../fixture/v1.0.0/showUsers.json')
