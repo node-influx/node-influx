@@ -38,8 +38,7 @@ class Escaper {
 
 	constructor(chars: string[], private wrap: string = '', private escaper: string = '\\') {
 		const patterns = chars.join('').replace(reEscape, '\\$&');
-		//this._re = new RegExp('[' + patterns + '\\\\]', 'g');
-    this._re = new RegExp('[' + patterns + ']', 'g');
+		this._re = new RegExp('[' + patterns + ']', 'g');
 	}
 
 	/**
@@ -104,7 +103,7 @@ export const escape = {
 	/**
    * Quoted escapes quoted values, such as database names.
    */
-	quoted: bindEsc(new Escaper(['"','\\\\'], '"')),
+	quoted: bindEsc(new Escaper(['"', '\\\\'], '"')),
 
 	/**
    * StringLitEscaper escapes single quotes in string literals.
