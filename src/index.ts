@@ -1090,8 +1090,8 @@ export class InfluxDB {
 	*     },
 	*   ])
 	* })
-	*/
-	 public showShards(): Promise<IResults<{
+  */
+	public showShards(): Promise<IResults<{
 		id: number;
 		database: string;
 		retention_policy: string;
@@ -1100,18 +1100,18 @@ export class InfluxDB {
 		end_time: string;
 		expiry_time: string;
 		owners: string;
-	 }>> {
-		 return this._pool
-			 .json(
-				 this._getQueryOpts(
-					 {
+	}>> {
+		return this._pool
+			.json(
+				this._getQueryOpts(
+					{
 						q: 'show shards '
-					 },
-					 'GET',
-				 ),
-			 )
-			 .then(result =>
-				 parseSingle<{
+					},
+					'GET',
+				),
+			)
+			.then(result =>
+				parseSingle<{
 					id: number;
 					database: string;
 					retention_policy: string;
@@ -1120,9 +1120,9 @@ export class InfluxDB {
 					end_time: string;
 					expiry_time: string;
 					owners: string;
-				 }>(result),
-			 );
-	 }
+				}>(result),
+			);
+	}
 
 	/**
    * WritePoints sends a list of points together in a batch to InfluxDB. In
