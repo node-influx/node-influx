@@ -14,7 +14,7 @@
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && open-cli coverage/lcov-report/index.html",
     "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
-    "test:lint": "eslint '{src,test}/**/*.ts'",
+    "test:lint": "eslint . --ext .ts",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
@@ -46,7 +46,8 @@
     "@types/node": "12.0.8",
     "@types/sinon": "7.0.13",
     "@types/sinon-chai": "3.2.2",
-    "@typescript-eslint/eslint-plugin": "1.9.0",
+    "@typescript-eslint/eslint-plugin": "1.10.2",
+    "@typescript-eslint/parser": "1.10.2",
     "awesome-typescript-loader": "5.2.1",
     "chai": "4.2.0",
     "coveralls": "3.0.4",
@@ -71,13 +72,13 @@
     "npm-run-all": "4.1.5",
     "open-cli": "5.0.0",
     "prettier": "1.18.2",
+    "semantic-release": "15.13.16",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "8.2.0",
     "typescript": "3.5.1",
-    "webpack": "4.34.0",
-    "semantic-release": "15.13.16"
+    "webpack": "4.34.0"
   },
   "eslintConfig": {
     "extends": [
