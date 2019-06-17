@@ -884,7 +884,8 @@ describe('influxdb', () => {
 		});
 
 		it('shows shards', () => {
-			expectQuery('json', 'show shards ', 'GET', dbFixture('showShards'));
+      setDefaultDB('_internal');
+      expectQuery('json', 'show shards ', 'GET', dbFixture('showShards'));
 			return influx.showShards().then(res => {
 				expect(res.slice()).to.deep.equal([
 					{

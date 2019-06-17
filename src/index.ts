@@ -1073,13 +1073,14 @@ export class InfluxDB {
 	/**
    * Shows shards on the database
    *
-   *
+   * @param [database] The database to list policies on, uses the
+   *     default database if not provided.
    * @return
    * @example
    * influx.showShards().then(shards => {
 	*   expect(shards.slice()).to.deep.equal([
 	*     {
-	*		id:
+	*		id: 1
 	*		database: 'database',
 	*		retention_policy: 'autogen',
 	*		shard_group: 1,
@@ -1091,7 +1092,7 @@ export class InfluxDB {
 	*   ])
 	* })
   */
-	public showShards(): Promise<IResults<{
+ public showShards(database: string = this._defaultDB()): Promise<Array<{
 		id: number;
 		database: string;
 		retention_policy: string;
@@ -1099,8 +1100,8 @@ export class InfluxDB {
 		start_time: string;
 		end_time: string;
 		expiry_time: string;
-		owners: string;
-	}>> {
+    owners: string;
+  }>>{
 		return this._pool
 			.json(
 				this._getQueryOpts(
@@ -1120,7 +1121,9 @@ export class InfluxDB {
 					end_time: string;
 					expiry_time: string;
 					owners: string;
-				}>(result),
+        }>(result).filter(function(i) {
+          return i.database === database;
+        })
 			);
 	}
 
