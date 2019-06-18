@@ -1,4 +1,4 @@
-s{
+{
   "name": "influx",
   "version": "0.0.0-development",
   "description": "InfluxDB Client",
