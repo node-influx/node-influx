@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-env node, mocha */
 /* eslint-disable no-unused-expressions */
 
@@ -490,6 +491,7 @@ describe('influxdb', () => {
           [
             {
               measurement: 'mymeas',
+              // eslint-disable-next-line @typescript-eslint/camelcase
               tags: { my_tag: '1' },
               fields: { myfield: 90 },
               timestamp: new Date(1463683075000),

@@ -21,6 +21,7 @@ export function newClient(): Promise<InfluxDB> {
         tags: ['location'],
         fields: {
           'level description': FieldType.STRING,
+          // eslint-disable-next-line @typescript-eslint/camelcase
           water_level: FieldType.FLOAT,
         },
       },
