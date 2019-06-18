@@ -1,13 +1,13 @@
-import {isoOrTimeToDate, TimePrecision} from './grammar';
+import { isoOrTimeToDate, TimePrecision } from './grammar';
 
 /**
  * A ResultError is thrown when a query generates errorful results from Influx.
  */
 export class ResultError extends Error {
-	constructor(message: string) {
-		super();
-		this.message = `Error from InfluxDB: ${message}`;
-	}
+  constructor(message: string) {
+    super();
+    this.message = `Error from InfluxDB: ${message}`;
+  }
 }
 
 /**
@@ -18,53 +18,56 @@ export class ResultError extends Error {
  * and it will confuse you, as it did me ;)
  */
 export interface IResponse {
-	results: IResultEntry[];
+  results: IResultEntry[];
 }
 
 export interface IResultEntry {
-	series?: IResponseSeries[];
-	error?: string;
+  series?: IResponseSeries[];
+  error?: string;
 }
 
-export type Tags = { [name: string]: string };
+export interface Tags {
+  [name: string]: string;
+}
 
 export type Row = any;
 
 export interface IResponseSeries {
-	name?: string;
-	columns: string[];
-	tags?: Tags;
-	values?: Row[];
+  name?: string;
+  columns: string[];
+  tags?: Tags;
+  values?: Row[];
 }
 
 function groupMethod(this: any, matcher: Tags): Row[] {
-	// We do a tiny bit of 'custom' deep equality checking here, taking
-	// advantage of the fact that the tag keys are consistent across all
-	// series results. This lets us match groupings much more efficiently,
-	// ~6000x faster than the fastest vanilla equality checker (lodash)
-	// when operating on large (~100,000 grouping) sets.
+  // We do a tiny bit of 'custom' deep equality checking here, taking
+  // advantage of the fact that the tag keys are consistent across all
+  // series results. This lets us match groupings much more efficiently,
+  // ~6000x faster than the fastest vanilla equality checker (lodash)
+  // when operating on large (~100,000 grouping) sets.
 
-	const srcKeys = this.groupsTagsKeys;
-	const dstKeys = Object.keys(matcher);
-	if (srcKeys.length === 0 || srcKeys.length !== dstKeys.length) {
-		return [];
-	}
+  const srcKeys = this.groupsTagsKeys;
+  const dstKeys = Object.keys(matcher);
+  if (srcKeys.length === 0 || srcKeys.length !== dstKeys.length) {
+    return [];
+  }
 
-	L: for (let row of this.groupRows) { // eslint-disable-line no-labels
-		for (let src of srcKeys) {
-			if (row.tags[src] !== matcher[src]) {
-				continue L; // eslint-disable-line no-labels
-			}
-		}
+  L: for (let row of this.groupRows) {
+    // eslint-disable-line no-labels
+    for (let src of srcKeys) {
+      if (row.tags[src] !== matcher[src]) {
+        continue L; // eslint-disable-line no-labels
+      }
+    }
 
-		return row.rows;
-	}
+    return row.rows;
+  }
 
-	return [];
+  return [];
 }
 
-function groupsMethod(this: any): Array<{ name: string; tags: Tags; rows: Row[] }> {
-	return this.groupRows;
+function groupsMethod(this: any): { name: string; tags: Tags; rows: Row[] }[] {
+  return this.groupRows;
 }
 
 /**
@@ -79,52 +82,52 @@ function groupsMethod(this: any): Array<{ name: string; tags: Tags; rows: Row[] 
  */
 
 function parseInner(series: IResponseSeries[] = [], precision?: TimePrecision): IResults<any> {
-	const results: any = [];
-	results.groupsTagsKeys = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
-	const tags = results.groupsTagsKeys;
+  const results: any = [];
+  results.groupsTagsKeys = series.length && series[0].tags ? Object.keys(series[0].tags) : [];
+  const tags = results.groupsTagsKeys;
 
-	let nextGroup: Row[] = [];
-	results.groupRows = new Array(series.length); // Tslint:disable-line
+  let nextGroup: Row[] = [];
+  results.groupRows = new Array(series.length); // Tslint:disable-line
 
-	for (let i = 0; i < series.length; i += 1, results.length) {
-		const {columns = [], values = []} = series[i];
+  for (let i = 0; i < series.length; i += 1, results.length) {
+    const { columns = [], values = [] } = series[i];
 
-		for (let value of values) {
-			const obj: Row = {};
-			for (let j = 0; j < columns.length; j += 1) {
-				if (columns[j] === 'time') {
-					obj.time = isoOrTimeToDate(value[j] as number | string, precision);
-				} else {
-					obj[columns[j]] = value[j];
-				}
-			}
+    for (let value of values) {
+      const obj: Row = {};
+      for (let j = 0; j < columns.length; j += 1) {
+        if (columns[j] === 'time') {
+          obj.time = isoOrTimeToDate(value[j] as number | string, precision);
+        } else {
+          obj[columns[j]] = value[j];
+        }
+      }
 
-			for (let tag of tags) {
-				obj[tag] = series[i].tags[tag];
-			}
+      for (let tag of tags) {
+        obj[tag] = series[i].tags[tag];
+      }
 
-			results.push(obj);
-			nextGroup.push(obj);
-		}
+      results.push(obj);
+      nextGroup.push(obj);
+    }
 
-		results.groupRows[i] = {
-			name: series[i].name,
-			rows: nextGroup,
-			tags: series[i].tags || {}
-		};
-		nextGroup = [];
-	}
+    results.groupRows[i] = {
+      name: series[i].name,
+      rows: nextGroup,
+      tags: series[i].tags || {},
+    };
+    nextGroup = [];
+  }
 
-	results.group = groupMethod;
-	results.groups = groupsMethod;
-	return results;
+  results.group = groupMethod;
+  results.groups = groupsMethod;
+  return results;
 }
 
 /**
  * IResultsParser is a user-friendly results tables from raw Influx responses.
  */
 export interface IResults<T> extends Array<T> {
-	/**
+  /**
    * Group looks for and returns the first group in the results
    * that matches the provided tags.
    *
@@ -149,9 +152,9 @@ export interface IResults<T> extends Array<T> {
    *   ])
    * })
    */
-	group(matcher: Tags): T[];
+  group(matcher: Tags): T[];
 
-	/**
+  /**
    * Returns the data grouped into nested arrays, similarly to how it was
    * returned from Influx originally.
    *
@@ -179,7 +182,7 @@ export interface IResults<T> extends Array<T> {
    *   ])
    * })
    */
-	groups(): Array<{ name: string; tags: Tags; rows: T[] }>;
+  groups(): { name: string; tags: Tags; rows: T[] }[];
 }
 
 /**
@@ -188,14 +191,14 @@ export interface IResults<T> extends Array<T> {
  * @throws {ResultError}
  */
 export function assertNoErrors(res: IResponse): IResponse {
-	for (let result of res.results) {
-		const {error} = result;
-		if (error) {
-			throw new ResultError(error);
-		}
-	}
+  for (let result of res.results) {
+    const { error } = result;
+    if (error) {
+      throw new ResultError(error);
+    }
+  }
 
-	return res;
+  return res;
 }
 
 /**
@@ -207,15 +210,15 @@ export function assertNoErrors(res: IResponse): IResponse {
  *  3. Multiple queries of types 1 and 2
  * @private
  */
-export function parse<T>(res: IResponse, precision?: TimePrecision): Array<IResults<T>> | IResults<T> {
-	assertNoErrors(res);
+export function parse<T>(res: IResponse, precision?: TimePrecision): IResults<T>[] | IResults<T> {
+  assertNoErrors(res);
 
-	if (res.results.length === 1) {
-		// Normalize case 3
-		return parseInner(res.results[0].series, precision);
-	}
+  if (res.results.length === 1) {
+    // Normalize case 3
+    return parseInner(res.results[0].series, precision);
+  }
 
-	return res.results.map(result => parseInner(result.series, precision));
+  return res.results.map(result => parseInner(result.series, precision));
 }
 
 /**
@@ -225,14 +228,14 @@ export function parse<T>(res: IResponse, precision?: TimePrecision): Array<IResu
  * @private
  */
 export function parseSingle<T>(res: IResponse, precision?: TimePrecision): IResults<T> {
-	assertNoErrors(res);
+  assertNoErrors(res);
 
-	if (res.results.length !== 1) {
-		throw new Error(
-			'node-influx expected the results length to equal 1, but ' +
+  if (res.results.length !== 1) {
+    throw new Error(
+      'node-influx expected the results length to equal 1, but ' +
         `it was ${0}. Please report this here: https://git.io/influx-err`,
-		);
-	}
+    );
+  }
 
-	return parseInner(res.results[0].series, precision);
+  return parseInner(res.results[0].series, precision);
 }

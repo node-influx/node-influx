@@ -1,4 +1,4 @@
-{
+s{
   "name": "influx",
   "version": "0.0.0-development",
   "description": "InfluxDB Client",
@@ -9,12 +9,12 @@
     "build:doc": "npm run clean && tsc -m es2015 -t es6 --moduleResolution node && esdoc -c esdoc.json",
     "clean": "rm -rf coverage doc lib",
     "prepare": "npm run clean && tsc -d",
-    "fmt": "prettier --single-quote --trailing-comma all --print-width 100 --write \"{src,test,examples}/**/*.ts\" && npm run test:lint -- --fix",
+    "fmt": "prettier --write \"{src,test,examples}/**/*.ts\" && npm run test:lint -- --fix",
     "test": "npm-run-all --parallel test:lint test:unit test:integrate",
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && open-cli coverage/lcov-report/index.html",
     "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
-    "test:lint": "eslint '{src,test}/**/*.ts'",
+    "test:lint": "eslint  \"{src,test,examples}/**/*.ts\" --quiet --fix",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
@@ -46,15 +46,16 @@
     "@types/node": "12.0.8",
     "@types/sinon": "7.0.13",
     "@types/sinon-chai": "3.2.2",
-    "@typescript-eslint/eslint-plugin": "1.9.0",
+    "@typescript-eslint/eslint-plugin": "1.10.2",
+    "@typescript-eslint/parser": "1.10.2",
     "awesome-typescript-loader": "5.2.1",
     "chai": "4.2.0",
     "coveralls": "3.0.4",
     "esdoc": "1.1.0",
     "esdoc-standard-plugin": "1.0.0",
     "eslint": "5.16.0",
-    "eslint-config-xo": "0.26.0",
-    "eslint-config-xo-typescript": "0.14.0",
+    "eslint-config-prettier": "5.0.0",
+    "eslint-plugin-prettier": "3.1.0",
     "freeport": "1.0.5",
     "istanbul": "0.4.5",
     "json-loader": "0.5.7",
@@ -71,22 +72,12 @@
     "npm-run-all": "4.1.5",
     "open-cli": "5.0.0",
     "prettier": "1.18.2",
+    "semantic-release": "15.13.16",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "8.2.0",
     "typescript": "3.5.1",
-    "webpack": "4.34.0",
-    "semantic-release": "15.13.16"
-  },
-  "eslintConfig": {
-    "extends": [
-      "xo",
-      "xo-typescript"
-    ],
-    "rules": {
-      "@typescript-eslint/interface-name-prefix": false,
-      "@typescript-eslint/camelcase": "warn"
-    }
+    "webpack": "4.34.0"
   }
 }
