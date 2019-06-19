@@ -436,18 +436,17 @@ export class InfluxDB {
 			this._pool.addHost(`${host.protocol}://${host.host}:${host.port}`, host.options);
 		});
 
-		this._options.schema.forEach(schema => this.createSchema(schema));	
+		this._options.schema.forEach(schema => this._createSchema(schema));
 	}
 
-
-   /**
-    * Adds specified schema for better fields coercing.
-    *
-    * @param {ISchemaOptions} schema
-    * @memberof InfluxDB
-    */
-	public addSchema (schema: ISchemaOptions): void {
-		this.createSchema(schema);
+  /**
+   * Adds specified schema for better fields coercing.
+   *
+   * @param {ISchemaOptions} schema
+   * @memberof InfluxDB
+   */
+	public addSchema(schema: ISchemaOptions): void {
+		this._createSchema(schema);
 	}
 
 	/**
@@ -1309,8 +1308,8 @@ export class InfluxDB {
 				...params
 			}
 		};
-   }
-   
+	}
+
    /**
    * Creates specified measurement schema
    *
@@ -1318,18 +1317,19 @@ export class InfluxDB {
    * @param {ISchemaOptions} schema
    * @memberof InfluxDB
    */
-	private createSchema (schema: ISchemaOptions) {
-		const db = schema.database = schema.database || this._options.database;
-		if (!db) {
+	private _createSchema(schema: ISchemaOptions): void {
+		schema.database = schema.database || this._options.database;
+		if (!schema.database) {
 			throw new Error(
 				`Schema ${schema.measurement} doesn't have a database specified,` +
 				'and no default database is provided!',
 			);
-		}
-		if (!this._schema[db]) {
-			this._schema[db] = Object.create(null);
+    }
+
+		if (!this._schema[schema.database]) {
+			this._schema[schema.database] = Object.create(null);
 		}
 
-		this._schema[db][schema.measurement] = new Schema(schema);
- 	}
+		this._schema[schema.database][schema.measurement] = new Schema(schema);
+	}
 }
