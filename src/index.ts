@@ -439,7 +439,7 @@ export class InfluxDB {
 		this._options.schema.forEach(schema => this._createSchema(schema));
 	}
 
-  /**
+	/**
    * Adds specified schema for better fields coercing.
    *
    * @param {ISchemaOptions} schema
@@ -1310,7 +1310,7 @@ export class InfluxDB {
 		};
 	}
 
-   /**
+	/**
    * Creates specified measurement schema
    *
    * @private
@@ -1324,7 +1324,7 @@ export class InfluxDB {
 				`Schema ${schema.measurement} doesn't have a database specified,` +
 				'and no default database is provided!',
 			);
-    }
+		}
 
 		if (!this._schema[schema.database]) {
 			this._schema[schema.database] = Object.create(null);
