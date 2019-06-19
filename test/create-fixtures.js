@@ -45,6 +45,8 @@ const queries = [
   update(`create retention policy "7d" on "${db}" duration 7d replication 1`),
   fixture('showRetentionPolicies', `show retention policies on "${db}"`),
 
+  update(`drop shard 1`),
+
   update(`drop user john`),
   update(`drop user steve`),
   update(`drop database "${db}"`)

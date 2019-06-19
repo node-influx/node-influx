@@ -51,7 +51,17 @@ describe('data operations', () => {
 			})
 			.then(() => db.getSeries())
 			.then(res => expect(res).to.not.contain('h2o_quality,location=coyote_creek,randtag=1'));
-	});
+  });
+  /* Can work when PR accepted
+  it('drops shard', () => {
+    const shards_in_db =  db.showShards('influx_test_db') ;
+    const first_shard_number  = shards_in_db[0].id;
+    return db
+			.dropShard(first_shard_number)
+			.then(() => db.showShards('influx_test_db'))
+			.then(res => expect(res[0]).to.not.contain(`id=${first_shard_number}`));
+  });
+  */
 
 	it('gets measurements', () => {
 		return db.getMeasurements().then(res => expect(res).to.deep.equal(['h2o_feet', 'h2o_quality']));
