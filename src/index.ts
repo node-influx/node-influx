@@ -1068,6 +1068,27 @@ export class InfluxDB {
 					shardGroupDuration: string;
 				}>(result),
 			);
+  }
+
+  	/**
+   * Drops a shard with the provided number.
+   * @param shard_id
+   * @return
+   * @example
+   * influx.dropShard(3)
+   */
+	public dropShard(shard_id: number): Promise<void> {
+		return this._pool
+			.json(
+				this._getQueryOpts(
+					{
+						q: `drop shard ${shard_id}`
+					},
+					'POST',
+				),
+			)
+			.then(assertNoErrors)
+			.then(() => undefined);
 	}
 
 	/**
