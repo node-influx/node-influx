@@ -12,13 +12,13 @@
  * a clean install/db with admin privileges.
  */
 
-"use strict";
+'use strict';
 
-const querystring = require("querystring");
-const fetch = require("node-fetch");
-const path = require("path");
-const db = "influx_test_gen";
-const fs = require("fs");
+const querystring = require('querystring');
+const fetch = require('node-fetch');
+const path = require('path');
+const db = 'influx_test_gen';
+const fs = require('fs');
 
 const queries = [
   // clean up from any old/failed tests:
@@ -27,37 +27,33 @@ const queries = [
   update(`drop user steve`),
 
   update(`create database "${db}"`),
-  fixture("showDatabases", "show databases"),
+  fixture('showDatabases', 'show databases'),
 
-  update("create user \"john\" with password 'password' with all privileges", { db }),
-  update("create user \"steve\" with password 'password'", { db }),
-  fixture("showUsers", "show users", { db }),
+  update('create user "john" with password \'password\' with all privileges', { db }),
+  update('create user "steve" with password \'password\'', { db }),
+  fixture('showUsers', 'show users', { db }),
 
-  write(fs.readFileSync(path.join(__dirname, "fixtures_test_data.txt")), { db }),
-  fixture("showMeasurements", "show measurements", { db }),
-  fixture("showSeries", "show series", { db }),
-  fixture("showSeriesFromOne", "show series from series_1", { db }),
-  fixture("selectFromEmpty", "select * from not_a_series", { db }),
-  fixture("selectFromOne", "select * from series_0 where my_tag = '1' order by time desc", { db }),
-  fixture(
-    "selectFromGroup",
-    "select top(my_value, 1) from series_0 group by my_tag order by time desc",
-    { db }
-  ),
-  fixture("error", "this is not a valid query!"),
+  write(fs.readFileSync(path.join(__dirname, 'fixtures_test_data.txt')), { db }),
+  fixture('showMeasurements', 'show measurements', { db }),
+  fixture('showSeries', 'show series', { db }),
+  fixture('showSeriesFromOne', 'show series from series_1', { db }),
+  fixture('selectFromEmpty', 'select * from not_a_series', { db }),
+  fixture('selectFromOne', "select * from series_0 where my_tag = '1' order by time desc", { db }),
+  fixture('selectFromGroup', 'select top(my_value, 1) from series_0 group by my_tag order by time desc', { db }),
+  fixture('error', 'this is not a valid query!'),
 
   update(`create retention policy "7d" on "${db}" duration 7d replication 1`),
-  fixture("showRetentionPolicies", `show retention policies on "${db}"`),
+  fixture('showRetentionPolicies', `show retention policies on "${db}"`),
 
-  fixture("showShards", "show shards"),
+  fixture('showShards', 'show shards'),
   update(`drop shard 1`),
 
   update(`drop user john`),
   update(`drop user steve`),
-  update(`drop database "${db}"`)
+  update(`drop database "${db}"`),
 ];
 
-const influxHost = process.env.INFLUX_HOST || "http://localhost:8086";
+const influxHost = process.env.INFLUX_HOST || 'http://localhost:8086';
 
 let fixtureDir; // filled in in boot()
 
@@ -68,8 +64,7 @@ let fixtureDir; // filled in in boot()
  * @return {Function}
  */
 function write(body, params) {
-  return () =>
-    fetch(`${influxHost}/write?${querystring.stringify(params)}`, { method: "POST", body });
+  return () => fetch(`${influxHost}/write?${querystring.stringify(params)}`, { method: 'POST', body });
 }
 
 /**
@@ -80,10 +75,7 @@ function write(body, params) {
  */
 function query(query, params = {}) {
   params.q = query;
-  return () =>
-    fetch(`${influxHost}/query?${querystring.stringify(params)}`, { method: "GET" }).then(res =>
-      res.json()
-    );
+  return () => fetch(`${influxHost}/query?${querystring.stringify(params)}`, { method: 'GET' }).then(res => res.json());
 }
 
 /**
@@ -95,7 +87,7 @@ function query(query, params = {}) {
 function update(query, params = {}) {
   params.q = query;
   return () =>
-    fetch(`${influxHost}/query?${querystring.stringify(params)}`, { method: "POST" }).then(res => {
+    fetch(`${influxHost}/query?${querystring.stringify(params)}`, { method: 'POST' }).then(res => {
       if (!res.ok) {
         return res.text().then(body => {
           throw new Error(`Unsuccessful update. Response: ${res.status}, body: ${body}`);
@@ -116,15 +108,15 @@ function fixture(fixtureName, body, params = {}) {
   return () =>
     query(body, params)().then(res => {
       const name = path.join(fixtureDir, `${fixtureName}.json`);
-      fs.writeFileSync(name, JSON.stringify(res, null, 2) + "\n");
+      fs.writeFileSync(name, JSON.stringify(res, null, 2) + '\n');
       console.log(`Created ${name}`);
     });
 }
 
 exports.boot = () => {
   return fetch(`${influxHost}/ping`).then(res => {
-    const version = res.headers.get("X-InfluxDB-Version");
-    fixtureDir = path.join(__dirname, "fixture", version);
+    const version = res.headers.get('X-InfluxDB-Version');
+    fixtureDir = path.join(__dirname, 'fixture', version);
 
     if (!fs.existsSync(fixtureDir)) {
       fs.mkdirSync(fixtureDir);
