@@ -14,7 +14,7 @@
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && open-cli coverage/lcov-report/index.html",
     "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
-    "test:lint": "eslint  \"{src,test,examples}/**/*.ts\" --quiet --fix",
+    "test:lint": "eslint \"{src,test}/**/*.ts\" ",
     "test:sauce": "SAUCE=1 karma start test/karma.conf.js",
     "test:travis": "npm-run-all clean test:lint test:sauce test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
     "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
