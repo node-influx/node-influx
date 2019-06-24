@@ -913,5 +913,24 @@ describe('influxdb', () => {
 				]);
 			});
 		});
+		
+		it('shows shards', () => {
+			setDefaultDB('_internal');
+			expectQuery('json', 'show shards ', 'GET', dbFixture('showShards'));
+			return influx.showShards().then(res => {
+				expect(res.slice()).to.deep.equal([
+					{
+						id: 1,
+						database: '_internal',
+						retention_policy: 'monitor',
+						shard_group: 1,
+						start_time: '2019-06-13T00:00:00Z',
+						end_time: '2019-06-14T00:00:00Z',
+						expiry_time: '2019-06-21T00:00:00Z',
+						owners: ''
+					}
+				]);
+			});
+		});
 	});
 });

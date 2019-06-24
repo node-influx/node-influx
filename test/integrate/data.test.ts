@@ -19,6 +19,10 @@ describe('data operations', () => {
 	it('shows databases', () => {
 		return db.getDatabaseNames().then(res => expect(res).contain('influx_test_db'));
 	});
+	
+	it('shows shards', () => {
+		return db.showShards('influx_test_db').then(res => expect(res[0]).to.have.property('database', 'influx_test_db' ));
+	});
 
 	it('writes complex values (issue #242)', () => {
 		const original = JSON.stringify({a: JSON.stringify({b: 'c c'})});

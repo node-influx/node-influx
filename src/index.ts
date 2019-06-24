@@ -1064,7 +1064,65 @@ export class InfluxDB {
 				}>(result),
 			);
 	}
+	
+	/**
+   * Shows shards on the database
+   *
+   * @param [database] The database to list policies on, uses the
+   *     default database if not provided.
+   * @return
+   * @example
+   * influx.showShards().then(shards => {
+	*   expect(shards.slice()).to.deep.equal([
+	*     {
+	*		id: 1
+	*		database: 'database',
+	*		retention_policy: 'autogen',
+	*		shard_group: 1,
+	*		start_time: '2019-05-06T00:00:00Z',
+	*		end_time: '2019-05-13T00:00:00Z',
+	*		expiry_time: '2019-05-13T00:00:00Z',
+	*		owners: null,
+	*     },
+	*   ])
+	* })
+  */
+ public showShards(database: string = this._defaultDB()): Promise<Array<{
+		id: number;
+		database: string;
+		retention_policy: string;
+		shard_group: number;
+		start_time: string;
+		end_time: string;
+		expiry_time: string;
+    owners: string;
+  }>>{
+		return this._pool
+			.json(
+				this._getQueryOpts(
+					{
+						q: 'show shards '
+					},
+					'GET',
+				),
+			)
+			.then(result =>
+				parseSingle<{
+					id: number;
+					database: string;
+					retention_policy: string;
+					shard_group: number;
+					start_time: string;
+					end_time: string;
+					expiry_time: string;
+					owners: string;
+        }>(result).filter(function(i) {
+          return i.database === database;
+        })
+			);
+	}
 
+	
 	/**
    * WritePoints sends a list of points together in a batch to InfluxDB. In
    * each point you must specify the measurement name to write into as well
