@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "statement_id": 0,
+      "series": [
+        {
+          "name": "_internal",
+          "columns": [
+            "id",
+            "database",
+            "retention_policy",
+            "shard_group",
+            "start_time",
+            "end_time",
+            "expiry_time",
+            "owners"
+          ],
+          "values": [
+            [
+              1,
+              "_internal",
+              "monitor",
+              1,
+              "2019-06-13T00:00:00Z",
+              "2019-06-14T00:00:00Z",
+              "2019-06-21T00:00:00Z",
+              ""
+            ]
+          ]
+        },
+        {
+          "name": "influx_test_gen",
+          "columns": [
+            "id",
+            "database",
+            "retention_policy",
+            "shard_group",
+            "start_time",
+            "end_time",
+            "expiry_time",
+            "owners"
+          ]
+        }
+      ]
+    }
+  ]
+}
