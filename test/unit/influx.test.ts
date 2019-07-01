@@ -228,6 +228,11 @@ describe('influxdb', () => {
 			influx.dropDatabase('f"oo');
 		});
 
+		it('.dropShard()', () => {
+			expectQuery('json', 'drop shard 1');
+			influx.dropShard(1);
+		});
+
 		it('.getDatabaseNames()', () => {
 			expectQuery('json', 'show databases', 'GET', dbFixture('showDatabases'));
 			return influx.getDatabaseNames().then(names => {

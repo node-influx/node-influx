@@ -58,6 +58,17 @@ describe('data operations', () => {
 			.then(() => db.getSeries())
 			.then(res => expect(res).to.not.contain('h2o_quality,location=coyote_creek,randtag=1'));
 	});
+	it('drops shard', () => {
+		let first_shard_number = 0;
+		return db
+			.showShards('influx_test_db')
+			.then(res => {
+				first_shard_number = res[0].id;
+			})
+			.then(() => db.dropShard(first_shard_number))
+			.then(() => db.showShards('influx_test_db'))
+			.then(res => expect(res[0].id).to.not.equal(first_shard_number));
+	});
 
 	it('gets measurements', () => {
 		return db.getMeasurements().then(res => expect(res).to.deep.equal(['h2o_feet', 'h2o_quality']));

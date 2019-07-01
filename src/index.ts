@@ -1123,6 +1123,27 @@ export class InfluxDB {
 	}
 
 	/**
+   * Drops a shard with the provided number.
+   * @param shard_id
+   * @return
+   * @example
+   * influx.dropShard(3)
+   */
+	public dropShard(shard_id: number): Promise<void> {
+		return this._pool
+			.json(
+				this._getQueryOpts(
+					{
+						q: `drop shard ${shard_id}`
+					},
+					'POST',
+				),
+			)
+			.then(assertNoErrors)
+			.then(() => undefined);
+	}
+
+	/**
    * WritePoints sends a list of points together in a batch to InfluxDB. In
    * each point you must specify the measurement name to write into as well
    * as a list of tag and field values. Optionally, you can specify the
