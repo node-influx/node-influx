@@ -50,7 +50,7 @@
     "@typescript-eslint/parser": "1.11.0",
     "awesome-typescript-loader": "5.2.1",
     "chai": "4.2.0",
-    "coveralls": "3.0.4",
+    "coveralls": "3.0.5",
     "esdoc": "1.1.0",
     "esdoc-standard-plugin": "1.0.0",
     "eslint": "5.16.0",
