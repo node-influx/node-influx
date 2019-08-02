@@ -78,7 +78,7 @@
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "8.3.0",
     "typescript": "3.5.3",
-    "webpack": "4.38.0",
+    "webpack": "4.39.1",
     "semantic-release": "15.13.19"
   },
   "eslintConfig": {
