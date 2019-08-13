@@ -55,7 +55,7 @@
     "esdoc-standard-plugin": "1.0.0",
     "eslint": "5.16.0",
     "eslint-config-xo": "0.26.0",
-    "eslint-config-xo-typescript": "0.14.0",
+    "eslint-config-xo-typescript": "0.16.0",
     "freeport": "1.0.5",
     "istanbul": "0.4.5",
     "json-loader": "0.5.7",
