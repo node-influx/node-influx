@@ -498,7 +498,7 @@ export class InfluxDB {
    * influx.getDatabaseNames().then(names =>
    *   console.log('My database names are: ' + names.join(', ')));
    */
-	public getDatabaseNames(): Promise<string | string[]> {
+	public getDatabaseNames(): Promise<string[]> {
 		return this._pool
 			.json(this._getQueryOpts({q: 'show databases'}))
 			.then(res => parseSingle<{ name: string }>(res).map(r => r.name));
