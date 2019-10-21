@@ -355,7 +355,7 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
  * @example
  * m.name('my_measurement') // "my_measurement"
  * m.name('my_measurement').policy('one_day') // "one_day"."my_measurement"
- * m.name('my_measurement').policy('one_day').db('mydb') // "mydb".one_day"."my_measurement"
+ * m.name('my_measurement').policy('one_day').db('mydb') // "mydb"."one_day"."my_measurement"
  */
 export class Measurement {
 	private _parts: string[] = [null, null, null];
