@@ -65,14 +65,14 @@ describe('pool', () => {
 
 	it('attempts to make an https request', () => {
 		const p = createPool();
-		p.addHost('https://httpbin.org/get');
+		p.addHost('https://httpbin.org');
 		return p.json({method: 'GET', path: '/get'});
 	});
 
 	it('passes through request options', () => {
 		const spy = sinon.spy(https, 'request');
 		const p = createPool();
-		p.addHost('https://httpbin.org/get', {rejectUnauthorized: false});
+		p.addHost('https://httpbin.org', {rejectUnauthorized: false});
 
 		return p.json({method: 'GET', path: '/get'}).then(() => {
 			expect((spy.args[0][0] as any).rejectUnauthorized).to.be.false;
@@ -82,7 +82,7 @@ describe('pool', () => {
 	it('valid request data content length', () => {
 		const p = createPool();
 		const body = '\u00FF';
-		p.addHost('https://httpbin.org/post');
+		p.addHost('https://httpbin.org');
 		p
 			.json({method: 'POST', path: '/post', body: body})
 			.then(data => expect(data.data).to.equal(body));

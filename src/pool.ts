@@ -349,13 +349,15 @@ export class Pool {
 			return callback(new ServiceNotAvailableError('No host available'), null);
 		}
 
-		let path = options.path;
+		const once = doOnce();
+		const host = this._getHost();
+
+		let path = host.url.pathname === '/' ? '' : host.url.pathname;
+		path += options.path;
 		if (options.query) {
 			path += '?' + querystring.stringify(options.query);
 		}
 
-		const once = doOnce();
-		const host = this._getHost();
 		const req = request(
 			{
 				headers: {'content-length': options.body ? Buffer.from(options.body).length : 0},

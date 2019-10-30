@@ -14,6 +14,7 @@ import {coerceBadly, ISchemaOptions, Schema} from './schema';
 const defaultHost: IHostConfig = Object.freeze({
 	host: '127.0.0.1',
 	port: 8086,
+	path: '',
 	protocol: 'http' as 'http'
 });
 
@@ -40,6 +41,11 @@ export interface IHostConfig {
    * Influx port to connect to, defaults to 8086.
    */
 	port?: number;
+	/**
+   * Path for Influx within the host, defaults to ''.
+   * May be used if Influx is behind a reverse proxy or load balancer.
+   */
+	path?: string;
 	/**
    * Protocol to connect over, defaults to 'http'.
    */
@@ -422,6 +428,7 @@ export class InfluxDB {
 				{
 					host: host.host,
 					port: host.port,
+					path: host.path,
 					protocol: host.protocol,
 					options: host.options
 				},
@@ -433,7 +440,7 @@ export class InfluxDB {
 		this._options = defaults(resolved, defaultOptions);
 
 		resolved.hosts.forEach(host => {
-			this._pool.addHost(`${host.protocol}://${host.host}:${host.port}`, host.options);
+			this._pool.addHost(`${host.protocol}://${host.host}:${host.port}${host.path}`, host.options);
 		});
 
 		this._options.schema.forEach(schema => this._createSchema(schema));
