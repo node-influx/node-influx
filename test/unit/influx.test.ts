@@ -21,6 +21,7 @@ describe('influxdb', () => {
 					{
 						host: '127.0.0.1',
 						port: 8086,
+						path: '',
 						protocol: 'http',
 						options: undefined
 					}
@@ -41,6 +42,7 @@ describe('influxdb', () => {
 					{
 						host: '192.168.0.1',
 						port: 1337,
+						path: '',
 						protocol: 'https',
 						options: undefined
 					}
@@ -59,6 +61,7 @@ describe('influxdb', () => {
 					{
 						host: '192.168.0.1',
 						port: 8086,
+						path: '',
 						protocol: 'http',
 						options: undefined
 					}
@@ -81,6 +84,7 @@ describe('influxdb', () => {
 					{
 						host: '192.168.0.1',
 						port: 8086,
+						path: '',
 						protocol: 'http',
 						options: {ca: null}
 					}
