@@ -300,7 +300,7 @@ export class Pool {
 							once((res: http.IncomingMessage) => {
 								resolve({
 									url,
-									res,
+									res: res.resume(),
 									online: res.statusCode < 300,
 									rtt: Date.now() - start,
 									version: res.headers['x-influxdb-version']
