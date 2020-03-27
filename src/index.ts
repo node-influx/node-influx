@@ -232,7 +232,7 @@ function defaults<T>(target: T, ...srcs: T[]): T {
 }
 
 /**
- * InfluxDB is the public interface to run queries against the your database.
+ * InfluxDB is the public interface to run queries against your database.
  * This is a 'driver-level' module, not a a full-fleged ORM or ODM; you run
  * queries directly by calling methods on this class.
  *
