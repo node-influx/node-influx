@@ -309,6 +309,7 @@ export class Pool {
 						);
 
 						const fail = once(() => {
+							req.abort();
 							resolve({
 								online: false,
 								res: null,
@@ -400,6 +401,7 @@ export class Pool {
 		req.on(
 			'timeout',
 			once(() => {
+				req.abort();
 				this._handleRequestError(
 					new ServiceNotAvailableError('Request timed out'),
 					host,
