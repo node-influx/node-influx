@@ -36,7 +36,8 @@
   "contributors": [
     "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
     "Connor Peet <connor@peet.io>",
-    "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
+    "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)",
+    "Timm Murray <tmurray@wumpus-cave.net> (http://wumpus-cave.net)"
   ],
   "license": "MIT",
   "devDependencies": {
