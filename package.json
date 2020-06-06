@@ -36,7 +36,8 @@
   "contributors": [
     "Ben Evans <ben@bensbit.co.uk> (http://bensbit.co.uk)",
     "Connor Peet <connor@peet.io>",
-    "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)"
+    "Steffen Konerow <steffen@nrg-media.de> (http://www.nrg-media.de)",
+    "Timm Murray <tmurray@wumpus-cave.net> (http://wumpus-cave.net)"
   ],
   "license": "MIT",
   "devDependencies": {
@@ -72,14 +73,13 @@
     "npm-run-all": "4.1.5",
     "open-cli": "5.0.0",
     "prettier": "1.18.2",
-    "semantic-release": "15.13.16",
+    "semantic-release": "15.13.19",
     "sinon": "7.4.1",
     "sinon-chai": "3.3.0",
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "8.3.0",
     "typescript": "3.5.3",
-    "webpack": "4.39.2",
-    "semantic-release": "15.13.19"
+    "webpack": "4.39.2"
   },
   "eslintConfig": {
     "extends": [

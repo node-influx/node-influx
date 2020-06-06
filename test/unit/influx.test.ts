@@ -743,7 +743,8 @@ describe('influxdb', () => {
 						q: 'select * from series_0',
 						epoch: undefined,
 						rp: undefined,
-						db: 'my_db'
+						db: 'my_db',
+						params: {}
 					},
 					'GET',
 					dbFixture('selectFromOne'),
@@ -761,7 +762,8 @@ describe('influxdb', () => {
 						q: 'select * from series_0',
 						epoch: undefined,
 						rp: undefined,
-						db: 'my_db'
+						db: 'my_db',
+						params: {}
 					},
 					'GET',
 					dbFixture('selectFromOne'),
@@ -782,7 +784,8 @@ describe('influxdb', () => {
 						q: 'select * from series_0;select * from series_1',
 						epoch: undefined,
 						rp: undefined,
-						db: 'my_db'
+						db: 'my_db',
+						params: {}
 					},
 					'GET',
 					dbFixture('selectFromOne'),
@@ -798,7 +801,8 @@ describe('influxdb', () => {
 						q: 'select * from series_0',
 						epoch: 'ms',
 						rp: 'asdf',
-						db: 'my_db'
+						db: 'my_db',
+						params: {}
 					},
 					'GET',
 					dbFixture('selectFromOne'),
@@ -817,7 +821,8 @@ describe('influxdb', () => {
 						q: 'select * from series_0',
 						epoch: undefined,
 						rp: 'asdf',
-						db: 'my_db'
+						db: 'my_db',
+						params: {}
 					},
 					'GET',
 					dbFixture('selectFromOne'),
@@ -826,6 +831,31 @@ describe('influxdb', () => {
 				return influx.query(['select * from series_0'], {
 					precision: 'n',
 					retentionPolicy: 'asdf'
+				});
+			});
+
+			it('uses placeholders', () => {
+				expectQuery(
+					'json',
+					{
+						q: 'select * from series_0 WHERE time > now() - $<since>',
+						epoch: undefined,
+						rp: 'asdf',
+						db: 'my_db',
+						params: { since: "10s" }
+					},
+					'GET',
+					dbFixture('selectFromOne'),
+				);
+
+				return influx.query([
+					'select * from series_0 WHERE time > now() - $<since>'
+                ], {
+					precision: 'n',
+					retentionPolicy: 'asdf',
+					placeholders: {
+						since: "10s"
+					}
 				});
 			});
 		});

@@ -177,6 +177,12 @@ export interface IQueryOptions {
    * database is not provided in Influx.
    */
 	database?: string;
+
+	/**
+   * Any placeholders used by the query. Using these is strongly recommended 
+   * to avoid injection attacks.
+   */
+	placeholders?: Record<string, string>;
 }
 
 /**
@@ -289,10 +295,14 @@ function defaults<T>(target: T, ...srcs: T[]): T {
  * ]).then(() => {
  *   return influx.query(`
  *     select * from response_times
- *     where host = ${Influx.escape.stringLit(os.hostname())}
+ *     where host = $<host>
  *     order by time desc
  *     limit 10
- *   `)
+ *   `, {
+ *      placeholders: {
+ *        host: os.hostname()
+ *      }
+ *   })
  * }).then(rows => {
  *   rows.forEach(row => console.log(`A request to ${row.path} took ${row.duration}ms`))
  * })
@@ -1328,7 +1338,11 @@ export class InfluxDB {
    * })
    */
 	public queryRaw(query: string | string[], options: IQueryOptions = {}): Promise<any> {
-		const {database = this._defaultDB(), retentionPolicy} = options;
+		const {
+			database = this._defaultDB(),
+			retentionPolicy,
+			placeholders = {}
+        } = options;
 
 		if (query instanceof Array) {
 			query = query.join(';');
@@ -1339,8 +1353,9 @@ export class InfluxDB {
 				db: database,
 				epoch: options.precision,
 				q: query,
-				rp: retentionPolicy
-			}),
+				rp: retentionPolicy,
+				params: placeholders
+            }),
 		);
 	}
 
