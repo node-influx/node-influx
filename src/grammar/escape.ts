@@ -53,6 +53,7 @@ class Escaper {
 		this._re.lastIndex = 0;
 		let chunkIndex = this._re.lastIndex;
 		let escapedVal = '';
+		val = val.replace(/\\/, '\\\\');
 		let match = this._re.exec(val);
 
 		while (match) {
