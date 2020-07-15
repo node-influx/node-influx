@@ -60,6 +60,13 @@ class Escaper {
 
     let match;
 
+    /* eslint-disable no-cond-assign */
+    while ((match = this._re.exec(val))) {
+      escapedVal +=
+        val.slice(chunkIndex, match.index) + this.escaper + match[0];
+      chunkIndex = this._re.lastIndex;
+    }
+
     while ((match = this._re.exec(val))) {
       escapedVal +=
         val.slice(chunkIndex, match.index) + this.escaper + match[0];

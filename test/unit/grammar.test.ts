@@ -24,7 +24,7 @@ describe("grammar", () => {
   it("escapes backslashes (issue #486)", () => {
     // eslint-disable-next-line quotes
     expect(grammar.escape.stringLit("GAZP()\\' or 1=1 --")).to.equal(
-      "'GAZP()\\' or 1=1 --'"
+      "'GAZP()\\\\\\' or 1=1 --'"
     );
   });
 
