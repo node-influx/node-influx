@@ -64,8 +64,9 @@ class Escaper {
       if (match.index > 0 && val[match.index - 1] !== "\\") {
         escapedVal +=
           val.slice(chunkIndex, match.index) + this.escaper + match[0];
-        chunkIndex = this._re.lastIndex;
       }
+
+      chunkIndex = this._re.lastIndex;
     }
 
     if (chunkIndex === 0) {
