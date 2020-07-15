@@ -61,6 +61,12 @@ class Escaper {
     let match;
 
     while ((match = this._re.exec(val))) {
+      escapedVal +=
+        val.slice(chunkIndex, match.index) + this.escaper + match[0];
+      chunkIndex = this._re.lastIndex;
+    }
+
+    while ((match = this._re.exec(val))) {
       if (match.index > 0 && val[match.index - 1] !== "\\") {
         escapedVal +=
           val.slice(chunkIndex, match.index) + this.escaper + match[0];
