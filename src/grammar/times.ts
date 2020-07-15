@@ -31,11 +31,7 @@ import { isNumeric } from "./ds";
  *  Influx timestamp = 'Influx time', abbreviated as 'Influx'
  */
 
-function leftPad(
-  str: number | string,
-  length: number,
-  pad: string = "0"
-): string {
+function leftPad(str: number | string, length: number, pad = "0"): string {
   if (typeof str === "number") {
     str = String(str);
   }
@@ -47,11 +43,7 @@ function leftPad(
   return str;
 }
 
-function rightPad(
-  str: number | string,
-  length: number,
-  pad: string = "0"
-): string {
+function rightPad(str: number | string, length: number, pad = "0"): string {
   if (typeof str === "number") {
     str = String(str);
   }
@@ -67,12 +59,12 @@ export interface INanoDate extends Date {
   /**
    * Returns the unix nanoseconds timestamp as a string.
    */
-  getNanoTime(): string;
+  getNanoTime: () => string;
 
   /**
    * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
    */
-  toNanoISOString(): string;
+  toNanoISOString: () => string;
 }
 
 export type TimePrecision = "n" | "u" | "ms" | "s" | "m" | "h";
@@ -108,23 +100,23 @@ interface IDateManipulator<T> {
   /**
    * FormatDate converts the Date instance to Influx's date query format.
    */
-  format(date: T): string;
+  format: (date: T) => string;
 
   /**
    * Converts a Date instance to a numeric unix
    * timestamp with the specified time precision.
    */
-  toTime(date: T, precision: TimePrecision): string;
+  toTime: (date: T, precision: TimePrecision) => string;
 
   /**
    * Converts an ISO timestamp to a Date instance.
    */
-  isoToDate(timestamp: string): T;
+  isoToDate: (timestamp: string) => T;
 
   /**
    * Converts a numeric timestamp with the specified precision to a date.
    */
-  timetoDate(timestamp: number, precision: TimePrecision): T;
+  timetoDate: (timestamp: number, precision: TimePrecision) => T;
 }
 
 class MillisecondDateManipulator implements IDateManipulator<Date> {
@@ -200,8 +192,8 @@ class MillisecondDateManipulator implements IDateManipulator<Date> {
 }
 
 const nsPer = {
-  ms: Math.pow(10, 6),
-  s: Math.pow(10, 9),
+  ms: 10 ** 6,
+  s: 10 ** 9,
 };
 
 function nanoIsoToTime(iso: string): string {

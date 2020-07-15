@@ -38,8 +38,8 @@ class Escaper {
 
   constructor(
     chars: string[],
-    private wrap: string = "",
-    private escaper: string = "\\"
+    private readonly wrap: string = "",
+    private readonly escaper: string = "\\"
   ) {
     const patterns = chars.join("").replace(reEscape, "\\$&");
     this._re = new RegExp("[" + patterns + "]", "g");
@@ -64,9 +64,8 @@ class Escaper {
       if (match.index > 0 && val[match.index - 1] !== "\\") {
         escapedVal +=
           val.slice(chunkIndex, match.index) + this.escaper + match[0];
+        chunkIndex = this._re.lastIndex;
       }
-
-      chunkIndex = this._re.lastIndex;
     }
 
     if (chunkIndex === 0) {

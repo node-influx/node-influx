@@ -156,7 +156,7 @@ export interface IResults<T> extends Array<T> {
    *   ])
    * })
    */
-  group(matcher: Tags): T[];
+  group: (matcher: Tags) => T[];
 
   /**
    * Returns the data grouped into nested arrays, similarly to how it was
@@ -186,7 +186,7 @@ export interface IResults<T> extends Array<T> {
    *   ])
    * })
    */
-  groups(): Array<{ name: string; tags: Tags; rows: T[] }>;
+  groups: () => Array<{ name: string; tags: Tags; rows: T[] }>;
 }
 
 /**

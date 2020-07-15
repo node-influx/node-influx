@@ -1,26 +1,26 @@
 import { escape, formatDate } from "./grammar";
 
 export interface IStringable {
-  toString(): string;
+  toString: () => string;
 }
 
 export interface IBaseExpression<T> {
   /**
    * Inserts a tag name in the expression.
    */
-  tag(name: string): T;
+  tag: (name: string) => T;
 
   /**
    * Inserts a field name in the expression.
    */
-  field(name: string): T;
+  field: (name: string) => T;
 
   /**
    * Chains on a value to the expression. An error will be thrown if the
    * value is a type we can't represent in InfluxQL, primarily `null` or
    * `undefined.`
    */
-  value(value: any): T;
+  value: (value: any) => T;
 }
 
 export interface IExpressionHead extends IBaseExpression<IBinaryOp> {}
@@ -128,7 +128,7 @@ function regexHasFlags(re: RegExp): boolean {
  * //   ("county" = 'US' AND "state" = 'WA')
  */
 export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
-  private _query: string[] = [];
+  private readonly _query: string[] = [];
 
   /**
    * Inserts a tag reference into the expression; the name will be
