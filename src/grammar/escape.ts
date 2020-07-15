@@ -57,12 +57,15 @@ class Escaper {
     this._re.lastIndex = 0;
     let chunkIndex = this._re.lastIndex;
     let escapedVal = "";
-    let match = this._re.exec(val);
 
+    let match = this._re.exec(val);
     while (match) {
-      escapedVal +=
-        val.slice(chunkIndex, match.index) + this.escaper + match[0];
-      chunkIndex = this._re.lastIndex;
+      if (match.index > 0 && val[match.index - 1] !== "\\") {
+        escapedVal +=
+          val.slice(chunkIndex, match.index) + this.escaper + match[0];
+        chunkIndex = this._re.lastIndex;
+      }
+
       match = this._re.exec(val);
     }
 

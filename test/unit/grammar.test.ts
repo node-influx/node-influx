@@ -1,7 +1,3 @@
-/* eslint-env node, mocha */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/no-require-imports */
-
 import { expect } from "chai";
 
 import * as grammar from "../../src/grammar";
@@ -23,6 +19,13 @@ describe("grammar", () => {
     expect(
       grammar.escape.quoted(new grammar.Raw('don"t escape') as any)
     ).to.equal('don"t escape');
+  });
+
+  it("escapes backslashes (issue #486)", () => {
+    // eslint-disable-next-line quotes
+    expect(grammar.escape.stringLit("GAZP()\\' or 1=1 --")).to.equal(
+      "'GAZP()\\' or 1=1 --'"
+    );
   });
 
   it("escapes complex values (issue #242)", () => {
