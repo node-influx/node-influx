@@ -25,9 +25,6 @@
          alt="NPM Downloads">
 
   </a>
-  <a href="https://gitter.im/node-influx/node-influx">
-    <img alt="Gitter" src="https://img.shields.io/gitter/room/node-influx/node-influx.svg?style=flat-square">
-  </a>
 </p>
 
 <hr/>
