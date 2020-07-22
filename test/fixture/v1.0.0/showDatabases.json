@@ -4,17 +4,8 @@
       "series": [
         {
           "name": "databases",
-          "columns": [
-            "name"
-          ],
-          "values": [
-            [
-              "_internal"
-            ],
-            [
-              "influx_test_gen"
-            ]
-          ]
+          "columns": ["name"],
+          "values": [["_internal"], ["influx_test_gen"]]
         }
       ]
     }

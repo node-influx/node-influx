@@ -2,9 +2,7 @@ Fixes #
 
 ## Proposed Changes
 
-  -
-  -
-  -
+- - -
 
 ## Checklist
 

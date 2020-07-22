@@ -1,4 +1,4 @@
-import {Raw} from './ds';
+import { Raw } from "./ds";
 
 const reEscape = /[-|\\{()[\]^$+*?.]/g;
 
@@ -34,43 +34,48 @@ const reEscape = /[-|\\{()[\]^$+*?.]/g;
  *
  */
 class Escaper {
-	private _re: RegExp;
+  private _re: RegExp;
 
-	constructor(chars: string[], private wrap: string = '', private escaper: string = '\\') {
-		const patterns = chars.join('').replace(reEscape, '\\$&');
-		this._re = new RegExp('[' + patterns + ']', 'g');
-	}
+  constructor(
+    chars: string[],
+    private wrap: string = "",
+    private escaper: string = "\\"
+  ) {
+    const patterns = chars.join("").replace(reEscape, "\\$&");
+    this._re = new RegExp("[" + patterns + "]", "g");
+  }
 
-	/**
+  /**
    * Escape replaces occurrences of special characters within the target
    * string with the necessary escape codes.
    */
-	public escape(val: string): string {
-		if (val as any instanceof Raw) {
-			return (val as any).getValue();
-		}
+  public escape(val: string): string {
+    if ((val as any) instanceof Raw) {
+      return (val as any).getValue();
+    }
 
-		this._re.lastIndex = 0;
-		let chunkIndex = this._re.lastIndex;
-		let escapedVal = '';
-		let match = this._re.exec(val);
+    this._re.lastIndex = 0;
+    let chunkIndex = this._re.lastIndex;
+    let escapedVal = "";
+    let match = this._re.exec(val);
 
-		while (match) {
-			escapedVal += val.slice(chunkIndex, match.index) + this.escaper + match[0];
-			chunkIndex = this._re.lastIndex;
-			match = this._re.exec(val);
-		}
+    while (match) {
+      escapedVal +=
+        val.slice(chunkIndex, match.index) + this.escaper + match[0];
+      chunkIndex = this._re.lastIndex;
+      match = this._re.exec(val);
+    }
 
-		if (chunkIndex === 0) {
-			return this.wrap + val + this.wrap;
-		}
+    if (chunkIndex === 0) {
+      return this.wrap + val + this.wrap;
+    }
 
-		if (chunkIndex < val.length) {
-			return this.wrap + escapedVal + val.slice(chunkIndex) + this.wrap;
-		}
+    if (chunkIndex < val.length) {
+      return this.wrap + escapedVal + val.slice(chunkIndex) + this.wrap;
+    }
 
-		return this.wrap + escapedVal + this.wrap;
-	}
+    return this.wrap + escapedVal + this.wrap;
+  }
 }
 
 const bindEsc = (e: Escaper): ((val: string) => string) => e.escape.bind(e);
@@ -95,22 +100,22 @@ const bindEsc = (e: Escaper): ((val: string) => string) => e.escape.bind(e);
  * console.log(escape.tag('my tag=')); // => my\ tag\=
  */
 export const escape = {
-	/**
+  /**
    * Measurement escapes measurement names.
    */
-	measurement: bindEsc(new Escaper([',', ' '])),
+  measurement: bindEsc(new Escaper([",", " "])),
 
-	/**
+  /**
    * Quoted escapes quoted values, such as database names.
    */
-	quoted: bindEsc(new Escaper(['"', '\\\\'], '"')),
+  quoted: bindEsc(new Escaper(['"', "\\\\"], '"')),
 
-	/**
+  /**
    * StringLitEscaper escapes single quotes in string literals.
    */
-	stringLit: bindEsc(new Escaper(['\''], '\'')),
-	/**
+  stringLit: bindEsc(new Escaper(["'"], "'")),
+  /**
    * TagEscaper escapes tag keys, tag values, and field keys.
    */
-	tag: bindEsc(new Escaper([',', '=', ' ']))
+  tag: bindEsc(new Escaper([",", "=", " "])),
 };

@@ -1,4 +1,4 @@
-import {Tags} from './results';
+import { Tags } from "./results";
 
 /**
  * Pool options can be passed into the database to configure the behaviour
@@ -153,9 +153,9 @@ import {Tags} from './results';
  * })
  */
 export class IResults<T> extends Array {
-	// For doc only, implementation in src/results.ts
+  // For doc only, implementation in src/results.ts
 
-	/**
+  /**
    * Looks for and returns the first group in the results
    * that matches the provided tags.
    *
@@ -180,11 +180,11 @@ export class IResults<T> extends Array {
    *   ])
    * })
    */
-	public group(_: Tags): T[] {
-		return null;
-	}
+  public group(_: Tags): T[] {
+    return null;
+  }
 
-	/**
+  /**
    * Returns the data grouped into nested arrays, similarly to how it was
    * returned from Influx originally.
    *
@@ -212,9 +212,9 @@ export class IResults<T> extends Array {
    *   ])
    * })
    */
-	public groups(): Array<{ name: string; tags: Tags; rows: T[] }> {
-		return null;
-	}
+  public groups(): Array<{ name: string; tags: Tags; rows: T[] }> {
+    return null;
+  }
 }
 
 /**
@@ -287,32 +287,32 @@ export class IResults<T> extends Array {
  * console.log(backoff.getDelay()); // => 10
  */
 export class IBackoffStrategy {
-	// For doc only, implementation in src/pool/backoff.ts
+  // For doc only, implementation in src/pool/backoff.ts
 
-	/**
+  /**
    * getDelay returns the amount of delay of the current backoff.
    * @return {Number}
    */
-	public getDelay(): number {
-		return 0;
-	}
+  public getDelay(): number {
+    return 0;
+  }
 
-	/**
+  /**
    * Next is called when a failure occurs on a host to
    * return the next backoff amount.
    * @return {IBackoffStrategy}
    */
-	public next(): IBackoffStrategy {
-		return this;
-	}
+  public next(): IBackoffStrategy {
+    return this;
+  }
 
-	/**
+  /**
    * Returns a strategy with a reset backoff counter.
    * @return {IBackoffStrategy}
    */
-	public reset(): IBackoffStrategy {
-		return this;
-	}
+  public reset(): IBackoffStrategy {
+    return this;
+  }
 }
 
 /**
@@ -322,24 +322,24 @@ export class IBackoffStrategy {
  * @interface
  */
 export class INanoDate extends Date {
-	// For doc only, implementations in src/grammar/times.ts
-	/**
+  // For doc only, implementations in src/grammar/times.ts
+  /**
    * Returns the unix nanoseconds timestamp as a string.
    * @example
    * const date = toNanoDate('1475985480231035677')
    * expect(date.getNanoTime()).to.equal('1475985480231035677')
    */
-	public getNanoTime(): string {
-		return '';
-	}
+  public getNanoTime(): string {
+    return "";
+  }
 
-	/**
+  /**
    * Formats the date as an ISO RFC3339 timestamp with nanosecond precision.
    * @example
    * const date = toNanoDate('1475985480231035677')
    * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
    */
-	public toNanoISOString(): string {
-		return '';
-	}
+  public toNanoISOString(): string {
+    return "";
+  }
 }

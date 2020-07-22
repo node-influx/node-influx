@@ -8,7 +8,7 @@
         "brand": {
           "title": "node-influx"
         },
-        "undocumentIdentifier": {"enable": false},
+        "undocumentIdentifier": { "enable": false },
         "manual": {
           "files": [
             "./examples/express_response_times/readme.md",
