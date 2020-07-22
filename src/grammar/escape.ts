@@ -38,8 +38,8 @@ class Escaper {
 
   constructor(
     chars: string[],
-    private wrap: string = "",
-    private escaper: string = "\\"
+    private readonly wrap: string = "",
+    private readonly escaper: string = "\\"
   ) {
     const patterns = chars.join("").replace(reEscape, "\\$&");
     this._re = new RegExp("[" + patterns + "]", "g");
@@ -57,13 +57,16 @@ class Escaper {
     this._re.lastIndex = 0;
     let chunkIndex = this._re.lastIndex;
     let escapedVal = "";
-    let match = this._re.exec(val);
 
-    while (match) {
+    let match;
+
+    val = val.replace(/\\'/, "\\\\'");
+
+    /* eslint-disable no-cond-assign */
+    while ((match = this._re.exec(val))) {
       escapedVal +=
         val.slice(chunkIndex, match.index) + this.escaper + match[0];
       chunkIndex = this._re.lastIndex;
-      match = this._re.exec(val);
     }
 
     if (chunkIndex === 0) {

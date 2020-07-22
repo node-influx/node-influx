@@ -113,7 +113,6 @@ export class RequestError extends Error {
  * through the first call of any function that it generated.
  */
 function doOnce<T extends Function>(): (arg: T) => <T>(arg: T) => any {
-  // eslint-disable-line @typescript-eslint/ban-types
   let handled = false;
 
   return (fn) => {
@@ -163,15 +162,15 @@ const request = (
  * host for a period of time.
  */
 export class Pool {
-  private _options: IPoolOptions;
+  private readonly _options: IPoolOptions;
 
   private _index: number;
 
-  private _timeout: number;
+  private readonly _timeout: number;
 
-  private _hostsAvailable: Set<Host>;
+  private readonly _hostsAvailable: Set<Host>;
 
-  private _hostsDisabled: Set<Host>;
+  private readonly _hostsDisabled: Set<Host>;
 
   /**
    * Creates a new Pool instance.
@@ -280,7 +279,7 @@ export class Pool {
    * Ping sends out a request to all available Influx servers, reporting on
    * their response time and version number.
    */
-  public ping(timeout: number, path: string = "/ping"): Promise<IPingStats[]> {
+  public ping(timeout: number, path = "/ping"): Promise<IPingStats[]> {
     const todo: Array<Promise<IPingStats>> = [];
 
     setToArray(this._hostsAvailable)
@@ -388,7 +387,7 @@ export class Pool {
         }
 
         if (res.statusCode >= 300) {
-          return RequestError.Create(req, res, (err) => callback(err, res)); // eslint-disable-line new-cap
+          return RequestError.Create(req, res, (err) => callback(err, res));
         }
 
         host.success();

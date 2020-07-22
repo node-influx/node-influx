@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/require-array-sort-compare */
-/* eslint-disable no-prototype-builtins */
-
 import { escape, FieldType, isNumeric } from "./grammar";
 
 export interface ISchemaOptions {
@@ -33,11 +30,11 @@ export type FieldMap = { [name: string]: string | number | boolean };
  * @private
  */
 export class Schema {
-  private _fieldNames: string[];
+  private readonly _fieldNames: string[];
 
   private _tagHash: { [tag: string]: true } = {};
 
-  constructor(private options: ISchemaOptions) {
+  constructor(private readonly options: ISchemaOptions) {
     // FieldNames are sorted for performance: when coerceFields is run the
     // fields will be added to the output in order.
     this._fieldNames = Object.keys(options.fields).sort();

@@ -39,7 +39,7 @@ export class Raw {
    * @example
    * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
    */
-  constructor(private value: string) {}
+  constructor(private readonly value: string) {}
 
   /**
    * Returns the wrapped string.

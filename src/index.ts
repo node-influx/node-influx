@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/unified-signatures */
-/* eslint-disable no-dupe-class-members */
 /* eslint-disable no-prototype-builtins */
 
 import { RequestOptions } from "https";
@@ -15,7 +14,7 @@ const defaultHost: IHostConfig = Object.freeze({
   host: "127.0.0.1",
   port: 8086,
   path: "",
-  protocol: "http" as "http",
+  protocol: "http" as const,
 });
 
 const defaultOptions: IClusterConfig = Object.freeze({
@@ -310,13 +309,13 @@ export class InfluxDB {
    * Connect pool for making requests.
    * @private
    */
-  private _pool: Pool;
+  private readonly _pool: Pool;
 
   /**
    * Config options for Influx.
    * @private
    */
-  private _options: IClusterConfig;
+  private readonly _options: IClusterConfig;
 
   /**
    * Map of Schema instances defining measurements in Influx.
@@ -698,7 +697,7 @@ export class InfluxDB {
   public createUser(
     username: string,
     password: string,
-    admin: boolean = false
+    admin = false
   ): Promise<void> {
     return this._pool
       .json(
@@ -879,7 +878,7 @@ export class InfluxDB {
     name: string,
     query: string,
     database: string = this._defaultDB(),
-    resample: string = ""
+    resample = ""
   ): Promise<void> {
     return this._pool
       .json(
@@ -1458,7 +1457,7 @@ export class InfluxDB {
    * Creates options to be passed into the pool to query databases.
    * @private
    */
-  private _getQueryOpts(params: any, method: string = "GET"): any {
+  private _getQueryOpts(params: any, method = "GET"): any {
     return {
       method,
       path: "/query",
