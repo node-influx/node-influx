@@ -48,7 +48,7 @@
     "@types/sinon-chai": "^3.2.4",
     "awesome-typescript-loader": "5.2.1",
     "chai": "4.2.0",
-    "coveralls": "3.0.6",
+    "coveralls": "^3.1.0",
     "esdoc": "1.1.0",
     "esdoc-standard-plugin": "1.0.0",
     "freeport": "1.0.5",
