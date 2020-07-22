@@ -1,9 +1,9 @@
-'use strict'
+"use strict";
 
-const urlModule = require('url')
+const urlModule = require("url");
 
 module.exports = function () {
-  const failNext = new Set()
+  const failNext = new Set();
 
   /**
    * Create a middleware that serves routes starting with /pool. Rounds can:
@@ -16,78 +16,83 @@ module.exports = function () {
    *    malformed responses, respectively
    */
 
-  return function handle (req, res, next) {
-    const url = urlModule.parse(req.url)
-    const parts = url.pathname.slice(1).split('/')
-    if (parts[0] !== 'pool') {
+  return function handle(req, res, next) {
+    const url = urlModule.parse(req.url);
+    const parts = url.pathname.slice(1).split("/");
+    if (parts[0] !== "pool") {
       // fall through otherwise. In Karma this is a middleware and we'll have
       // a next() function, otherwise send a 404.
-      if (typeof next === 'function') {
-        return next()
+      if (typeof next === "function") {
+        return next();
       }
 
-      res.writeHead(404)
-      res.end()
-      return
+      res.writeHead(404);
+      res.end();
+      return;
     }
 
     for (let i = 0; i < parts.length; i++) {
-      const sid = parts[i]
-      if (sid.startsWith('altFail-')) {
+      const sid = parts[i];
+      if (sid.startsWith("altFail-")) {
         if (failNext.has(sid)) {
-          failNext.delete(sid)
-          res.writeHead(500)
-          res.end()
-          return
+          failNext.delete(sid);
+          res.writeHead(500);
+          res.end();
+          return;
         } else {
-          failNext.add(sid)
+          failNext.add(sid);
         }
       }
     }
 
-    const last = parts[parts.length - 1]
+    const last = parts[parts.length - 1];
     switch (last) {
-      case 'ping':
-        res.setHeader('X-Influxdb-Version', 'v1.0.0')
-        res.writeHead(204)
-        res.end()
-        break
+      case "ping":
+        res.setHeader("X-Influxdb-Version", "v1.0.0");
+        res.writeHead(204);
+        res.end();
+        break;
 
-      case 'echo':
-        let body = ''
-        req.setEncoding('utf8')
-        req.on('data', str => { body += str })
-        req.on('end', () => {
-          res.end(JSON.stringify({
-            method: req.method,
-            query: url.query,
-            body}))
-        })
-        break
+      case "echo":
+        let body = "";
+        req.setEncoding("utf8");
+        req.on("data", (str) => {
+          body += str;
+        });
+        req.on("end", () => {
+          res.end(
+            JSON.stringify({
+              method: req.method,
+              query: url.query,
+              body,
+            })
+          );
+        });
+        break;
 
-      case 'json':
-        res.end(JSON.stringify({ ok: true }))
-        break
+      case "json":
+        res.end(JSON.stringify({ ok: true }));
+        break;
 
-      case 'wait-json':
+      case "wait-json":
         setTimeout(() => {
-          res.end(JSON.stringify({ ok: true }))
-        }, 1500)
-        break
+          res.end(JSON.stringify({ ok: true }));
+        }, 1500);
+        break;
 
-      case 'badjson':
-        res.end('{')
-        break
+      case "badjson":
+        res.end("{");
+        break;
 
       default:
-        const code = Number(last)
+        const code = Number(last);
         if (Number.isNaN(code)) {
-          console.error(`Could not handle path ${req.url}`)
+          console.error(`Could not handle path ${req.url}`);
         }
 
-        res.writeHead(code)
-        res.end()
-        break
+        res.writeHead(code);
+        res.end();
+        break;
     }
-  }
-}
+  };
+};

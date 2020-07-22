@@ -3,19 +3,10 @@
     {
       "series": [
         {
-          "columns": [
-            "user",
-            "admin"
-          ],
+          "columns": ["user", "admin"],
           "values": [
-            [
-              "john",
-              true
-            ],
-            [
-              "steve",
-              false
-            ]
+            ["john", true],
+            ["steve", false]
           ]
         }
       ]

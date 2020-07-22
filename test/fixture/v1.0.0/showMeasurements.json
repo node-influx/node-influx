@@ -4,20 +4,8 @@
       "series": [
         {
           "name": "measurements",
-          "columns": [
-            "name"
-          ],
-          "values": [
-            [
-              "series_0"
-            ],
-            [
-              "series_1"
-            ],
-            [
-              "series_2"
-            ]
-          ]
+          "columns": ["name"],
+          "values": [["series_0"], ["series_1"], ["series_2"]]
         }
       ]
     }

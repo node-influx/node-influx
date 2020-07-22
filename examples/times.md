@@ -21,35 +21,39 @@ There are three places that dates can get passed around:
 To deal with this, we introduce a new type called **NanoDate**. These dates behave just like the normal `Date` type, but have two additional methods: `.getNanoTime()` and `.getNanoISOString()`. They behave just like the normal `.getTime()` and `getISOString` methods, but they both return nanosecond-precision strings instead of millisecond-precision numbers and timestamps.
 
 ```js
-expect(myNanoDate.getTime()).to.equal(1475985480231)
-expect(myNanoDate.getNanoTime()).to.equal('1475985480231035677')
-expect(myNanoDate.toISOString()).to.equal('2016-10-09T03:58:00.231Z')
-expect(myNanoDate.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035677Z')
+expect(myNanoDate.getTime()).to.equal(1475985480231);
+expect(myNanoDate.getNanoTime()).to.equal("1475985480231035677");
+expect(myNanoDate.toISOString()).to.equal("2016-10-09T03:58:00.231Z");
+expect(myNanoDate.toNanoISOString()).to.equal("2016-10-09T03:58:00.231035677Z");
 ```
 
 **All times returned from Influx queries are parsed to INanoDates**. For example, you can do something like the following:
 
 ```js
-influx.query('select * from perf').then(results => {
-  results.forEach(row => console.log(`Used ${row.cpu} at ${row.time.toNanoISOString()}`))
-})
+influx.query("select * from perf").then((results) => {
+  results.forEach((row) =>
+    console.log(`Used ${row.cpu} at ${row.time.toNanoISOString()}`)
+  );
+});
 ```
 
 When writing data to Influx, **all write methods accept INanoDates in all situations**. This means if you select data from Influx and want to update a data point, you can pass that time right back into the `write` method. (Remember, points within series are unique by their time!) If you have a nanosecond timestamp from some external source, you can convert it to a INanoDate using [`toNanoDate`](https://node-influx.github.io/function/index.html#static-function-toNanoDate).
 
 ```js
-import { toNanoDate } from 'influx'
+import { toNanoDate } from "influx";
 
-const myNanoDate = toNanoDate('1475985480231035600')
-expect(myNanoDate.getTime()).to.equal(1475985480231)
-expect(myNanoDate.getNanoTime()).to.equal('1475985480231035600')
-expect(myNanoDate.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z')
+const myNanoDate = toNanoDate("1475985480231035600");
+expect(myNanoDate.getTime()).to.equal(1475985480231);
+expect(myNanoDate.getNanoTime()).to.equal("1475985480231035600");
+expect(myNanoDate.toNanoISOString()).to.equal("2016-10-09T03:58:00.231035600Z");
 ```
 
 Finally, **if you want to embed a INanoDate into an Influx query, you should should use `toNanoISOString`** to so do:
 
 ```js
-influx.query(`select * from perf where time > "${myNanoDate.toNanoISOString()}"`)
+influx.query(
+  `select * from perf where time > "${myNanoDate.toNanoISOString()}"`
+);
 ```
 
 ---

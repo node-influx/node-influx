@@ -32,7 +32,6 @@
 
 <hr/>
 
-
 ## Installation
 
 For Node, simply:
@@ -43,10 +42,10 @@ For browsers, see the [browser setup](https://node-influx.github.io/manual/usage
 
 ## Features
 
- * Simple API for nearly all Influx operations
- * Fully supported in Node and the browser
- * Performant, processing millions of rows/sec on modest hardware
- * Zero dependencies
+- Simple API for nearly all Influx operations
+- Fully supported in Node and the browser
+- Performant, processing millions of rows/sec on modest hardware
+- Zero dependencies
 
 ## Compatibility
 
@@ -58,7 +57,7 @@ Version 3.x.x is compatible with InfluxDB 0.8.x - 3.x will no longer have update
 
 ## Usage
 
- * [API Documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html)
- * [Tutorials & Examples](https://node-influx.github.io/manual/tutorial.html)
- * [Changelog](https://node-influx.github.io/manual/changelog.html)
- * [Contributing](CONTRIBUTING.md)
+- [API Documentation](https://node-influx.github.io/class/src/index.js~InfluxDB.html)
+- [Tutorials & Examples](https://node-influx.github.io/manual/tutorial.html)
+- [Changelog](https://node-influx.github.io/manual/changelog.html)
+- [Contributing](CONTRIBUTING.md)

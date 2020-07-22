@@ -15,14 +15,14 @@
  * }
  */
 export enum FieldType {
-	FLOAT,
-	INTEGER,
-	STRING,
-	BOOLEAN,
+  FLOAT,
+  INTEGER,
+  STRING,
+  BOOLEAN,
 }
 
 export function isNumeric(value: string): boolean {
-	return !Number.isNaN(Number(value));
+  return !Number.isNaN(Number(value));
 }
 
 /**
@@ -33,19 +33,19 @@ export function isNumeric(value: string): boolean {
  * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
  */
 export class Raw {
-	/**
+  /**
    * Wraps a string so that it is not escaped in Influx queries.
    * @param value
    * @example
    * influx.createDatabase(new Influx.Raw('This won\'t be escaped!'));
    */
-	constructor(private value: string) {}
+  constructor(private value: string) {}
 
-	/**
+  /**
    * Returns the wrapped string.
    * @return
    */
-	public getValue(): string {
-		return this.value;
-	}
+  public getValue(): string {
+    return this.value;
+  }
 }
