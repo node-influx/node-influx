@@ -263,7 +263,11 @@ const nanoDateMethods = {
  * expect(date.toNanoISOString()).to.equal('2016-10-09T03:58:00.231035600Z');
  */
 export function toNanoDate(timestamp: string): INanoDate {
-  const date = new Date(Math.floor(Number(timestamp) / nsPer.ms)) as any;
+  const secs = Math.floor(Number(timestamp) / nsPer.s);
+  const remainingNs = timestamp.slice(String(secs).length);
+  const remainingMs = Number(remainingNs) / nsPer.ms;
+  const date = new Date(0) as any;
+  date.setUTCSeconds(secs, remainingMs);
   date._nanoTime = timestamp;
   date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
   date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;

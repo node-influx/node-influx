@@ -50,6 +50,13 @@ describe("grammar", () => {
     expect(date.toNanoISOString()).to.equal("2016-10-09T03:58:00.231035600Z");
   });
 
+  it("converts a nanoseconds timestamp with trailing zeroes to a nano date", () => {
+    const date = grammar.toNanoDate("1254646541002000000");
+    expect(date.getTime()).to.equal(1254646541002);
+    expect(date.getNanoTime()).to.equal("1254646541002000000"); // Precision is lost
+    expect(date.toNanoISOString()).to.equal("2009-10-04T08:55:41.002000000Z");
+  });
+
   describe("formatting", () => {
     it("formats nanosecond dates", () => {
       expect(grammar.formatDate(nanoDate)).to.equal(
