@@ -60,7 +60,9 @@ class Escaper {
 
     let match;
 
-    val = val.replace(/\\'/, "\\\\'");
+    if (typeof val === "string") {
+      val = val.replace(/\\'/, "\\\\'");
+    }
 
     /* eslint-disable no-cond-assign */
     while ((match = this._re.exec(val))) {
