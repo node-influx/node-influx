@@ -26,7 +26,7 @@ describe("grammar", () => {
     expect(grammar.escape.stringLit("GAZP()\\' or 1=1 --")).to.equal(
       "'GAZP()\\\\\\' or 1=1 --'"
     );
-    expect(grammar.escape.tag(1 as any)).to.equal('1');
+    expect(grammar.escape.tag(1 as any)).to.equal("1");
   });
 
   it("escapes complex values (issue #242)", () => {

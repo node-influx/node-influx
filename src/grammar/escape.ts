@@ -60,7 +60,7 @@ class Escaper {
 
     let match;
 
-    if (typeof val === 'string') {
+    if (typeof val === "string") {
       val = val.replace(/\\'/, "\\\\'");
     }
 
