@@ -88,6 +88,15 @@ describe("pool", () => {
     );
   });
 
+  it("handles unicode chunks correctly", () => {
+    const p = createPool();
+    const body = "درود".repeat(40960);
+    p.addHost("https://httpbin.org");
+    p.json({ method: "POST", path: "/post", body: body }).then((data) =>
+      expect(data.data).to.equal(body)
+    );
+  });
+
   describe("request generators", () => {
     it("makes a text request", () => {
       return pool
