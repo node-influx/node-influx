@@ -377,6 +377,7 @@ export class Pool {
         ...host.options,
       },
       once((res: http.IncomingMessage) => {
+        res.setEncoding("utf8");
         if (res.statusCode >= 500) {
           return this._handleRequestError(
             new ServiceNotAvailableError(res.statusMessage),
