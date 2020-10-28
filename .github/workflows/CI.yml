@@ -26,7 +26,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Prettier
-        uses: creyD/prettier_action@v3.0
+        uses: creyD/prettier_action@v3.1
         with:
           prettier_options: --write **/*.{tsx,ts,md}
           commit_message: "style: prettier code"
