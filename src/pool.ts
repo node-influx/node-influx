@@ -466,11 +466,15 @@ export class Pool {
    * re-enabled after a backoff interval
    */
   private _disableHost(host: Host): void {
-    this._hostsAvailable.delete(host);
-    this._hostsDisabled.add(host);
-    this._index %= Math.max(1, this._hostsAvailable.size);
+    const delay = host.fail();
 
-    setTimeout(() => this._enableHost(host), host.fail());
+    if (delay > 0) {
+      this._hostsAvailable.delete(host);
+      this._hostsDisabled.add(host);
+      this._index %= Math.max(1, this._hostsAvailable.size);
+
+      setTimeout(() => this._enableHost(host), delay);
+    }
   }
 
   private _handleRequestError(
