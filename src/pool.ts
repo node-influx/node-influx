@@ -379,12 +379,20 @@ export class Pool {
       once((res: http.IncomingMessage) => {
         res.setEncoding("utf8");
         if (res.statusCode >= 500) {
-          return this._handleRequestError(
-            new ServiceNotAvailableError(res.statusMessage),
-            host,
-            options,
-            callback
-          );
+          res.on("data", () => {
+            /* ignore */
+          });
+
+          res.on("end", () => {
+            return this._handleRequestError(
+              new ServiceNotAvailableError(res.statusMessage),
+              host,
+              options,
+              callback
+            );
+          });
+
+          return;
         }
 
         if (res.statusCode >= 300) {
