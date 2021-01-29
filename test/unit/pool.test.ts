@@ -8,6 +8,8 @@ import * as sinon from "sinon";
 import * as https from "https";
 
 import { ExponentialBackoff } from "../../src/backoff/exponential";
+import { IBackoffStrategy } from "../../src/backoff/backoff";
+import { ConstantBackoff, IConstantOptions } from "../../src/backoff/constant";
 import { Pool, RequestError, ServiceNotAvailableError } from "../../src/pool";
 
 const hosts = 2;
@@ -18,13 +20,15 @@ describe("pool", () => {
   let server: http.Server;
   let sid: string; // Random string to avoid conflicts with other running tests
 
-  const createPool = (): Pool => {
+  const createPool = (backoff?: IBackoffStrategy): Pool => {
     return new Pool({
-      backoff: new ExponentialBackoff({
-        initial: 300,
-        random: 0,
-        max: 10 * 1000,
-      }),
+      backoff:
+        backoff ||
+        new ExponentialBackoff({
+          initial: 300,
+          random: 0,
+          max: 10 * 1000,
+        }),
     });
   };
 
@@ -207,69 +211,117 @@ describe("pool", () => {
   });
 
   describe("backoff", () => {
-    beforeEach(() => {
-      clock = sinon.useFakeTimers();
-      return pool.discard({ method: "GET", path: "/pool/502" }).catch(() => {
-        /* ignore */
+    describe("exponential", () => {
+      beforeEach(() => {
+        clock = sinon.useFakeTimers();
+        return pool.discard({ method: "GET", path: "/pool/502" }).catch(() => {
+          /* ignore */
+        });
+      });
+
+      it("should error if there are no available hosts", () => {
+        return pool
+          .discard({ method: "GET", path: "/pool/json" })
+          .then(() => {
+            throw new Error("Expected to have thrown");
+          })
+          .catch((err) => {
+            expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+            expect(err.message).to.equal("No host available");
+          });
+      });
+
+      it("should reenable hosts after the backoff expires", () => {
+        expect(pool.hostIsAvailable()).to.be.false;
+        clock.tick(300);
+        expect(pool.hostIsAvailable()).to.be.true;
+      });
+
+      it("should back off if failures continue", () => {
+        clock.tick(300);
+        expect(pool.hostIsAvailable()).to.be.true;
+
+        return pool
+          .discard({ method: "GET", path: "/pool/502" })
+          .then(() => {
+            throw new Error("Expected to have thrown");
+          })
+          .catch((err) => {
+            expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+            expect(pool.hostIsAvailable()).to.be.false;
+
+            clock.tick(300);
+            expect(pool.hostIsAvailable()).to.be.false;
+            clock.tick(300);
+            expect(pool.hostIsAvailable()).to.be.true;
+          });
+      });
+
+      it("should reset backoff after success", () => {
+        clock.tick(300);
+        expect(pool.hostIsAvailable()).to.be.true;
+
+        return pool
+          .discard({ method: "GET", path: "/pool/204" })
+          .then(() => {
+            return pool.discard({ method: "GET", path: "/pool/502" });
+          })
+          .then(() => {
+            throw new Error("Expected to have thrown");
+          })
+          .catch((err) => {
+            expect(err).not.to.be.undefined;
+            expect(pool.hostIsAvailable()).to.be.false;
+            clock.tick(300);
+            expect(pool.hostIsAvailable()).to.be.true;
+          });
       });
     });
 
-    it("should error if there are no available hosts", () => {
-      return pool
-        .discard({ method: "GET", path: "/pool/json" })
-        .then(() => {
-          throw new Error("Expected to have thrown");
-        })
-        .catch((err) => {
-          expect(err).to.be.an.instanceof(ServiceNotAvailableError);
-          expect(err.message).to.equal("No host available");
-        });
-    });
+    describe("constant", () => {
+      const createConstantBackoffPool = (options: IConstantOptions): Pool => {
+        const p = createPool(new ConstantBackoff(options));
 
-    it("should reenable hosts after the backoff expires", () => {
-      expect(pool.hostIsAvailable()).to.be.false;
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
-    });
+        for (let i = 0; i < hosts; i += 1) {
+          p.addHost(
+            process.env.WEBPACK ? location.origin : `http://127.0.0.1:${3005}`
+          );
+        }
 
-    it("should back off if failures continue", () => {
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
+        return p;
+      };
 
-      return pool
-        .discard({ method: "GET", path: "/pool/502" })
-        .then(() => {
-          throw new Error("Expected to have thrown");
-        })
-        .catch((err) => {
-          expect(err).to.be.an.instanceof(ServiceNotAvailableError);
-          expect(pool.hostIsAvailable()).to.be.false;
+      it("should disable hosts if backoff delay is greater than zero", () => {
+        const p = createConstantBackoffPool({ delay: 300, jitter: 0 });
 
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.false;
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.true;
-        });
-    });
+        return p
+          .discard({ method: "GET", path: "/pool/502" })
+          .then(() => {
+            throw new Error("Expected to have thrown");
+          })
+          .catch((err) => {
+            expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+            expect(err.message).to.equal("Bad Gateway");
 
-    it("should reset backoff after success", () => {
-      clock.tick(300);
-      expect(pool.hostIsAvailable()).to.be.true;
+            expect(p.getHostsDisabled().length).to.be.greaterThan(0);
+          });
+      });
 
-      return pool
-        .discard({ method: "GET", path: "/pool/204" })
-        .then(() => {
-          return pool.discard({ method: "GET", path: "/pool/502" });
-        })
-        .then(() => {
-          throw new Error("Expected to have thrown");
-        })
-        .catch((err) => {
-          expect(err).not.to.be.undefined;
-          expect(pool.hostIsAvailable()).to.be.false;
-          clock.tick(300);
-          expect(pool.hostIsAvailable()).to.be.true;
-        });
+      it("should not disable hosts if backoff delay is zero", () => {
+        const p = createConstantBackoffPool({ delay: 0, jitter: 0 });
+
+        return p
+          .discard({ method: "GET", path: "/pool/502" })
+          .then(() => {
+            throw new Error("Expected to have thrown");
+          })
+          .catch((err) => {
+            expect(err).to.be.an.instanceof(ServiceNotAvailableError);
+            expect(err.message).to.equal("Bad Gateway");
+
+            expect(p.getHostsDisabled().length).to.be.equal(0);
+          });
+      });
     });
   });
 });
