@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
- <a href="https://travis-ci.org/node-influx/node-influx">
-    <img src="https://img.shields.io/travis/node-influx/node-influx/master.svg?style=flat-square"
-         alt="Travis Build">
+ <a href="https://github.com/node-influx/node-influx/actions">
+    <img src="https://img.shields.io/github/workflow/status/node-influx/node-influx/CI/master?style=flat-square"
+         alt="CI Status">
   </a>
   <a href="">
     <img alt="Coveralls github branch" src="https://img.shields.io/coveralls/github/node-influx/node-influx/master.svg?style=flat-square">
