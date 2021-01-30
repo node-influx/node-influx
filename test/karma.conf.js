@@ -7,7 +7,7 @@ module.exports = function (config) {
      * General base config:
      */
     basePath: path.join(__dirname, ".."),
-    frameworks: ["mocha"],
+    frameworks: ["mocha", 'webpack'],
     reporters: ['mocha'],
 
     client: {
