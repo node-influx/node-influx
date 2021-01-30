@@ -22,7 +22,6 @@ module.exports = function (config) {
       require("karma-chrome-launcher"),
       require("karma-webpack"),
       require("karma-sourcemap-loader"),
-      require("karma-sauce-launcher"),
       {
         "middleware:pool-tests": [
           "factory",
