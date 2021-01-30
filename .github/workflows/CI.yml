@@ -37,8 +37,8 @@ jobs:
       - name: Run InfluxDB
         run: docker run -d -p 8083:8083 -p 8086:8086 influxdb
 
-      - name: Run tests on Sauce
-        run: npm run test:sauce
+      - name: Run tests in browser
+        run: npm run test:browser
 
   test-node:
     name: "Testing on Node.js v${{matrix.node}}"
@@ -65,4 +65,10 @@ jobs:
         run: docker run -d -p 8083:8083 -p 8086:8086 influxdb
 
       - name: Run tests
-        run: npm run test
+        run: npm run test:ci
+
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
