@@ -17,7 +17,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  test:
+  test-browser:
+    name: "Testing Browser"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install depencencies
+        run: npm ci
+
+      - name: Run InfluxDB
+        run: docker run -d -p 8083:8083 -p 8086:8086 influxdb
+
+      - name: Run tests on Sauce
+        run: npm run test:sauce
+
+  test-node:
+    name: "Testing on Node.js v${{matrix.node}}"
+
     runs-on: ubuntu-latest
 
     strategy:
