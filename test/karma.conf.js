@@ -34,10 +34,16 @@ module.exports = function (config) {
      * Webpack and bundling config:
      */
     webpack: require("./webpack.config"),
-    webpackServer: { noInfo: true },
-    webpackMiddleware: { stats: "errors-only" },
+    webpackServer: {
+      noInfo: true,
+    },
+    webpackMiddleware: {
+      stats: "errors-only",
+    },
     files: ["test/karma.shim.js"],
-    preprocessors: { "test/karma.shim.js": ["sourcemap", "webpack"] },
+    preprocessors: {
+      "test/karma.shim.js": ["sourcemap", "webpack"],
+    },
     middleware: ["pool-tests"],
 
     /**
