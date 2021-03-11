@@ -63,7 +63,7 @@ jobs:
         run: npm ci
 
       - name: Run InfluxDB
-        run: docker run -d -p 8083:8083 -p 8086:8086 influxdb
+        run: docker run -d -p 8083:8083 -p 8086:8086 influxdb:1.8
 
       - name: Run tests
         run: npm run test:ci
@@ -72,4 +72,3 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
