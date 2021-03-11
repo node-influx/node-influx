@@ -147,6 +147,22 @@ export interface IPoint {
   timestamp?: Date | string | number;
 }
 
+export interface IParsedPoint extends IPoint {
+  /**
+   * Fields Pairs is the list of key/value pairs for each field on the point
+   */
+  fieldsPairs: Array<[string, string]>;
+  /**
+   * Tags Names is the list of tag names in the point
+   */
+  tagsNames: string[];
+  /**
+   * Casted Timestamp is the timestamp value after being casted to the
+   * desired precision. Default 'n'
+   */
+  castedTimestamp?: string;
+}
+
 export interface IWriteOptions {
   /**
    * Precision at which the points are written, defaults to nanoseconds 'n'.
@@ -190,6 +206,18 @@ export interface IQueryOptions {
    * to avoid injection attacks.
    */
   placeholders?: Record<string, string>;
+}
+
+export interface IParseOptions {
+  /**
+   * Precision at which the points are written, defaults to nanoseconds 'n'.
+   */
+  precision?: grammar.TimePrecision;
+  /**
+   * Database under which to write the points. This is required if a default
+   * database is not provided in Influx.
+   */
+  database?: string;
 }
 
 /**
@@ -1283,14 +1311,13 @@ export class InfluxDB {
 
     let payload = "";
     points.forEach((point) => {
-      const { fields = {}, tags = {}, measurement, timestamp } = point;
-
-      const schema =
-        this._schema[database] && this._schema[database][measurement];
-      const fieldsPairs = schema
-        ? schema.coerceFields(fields)
-        : coerceBadly(fields);
-      const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
+      const {
+        measurement,
+        tags,
+        fieldsPairs,
+        tagsNames,
+        castedTimestamp,
+      } = this.parsePoint(point, { database, precision });
 
       payload += (payload.length > 0 ? "\n" : "") + measurement;
 
@@ -1310,8 +1337,8 @@ export class InfluxDB {
           fieldsPairs[i][1];
       }
 
-      if (timestamp !== undefined) {
-        payload += " " + grammar.castTimestamp(timestamp, precision);
+      if (castedTimestamp !== undefined) {
+        payload += " " + castedTimestamp;
       }
     });
 
@@ -1327,6 +1354,75 @@ export class InfluxDB {
         u: this._options.username,
       },
     });
+  }
+
+  /**
+   * ParsePoint will perform the coercions/schema checks and return the data
+   * required for writing a point. This will throw an error if a schema check
+   * or coercion fails. This can be useful for flagging or "throwing out" bad
+   * points in a batch write to prevent the entire batch from getting aborted
+   *
+   * ---
+   *
+   * A note when using this function, {@link InfluxDB#writePoints} will still perform
+   * the same checks, so any pre-processed data will be checked for validity twice which
+   * has potential performance implications on large data sets
+   *
+   * @param point
+   * @param [options]
+   * @return
+   * @example
+   * // parse a point as if it is getting written to the default
+   * // databse with the default time precision
+   * influx.parsePoint({
+   *     measurement: 'perf',
+   *     tags: { host: 'box1.example.com' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage() },
+   * })
+   *
+   * // you can manually specify the database and time precision
+   * influx.parsePoint({
+   *     measurement: 'perf',
+   *     tags: { host: 'box1.example.com' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage() },
+   * }, {
+   *   precision: 's',
+   *   database: 'my_db'
+   * })
+   *
+   * // if an error occurs, you can catch the error with try...catch
+   * try {
+   *   influx.parsePoint({
+   *     measurement: 'perf',
+   *     tags: { host: 'box1.example.com', myExtraneousTag: 'value' },
+   *     fields: { cpu: getCpuUsage(), mem: getMemUsage(), myExtraneousField: 'value' },
+   *   })
+   * } catch(err) {
+   *   handleError(err);
+   * }
+   */
+  parsePoint(point: IPoint, options: IParseOptions = {}): IParsedPoint {
+    const { database = this._defaultDB(), precision = "n" } = options;
+
+    const { fields = {}, tags = {}, measurement, timestamp } = point;
+
+    const schema =
+      this._schema[database] && this._schema[database][measurement];
+    const fieldsPairs = schema
+      ? schema.coerceFields(fields)
+      : coerceBadly(fields);
+    const tagsNames = schema ? schema.checkTags(tags) : Object.keys(tags);
+    const castedTimestamp =
+      timestamp && grammar.castTimestamp(timestamp, precision);
+    return {
+      fields,
+      tags,
+      measurement,
+      timestamp,
+      fieldsPairs,
+      tagsNames,
+      castedTimestamp,
+    };
   }
 
   /**

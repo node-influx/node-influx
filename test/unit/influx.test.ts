@@ -640,37 +640,6 @@ describe("influxdb", () => {
         ]);
       });
 
-      it("throws on schema violations", () => {
-        setDefaultDB("my_db");
-
-        expect(() => {
-          influx.writePoints([
-            {
-              measurement: "my_schemed_measure",
-              tags: { not_a_tag: "1" },
-            },
-          ]);
-        }).to.throw(/extraneous tags/i);
-
-        expect(() => {
-          influx.writePoints([
-            {
-              measurement: "my_schemed_measure",
-              fields: { not_a_field: "1" },
-            },
-          ]);
-        }).to.throw(/extraneous fields/i);
-
-        expect(() => {
-          influx.writePoints([
-            {
-              measurement: "my_schemed_measure",
-              fields: { bool: "lol, not a bool" },
-            },
-          ]);
-        }).to.throw(/expected bool/i);
-      });
-
       it("handles lack of tags", () => {
         expectWrite("mymeas myfield=90", {
           precision: "n",
@@ -778,6 +747,119 @@ describe("influxdb", () => {
           ],
           { precision: "ms" }
         );
+      });
+    });
+
+    describe(".parsePoint()", () => {
+      it("parses a minimal valid point with default options", () => {
+        setDefaultDB("my_db");
+        let point = {
+          measurement: "mymeas",
+          fields: { myfield: 90 },
+        };
+        let parsedPoint = influx.parsePoint(point);
+        expect(parsedPoint.measurement).to.equal(point.measurement);
+        expect(parsedPoint.fields).to.equal(point.fields);
+        expect(parsedPoint.tags).to.deep.equals({});
+        expect(parsedPoint.fieldsPairs).to.deep.equals([["myfield", "90"]]);
+        expect(parsedPoint.tagsNames).to.deep.equals([]);
+        expect(parsedPoint.castedTimestamp).to.be.undefined;
+      });
+
+      it("parses a point with fields, tags, and timestamp", () => {
+        setDefaultDB("my_db");
+        let date = new Date();
+        let point = {
+          measurement: "mymeas",
+          fields: { myfield: 90 },
+          tags: { my_tag: "2" },
+          timestamp: date,
+        };
+        let parsedPoint = influx.parsePoint(point);
+        expect(parsedPoint.measurement).to.equal(point.measurement);
+        expect(parsedPoint.fields).to.equal(point.fields);
+        expect(parsedPoint.tags).to.equals(point.tags);
+        expect(parsedPoint.fieldsPairs).to.deep.equals([["myfield", "90"]]);
+        expect(parsedPoint.tagsNames).to.deep.equals(["my_tag"]);
+        expect(parsedPoint.castedTimestamp).not.to.be.undefined;
+      });
+
+      it("accepts custom precision option", () => {
+        setDefaultDB("my_db");
+        let date = new Date();
+        let point = {
+          measurement: "mymeas",
+          fields: { myfield: 90 },
+          timestamp: date,
+        };
+        let parsedPoint = influx.parsePoint(point, { precision: "ms" });
+        expect(parsedPoint.castedTimestamp).to.equal(date.getTime().toString());
+      });
+
+      it("accepts custom database option", () => {
+        let date = new Date();
+        let point = {
+          measurement: "mymeas",
+          fields: { myfield: 90 },
+          timestamp: date,
+        };
+        let parsedPoint = influx.parsePoint(point, { database: "my_db" });
+        expect(parsedPoint).to.exist;
+      });
+
+      it("uses a schema to coerce", () => {
+        setDefaultDB("my_db");
+        let date = new Date();
+        let point = {
+          measurement: "my_schemed_measure",
+          fields: { bool: true, float: 43, int: 42 },
+          tags: { my_tag: "2" },
+          timestamp: date,
+        };
+        let parsedPoint = influx.parsePoint(point);
+        expect(parsedPoint.measurement).to.equal(point.measurement);
+        expect(parsedPoint.fields).to.equal(point.fields);
+        expect(parsedPoint.tags).to.equals(point.tags);
+        expect(parsedPoint.fieldsPairs).to.deep.equals([
+          ["bool", "T"],
+          ["float", "43"],
+          ["int", "42i"],
+        ]);
+        expect(parsedPoint.tagsNames).to.deep.equals(["my_tag"]);
+        expect(parsedPoint.castedTimestamp).not.to.be.undefined;
+      });
+
+      it("should throw an error if extraneous tags are given", () => {
+        setDefaultDB("my_db");
+        expect(() => {
+          let point = {
+            measurement: "my_schemed_measure",
+            tags: { not_a_tag: "1" },
+          };
+          influx.parsePoint(point);
+        }).to.throw(/extraneous tags/i);
+      });
+
+      it("should throw an error if extraneous fields are given", () => {
+        setDefaultDB("my_db");
+        expect(() => {
+          let point = {
+            measurement: "my_schemed_measure",
+            fields: { not_a_field: "1" },
+          };
+          influx.parsePoint(point);
+        }).to.throw(/extraneous fields/i);
+      });
+
+      it("should throw an error if invalid value for field type given", () => {
+        setDefaultDB("my_db");
+        expect(() => {
+          let point = {
+            measurement: "my_schemed_measure",
+            fields: { bool: "lol, not a bool" },
+          };
+          influx.parsePoint(point);
+        }).to.throw(/expected bool/i);
       });
     });
 
