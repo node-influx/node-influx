@@ -1,5 +1,5 @@
 const path = require("path");
-process.env.CHROME_BIN = require('puppeteer').executablePath()
+process.env.CHROME_BIN = require("puppeteer").executablePath();
 
 module.exports = function (config) {
   config.set({
@@ -7,8 +7,8 @@ module.exports = function (config) {
      * General base config:
      */
     basePath: path.join(__dirname, ".."),
-    frameworks: ["mocha", 'webpack'],
-    reporters: ['mocha'],
+    frameworks: ["mocha", "webpack"],
+    reporters: ["mocha"],
 
     client: {
       mocha: {
@@ -43,7 +43,7 @@ module.exports = function (config) {
     /**
      * Karma run config:
      */
-    browsers: ['ChromeHeadless'],
+    browsers: ["ChromeHeadless"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
