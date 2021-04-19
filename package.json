@@ -54,7 +54,7 @@
     "freeport": "1.0.5",
     "istanbul": "0.4.5",
     "json-loader": "0.5.7",
-    "karma": "^6.0.0",
+    "karma": "^6.3.2",
     "karma-chrome-launcher": "^3.1.0",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "2.2.5",
