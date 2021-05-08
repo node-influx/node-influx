@@ -1545,7 +1545,13 @@ export class InfluxDB {
    * })
    */
   public ping(timeout: number): Promise<IPingStats[]> {
-    return this._pool.ping(timeout);
+    let auth: string = undefined;
+
+    if (typeof this._options.username === "string") {
+      auth = `${this._options.username}:${this._options.password || ""}`;
+    }
+
+    return this._pool.ping(timeout, "/ping", auth);
   }
 
   /**

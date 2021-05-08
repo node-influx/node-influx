@@ -279,7 +279,11 @@ export class Pool {
    * Ping sends out a request to all available Influx servers, reporting on
    * their response time and version number.
    */
-  public ping(timeout: number, path = "/ping"): Promise<IPingStats[]> {
+  public ping(
+    timeout: number,
+    path: string = "/ping",
+    auth: string | undefined = undefined
+  ): Promise<IPingStats[]> {
     const todo: Array<Promise<IPingStats>> = [];
 
     setToArray(this._hostsAvailable)
@@ -291,6 +295,12 @@ export class Pool {
 
         return todo.push(
           new Promise((resolve) => {
+            const headers: http.OutgoingHttpHeaders = {};
+            if (typeof auth !== "undefined") {
+              const encodedAuth = Buffer.from(auth).toString("base64");
+              headers["Authorization"] = `Basic ${encodedAuth}`;
+            }
+
             const req = request(
               {
                 hostname: url.hostname,
@@ -299,6 +309,7 @@ export class Pool {
                 port: Number(url.port),
                 protocol: url.protocol,
                 timeout,
+                headers: headers,
                 ...host.options,
               },
               once((res: http.IncomingMessage) => {
