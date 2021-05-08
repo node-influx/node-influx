@@ -17,7 +17,11 @@ describe("administrative actions", () => {
     const expectUser = (name: string, admin: boolean): Promise<void> => {
       return db
         .getUsers()
-        .then((users) => expect(users).to.deep.equal([{ user: name, admin }]))
+        .then((users) =>
+          expect(users.filter((value) => value.user === name)).to.deep.equal([
+            { user: name, admin },
+          ])
+        )
         .then(() => undefined);
     };
 
