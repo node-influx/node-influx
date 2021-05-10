@@ -71,10 +71,12 @@ describe("influxdb", () => {
 
     it("parses cluster configs", () => {
       expect(
-        (new InfluxDB({
-          database: "foo",
-          hosts: [{ host: "192.168.0.1", options: { ca: null } }],
-        }) as any)._options
+        (
+          new InfluxDB({
+            database: "foo",
+            hosts: [{ host: "192.168.0.1", options: { ca: null } }],
+          }) as any
+        )._options
       ).to.deep.equal({
         username: "root",
         password: "root",
