@@ -942,9 +942,7 @@ export class InfluxDB {
    * @example
    * influx.showContinousQueries()
    */
-  public showContinousQueries(
-    database: string = this._defaultDB()
-  ): Promise<
+  public showContinousQueries(database: string = this._defaultDB()): Promise<
     IResults<{
       name: string;
       query: string;
@@ -1126,9 +1124,7 @@ export class InfluxDB {
    *   ])
    * })
    */
-  public showRetentionPolicies(
-    database: string = this._defaultDB()
-  ): Promise<
+  public showRetentionPolicies(database: string = this._defaultDB()): Promise<
     IResults<{
       default: boolean;
       duration: string;
@@ -1179,9 +1175,7 @@ export class InfluxDB {
    *   ])
    * })
    */
-  public showShards(
-    database: string = this._defaultDB()
-  ): Promise<
+  public showShards(database: string = this._defaultDB()): Promise<
     Array<{
       id: number;
       database: string;
@@ -1311,13 +1305,8 @@ export class InfluxDB {
 
     let payload = "";
     points.forEach((point) => {
-      const {
-        measurement,
-        tags,
-        fieldsPairs,
-        tagsNames,
-        castedTimestamp,
-      } = this.parsePoint(point, { database, precision });
+      const { measurement, tags, fieldsPairs, tagsNames, castedTimestamp } =
+        this.parsePoint(point, { database, precision });
 
       payload += (payload.length > 0 ? "\n" : "") + measurement;
 
