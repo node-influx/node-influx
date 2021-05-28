@@ -27,6 +27,10 @@
   </a>
 </p>
 
+# InfluxDB v1.x JavaScript library
+
+Node and browser library for InfluxDB v1.x and older. For v2, please use the [official client](https://github.com/influxdata/influxdb-client-js/).
+
 <hr/>
 
 ## Installation
