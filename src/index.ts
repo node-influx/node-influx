@@ -1513,7 +1513,7 @@ export class InfluxDB {
         epoch: options.precision,
         q: query,
         rp: retentionPolicy,
-        params: placeholders,
+        params: JSON.stringify(placeholders),
       })
     );
   }
