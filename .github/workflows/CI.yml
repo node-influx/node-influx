@@ -27,6 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Reconfigure Git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -53,6 +58,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Reconfigure Git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
 
       - name: Setup node ${{ matrix.node }}
         uses: actions/setup-node@v2
