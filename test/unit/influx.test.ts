@@ -981,23 +981,26 @@ describe("influxdb", () => {
         expectQuery(
           "json",
           {
-            q: "select * from series_0 WHERE time > now() - $<since>",
+            q: "select * from series_0 WHERE time > now() - $<since> AND value >= $<minimumValue>",
             epoch: undefined,
             rp: "asdf",
             db: "my_db",
-            params: '{"since":"10s"}',
+            params: '{"since":"10s","minimumValue":12}',
           },
           "GET",
           dbFixture("selectFromOne")
         );
 
         return influx.query(
-          ["select * from series_0 WHERE time > now() - $<since>"],
+          [
+            "select * from series_0 WHERE time > now() - $<since> AND value >= $<minimumValue>",
+          ],
           {
             precision: "n",
             retentionPolicy: "asdf",
             placeholders: {
               since: "10s",
+              minimumValue: 12,
             },
           }
         );
