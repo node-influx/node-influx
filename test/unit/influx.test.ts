@@ -876,7 +876,7 @@ describe("influxdb", () => {
             epoch: undefined,
             rp: undefined,
             db: "my_db",
-            params: {},
+            params: "{}",
           },
           "GET",
           dbFixture("selectFromOne")
@@ -895,7 +895,7 @@ describe("influxdb", () => {
             epoch: undefined,
             rp: undefined,
             db: "my_db",
-            params: {},
+            params: "{}",
           },
           "GET",
           dbFixture("selectFromOne")
@@ -925,7 +925,7 @@ describe("influxdb", () => {
             epoch: undefined,
             rp: undefined,
             db: "my_db",
-            params: {},
+            params: "{}",
           },
           "GET",
           dbFixture("selectFromOne")
@@ -945,7 +945,7 @@ describe("influxdb", () => {
             epoch: "ms",
             rp: "asdf",
             db: "my_db",
-            params: {},
+            params: "{}",
           },
           "GET",
           dbFixture("selectFromOne")
@@ -965,7 +965,7 @@ describe("influxdb", () => {
             epoch: undefined,
             rp: "asdf",
             db: "my_db",
-            params: {},
+            params: "{}",
           },
           "GET",
           dbFixture("selectFromOne")
@@ -985,7 +985,7 @@ describe("influxdb", () => {
             epoch: undefined,
             rp: "asdf",
             db: "my_db",
-            params: { since: "10s" },
+            params: '{"since":"10s"}',
           },
           "GET",
           dbFixture("selectFromOne")
