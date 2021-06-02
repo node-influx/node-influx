@@ -205,7 +205,7 @@ export interface IQueryOptions {
    * Any placeholders used by the query. Using these is strongly recommended
    * to avoid injection attacks.
    */
-  placeholders?: Record<string, string>;
+  placeholders?: Record<string, string | number>;
 }
 
 export interface IParseOptions {
