@@ -41,7 +41,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.11",
-    "@types/freeport": "1.0.21",
+    "@types/freeport": "1.0.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^14.0.24",
     "@types/sinon": "^10.0.0",
