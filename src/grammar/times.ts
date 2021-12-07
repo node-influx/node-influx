@@ -348,7 +348,7 @@ class NanosecondsDateManipulator implements IDateManipulator<INanoDate> {
       case "u":
         timestamp *= 1000;
       case "n": {
-        const date = new Date(timestamp / nsPer.ms) as any;
+        const date = new Date(Math.round(timestamp / nsPer.ms)) as any;
         date._nanoTime = String(timestamp);
         date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
         date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
