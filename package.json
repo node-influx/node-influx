@@ -67,7 +67,7 @@
     "open-cli": "^7.0.0",
     "prettier": "^2.3.0",
     "puppeteer": "^13.0.0",
-    "semantic-release": "^18.0.0",
+    "semantic-release": "^19.0.0",
     "sinon": "^13.0.0",
     "sinon-chai": "^3.5.0",
     "stream-http": "github:node-influx/stream-http",
