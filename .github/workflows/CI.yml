@@ -33,7 +33,7 @@ jobs:
           ssh://git@github.com/
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "16"
 
@@ -65,7 +65,7 @@ jobs:
           ssh://git@github.com/
 
       - name: Setup node ${{ matrix.node }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
 
