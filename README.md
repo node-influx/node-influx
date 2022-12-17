@@ -10,7 +10,7 @@
 
 <p align="center">
  <a href="https://github.com/node-influx/node-influx/actions">
-    <img src="https://img.shields.io/github/workflow/status/node-influx/node-influx/CI/master?style=flat-square"
+    <img src="https://img.shields.io/github/actions/workflow/status/node-influx/node-influx/CI.yml?branch=master&style=flat-square"
          alt="CI Status">
   </a>
   <a href="">
