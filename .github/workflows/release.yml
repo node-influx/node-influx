@@ -6,7 +6,7 @@ on:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     if: github.repository == 'node-influx/node-influx'
     steps:
       - name: Checkout
