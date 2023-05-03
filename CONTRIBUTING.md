@@ -21,7 +21,7 @@ We try to make it as easy as possible for you but there are a few things to cons
 - Make use of the `.editorconfig`-file if provided with the repository.
 - Make commits of logical units and describe them properly, documenting anything new that you add.
 - If possible, submit tests to your patch / new feature so it can be tested easily.
-- Assure nothing is broken by running all the tests via `npm test`.
+- Assure nothing is broken by running all the tests via `npm test`. Start a test-database by running `docker run -p 8086:8086 influxdb:1.8`
 
 ## Submit Changes
 
