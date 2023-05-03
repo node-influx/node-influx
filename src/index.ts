@@ -3,6 +3,7 @@
 
 import { RequestOptions } from "https";
 import * as url from "url";
+import * as http from "http";
 
 import * as b from "./builder";
 import * as grammar from "./grammar";
@@ -1515,6 +1516,39 @@ export class InfluxDB {
         rp: retentionPolicy,
         params: JSON.stringify(placeholders),
       })
+    );
+  }
+
+  /**
+   * Makes a request and calls back with the IncomingMessage stream,
+   * if possible. An error is returned on a non-2xx status code.
+   *
+   * @param query
+   * @param callback A function receiving an optional error as the first argument,
+   * and an IncomingMessage as second parameter. The IncomingMessage can be used
+   * to listen for example for "data" and "end" events.
+   * @param [options]
+   * @example
+   * influx.stream('select * from perf', (err, res) => {
+   *   res.on('data', (data: string): void => {
+   *     console.log(data)
+   *   })
+   * })
+   */
+  public stream(
+    query: string | string[],
+    callback: (err: Error | undefined, res: http.IncomingMessage) => void,
+    options: IQueryOptions = {}
+  ): void {
+    this._pool.stream(
+      this._getQueryOpts({
+        db: options.database ?? this._defaultDB(),
+        epoch: options.precision,
+        q: query,
+        rp: options.retentionPolicy,
+        params: JSON.stringify(options.placeholders ?? {}),
+      }),
+      callback
     );
   }
 

@@ -4,6 +4,7 @@ import * as sinon from "sinon";
 import { FieldType, InfluxDB, toNanoDate } from "../../src";
 import { Pool } from "../../src/pool";
 import { dbFixture } from "./helpers";
+import * as http from "http";
 
 describe("influxdb", () => {
   describe("constructor", () => {
@@ -165,6 +166,7 @@ describe("influxdb", () => {
       sinon.stub(pool, "discard");
       sinon.stub(pool, "json");
       sinon.stub(pool, "text");
+      sinon.stub(pool, "stream");
     });
 
     afterEach(() => {
@@ -1003,6 +1005,33 @@ describe("influxdb", () => {
               minimumValue: 12,
             },
           }
+        );
+      });
+    });
+
+    describe(".stream", () => {
+      beforeEach(() => setDefaultDB("my_db"));
+
+      it("calls the pools stream method correctly", () => {
+        const callback = (_err: Error, _res: http.IncomingMessage) => {};
+
+        expectQuery(
+          "stream",
+          {
+            q: "select * from series_0",
+            epoch: undefined,
+            rp: undefined,
+            db: "my_db",
+            params: "{}",
+          },
+          "GET",
+          dbFixture("selectFromOne")
+        );
+
+        influx.stream("select * from series_0", callback);
+
+        expect((pool.stream as sinon.SinonSpy).getCall(0).args[1]).to.equal(
+          callback
         );
       });
     });
