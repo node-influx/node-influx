@@ -68,6 +68,13 @@ export interface IPoolRequestOptions {
   retries?: number;
 }
 
+export interface IPoolStreamOptions extends IPoolRequestOptions {
+  /**
+   * If true, will instruct the influxdb to answer with csv data.
+   */
+  csv?: boolean;
+}
+
 /**
  * An ServiceNotAvailableError is returned as an error from requests that
  * result in a > 500 error code.
@@ -358,7 +365,7 @@ export class Pool {
    * if possible. An error is returned on a non-2xx status code.
    */
   public stream(
-    options: IPoolRequestOptions,
+    options: IPoolStreamOptions,
     callback: (err: Error, res: http.IncomingMessage) => void
   ): void {
     if (!this.hostIsAvailable()) {
@@ -374,11 +381,17 @@ export class Pool {
       path += "?" + querystring.stringify(options.query);
     }
 
+    const headers: Record<string, string | number> = {
+      "content-length": options.body ? Buffer.from(options.body).length : 0,
+    };
+
+    if (options.csv) {
+      headers.accept = "application/csv";
+    }
+
     const req = request(
       {
-        headers: {
-          "content-length": options.body ? Buffer.from(options.body).length : 0,
-        },
+        headers,
         hostname: host.url.hostname,
         method: options.method,
         path,

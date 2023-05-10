@@ -209,6 +209,13 @@ export interface IQueryOptions {
   placeholders?: Record<string, string | number>;
 }
 
+export interface IStreamOptions extends IQueryOptions {
+  /**
+   * If true, will instruct the influxdb to answer with csv data.
+   */
+  csv?: boolean;
+}
+
 export interface IParseOptions {
   /**
    * Precision at which the points are written, defaults to nanoseconds 'n'.
@@ -1525,29 +1532,32 @@ export class InfluxDB {
    *
    * @param query
    * @param callback A function receiving an optional error as the first argument,
-   * and an IncomingMessage as second parameter. The IncomingMessage can be used
-   * to listen for example for "data" and "end" events.
+   * and an IncomingMessage as second parameter. The IncomingMessage is a readable
+   * stream and can be used to listen for example for "data" and "end" events.
    * @param [options]
    * @example
    * influx.stream('select * from perf', (err, res) => {
    *   res.on('data', (data: string): void => {
    *     console.log(data)
    *   })
-   * })
+   * }, { csv: true })
    */
   public stream(
     query: string | string[],
     callback: (err: Error | undefined, res: http.IncomingMessage) => void,
-    options: IQueryOptions = {}
+    options: IStreamOptions = {}
   ): void {
     this._pool.stream(
-      this._getQueryOpts({
-        db: options.database ?? this._defaultDB(),
-        epoch: options.precision,
-        q: query,
-        rp: options.retentionPolicy,
-        params: JSON.stringify(options.placeholders ?? {}),
-      }),
+      {
+        ...this._getQueryOpts({
+          db: options.database ?? this._defaultDB(),
+          epoch: options.precision,
+          q: query,
+          rp: options.retentionPolicy,
+          params: JSON.stringify(options.placeholders ?? {}),
+        }),
+        csv: options.csv || false,
+      },
       callback
     );
   }
