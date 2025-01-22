@@ -65,7 +65,7 @@ function groupMethod(this: any, matcher: Tags): Row[] {
 }
 
 function groupsMethod(
-  this: any
+  this: any,
 ): Array<{ name: string; tags: Tags; rows: Row[] }> {
   return this.groupRows;
 }
@@ -83,7 +83,7 @@ function groupsMethod(
 
 function parseInner(
   series: IResponseSeries[] = [],
-  precision?: TimePrecision
+  precision?: TimePrecision,
 ): IResults<any> {
   const results: any = [];
   results.groupsTagsKeys =
@@ -216,7 +216,7 @@ export function assertNoErrors(res: IResponse): IResponse {
  */
 export function parse<T>(
   res: IResponse,
-  precision?: TimePrecision
+  precision?: TimePrecision,
 ): Array<IResults<T>> | IResults<T> {
   assertNoErrors(res);
 
@@ -236,14 +236,14 @@ export function parse<T>(
  */
 export function parseSingle<T>(
   res: IResponse,
-  precision?: TimePrecision
+  precision?: TimePrecision,
 ): IResults<T> {
   assertNoErrors(res);
 
   if (res.results.length !== 1) {
     throw new Error(
       "node-influx expected the results length to equal 1, but " +
-        `it was ${0}. Please report this here: https://git.io/influx-err`
+        `it was ${0}. Please report this here: https://git.io/influx-err`,
     );
   }
 

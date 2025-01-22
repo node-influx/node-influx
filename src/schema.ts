@@ -74,8 +74,8 @@ export class Schema {
           if (typ !== "number" && !isNumeric(String(value))) {
             throw new Error(
               `Expected numeric value for ${this._ref(
-                field
-              )}, but got '${value}'!`
+                field,
+              )}, but got '${value}'!`,
             );
           }
 
@@ -86,8 +86,8 @@ export class Schema {
           if (typ !== "number" && !isNumeric(String(value))) {
             throw new Error(
               `Expected numeric value for ${this._ref(
-                field
-              )}, but got '${value}'!`
+                field,
+              )}, but got '${value}'!`,
             );
           }
 
@@ -98,8 +98,8 @@ export class Schema {
           if (typ !== "boolean") {
             throw new Error(
               `Expected boolean value for ${this._ref(
-                field
-              )}, but got a ${typ}!`
+                field,
+              )}, but got a ${typ}!`,
             );
           }
 
@@ -109,7 +109,7 @@ export class Schema {
         default:
           throw new Error(
             `Unknown field type ${this.options.fields[field]} for ${field} in ` +
-              `${this._ref()}. Please ensure that your configuration is correct.`
+              `${this._ref()}. Please ensure that your configuration is correct.`,
           );
       }
 
@@ -122,7 +122,7 @@ export class Schema {
 
       throw new Error(
         "Extraneous fields detected for writing InfluxDB point in " +
-          `${this._ref()}: \`${extraneous.join("`, `")}\`.`
+          `${this._ref()}: \`${extraneous.join("`, `")}\`.`,
       );
     }
 
@@ -139,7 +139,7 @@ export class Schema {
     if (extraneous.length > 0) {
       throw new Error(
         "Extraneous tags detected for writing InfluxDB point in " +
-          `${this._ref()}: \`${extraneous.join("`, `")}\`.`
+          `${this._ref()}: \`${extraneous.join("`, `")}\`.`,
       );
     }
 
