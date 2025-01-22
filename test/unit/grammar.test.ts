@@ -93,6 +93,12 @@ describe("grammar", () => {
       );
     });
 
+    it("accounts for floating point errors", () => {
+      const parsed = grammar.isoOrTimeToDate(1638842483690000000, "n");
+      expect(parsed.getTime()).to.equal(1638842483690);
+      expect(parsed.toISOString()).to.equal("2021-12-07T02:01:23.690Z");
+    });
+
     it("parses numeric `u` timestamps", () => {
       const parsed = grammar.isoOrTimeToDate(1475985480231035, "u");
       expect(parsed.getTime()).to.equal(1475985480231);
