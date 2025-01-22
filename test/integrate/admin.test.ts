@@ -20,7 +20,7 @@ describe("administrative actions", () => {
         .then((users) =>
           expect(users.filter((value) => value.user === name)).to.deep.equal([
             { user: name, admin },
-          ])
+          ]),
         )
         .then(() => undefined);
     };
@@ -30,7 +30,7 @@ describe("administrative actions", () => {
     afterEach(() =>
       db.dropUser("connor").catch(() => {
         /* Noop */
-      })
+      }),
     );
 
     it("creates users", () => expectUser("connor", false));
@@ -57,7 +57,7 @@ describe("administrative actions", () => {
         .dropUser("connor")
         .then(() => db.getUsers())
         .then((users) =>
-          expect(users.map((u) => u.user)).not.to.contain("connor")
+          expect(users.map((u) => u.user)).not.to.contain("connor"),
         );
     });
   });
@@ -67,7 +67,7 @@ describe("administrative actions", () => {
       return db
         .showRetentionPolicies()
         .then((rps) =>
-          expect(rps.find((p) => p.name === policy.name)).to.deep.equal(policy)
+          expect(rps.find((p) => p.name === policy.name)).to.deep.equal(policy),
         )
         .then(() => undefined);
     };
@@ -82,7 +82,7 @@ describe("administrative actions", () => {
     afterEach(() =>
       db.dropRetentionPolicy("7d").catch(() => {
         /* Noop */
-      })
+      }),
     );
 
     it("creates policies", () => {
