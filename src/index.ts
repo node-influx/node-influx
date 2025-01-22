@@ -1441,10 +1441,10 @@ export class InfluxDB {
 
   public query<T>(
     query: string[],
-    options?: IQueryOptions,
-  ): Promise<Array<IResults<T>>>;
+    options?: IQueryOptions
+  ): Promise<Array<IResults<T & {time: grammar.INanoDate}>>>;
 
-  public query<T>(query: string, options?: IQueryOptions): Promise<IResults<T>>;
+  public query<T>(query: string, options?: IQueryOptions): Promise<IResults<T & {time: grammar.INanoDate}>>;
 
   /**
    * .query() runs a query (or list of queries), and returns the results in a
@@ -1461,8 +1461,8 @@ export class InfluxDB {
    */
   public query<T>(
     query: string | string[],
-    options: IQueryOptions = {},
-  ): Promise<IResults<T> | Array<IResults<T>>> {
+    options: IQueryOptions = {}
+  ): Promise<IResults<T & {time: grammar.INanoDate}> | Array<IResults<T & {time: grammar.INanoDate}>>> {
     if (Array.isArray(query)) {
       query = query.join(";");
     }
