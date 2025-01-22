@@ -1,3 +1,4 @@
+import type { INanoDate } from "./grammar";
 import { isoOrTimeToDate, TimePrecision } from "./grammar";
 
 /**
@@ -217,7 +218,7 @@ export function assertNoErrors(res: IResponse): IResponse {
 export function parse<T>(
   res: IResponse,
   precision?: TimePrecision
-): Array<IResults<T>> | IResults<T> {
+): Array<IResults<T & {time: INanoDate}>> | IResults<T & {time: INanoDate}> {
   assertNoErrors(res);
 
   if (res.results.length === 1) {
