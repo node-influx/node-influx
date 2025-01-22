@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Prettier
-        uses: creyD/prettier_action@v4.2
+        uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --write **/*.{tsx,ts,md}
           commit_message: "style: prettier code"
@@ -21,7 +21,7 @@ jobs:
   test-browser:
     name: "Testing Browser"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
