@@ -3,20 +3,20 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  lint:
-    name: Check Code Style
-    runs-on: ubuntu-latest
+  # lint:
+  #   name: Check Code Style
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Prettier
-        uses: creyD/prettier_action@v4.3
-        with:
-          prettier_options: --write **/*.{tsx,ts,md}
-          commit_message: "style: prettier code"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Prettier
+  #       uses: creyD/prettier_action@v4.3
+  #       with:
+  #         prettier_options: --write **/*.{tsx,ts,md}
+  #         commit_message: "style: prettier code"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test-browser:
     name: "Testing Browser"
