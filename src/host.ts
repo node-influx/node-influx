@@ -14,7 +14,7 @@ export class Host {
   constructor(
     url: string,
     private backoff: IBackoffStrategy,
-    public readonly options: RequestOptions,
+    public readonly options: RequestOptions
   ) {
     this.url = urlModule.parse(url);
   }

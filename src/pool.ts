@@ -88,7 +88,7 @@ export class RequestError extends Error {
   constructor(
     public req: http.ClientRequest,
     public res: http.IncomingMessage,
-    body: string,
+    body: string
   ) {
     super();
     this.message = `A ${res.statusCode} ${res.statusMessage} error occurred: ${body}`;
@@ -98,7 +98,7 @@ export class RequestError extends Error {
   public static Create(
     req: http.ClientRequest,
     res: http.IncomingMessage,
-    callback: (e: RequestError) => void,
+    callback: (e: RequestError) => void
   ): void {
     let body = "";
     res.on("data", (str) => {
@@ -146,7 +146,7 @@ function setToArray<T>(itemSet: Set<T>): T[] {
 
 const request = (
   options: http.RequestOptions,
-  callback: (res: http.IncomingMessage) => void,
+  callback: (res: http.IncomingMessage) => void
 ): http.ClientRequest => {
   if (options.protocol === "https:") {
     return https.request(options, callback);
@@ -282,7 +282,7 @@ export class Pool {
   public ping(
     timeout: number,
     path: string = "/ping",
-    auth: string | undefined = undefined,
+    auth: string | undefined = undefined
   ): Promise<IPingStats[]> {
     const todo: Array<Promise<IPingStats>> = [];
 
@@ -320,7 +320,7 @@ export class Pool {
                   rtt: Date.now() - start,
                   version: res.headers["x-influxdb-version"],
                 } as IPingStats);
-              }),
+              })
             );
 
             const fail = once(() => {
@@ -346,7 +346,7 @@ export class Pool {
             req.on("timeout", fail);
             req.on("error", fail);
             req.end();
-          }),
+          })
         );
       });
 
@@ -359,7 +359,7 @@ export class Pool {
    */
   public stream(
     options: IPoolRequestOptions,
-    callback: (err: Error, res: http.IncomingMessage) => void,
+    callback: (err: Error, res: http.IncomingMessage) => void
   ): void {
     if (!this.hostIsAvailable()) {
       return callback(new ServiceNotAvailableError("No host available"), null);
@@ -399,7 +399,7 @@ export class Pool {
               new ServiceNotAvailableError(res.statusMessage),
               host,
               options,
-              callback,
+              callback
             );
           });
 
@@ -412,7 +412,7 @@ export class Pool {
 
         host.success();
         return callback(undefined, res);
-      }),
+      })
     );
 
     // Handle network or HTTP parsing errors:
@@ -420,7 +420,7 @@ export class Pool {
       "error",
       once((err: Error) => {
         this._handleRequestError(err, host, options, callback);
-      }),
+      })
     );
 
     // Handle timeouts:
@@ -432,9 +432,9 @@ export class Pool {
           new ServiceNotAvailableError("Request timed out"),
           host,
           options,
-          callback,
+          callback
         );
-      }),
+      })
     );
 
     // Support older Nodes and polyfills which don't allow .timeout() in the
@@ -492,7 +492,7 @@ export class Pool {
     err: any,
     host: Host,
     options: IPoolRequestOptions,
-    callback: (err: Error, res: http.IncomingMessage) => void,
+    callback: (err: Error, res: http.IncomingMessage) => void
   ): void {
     if (
       !(err instanceof ServiceNotAvailableError) &&

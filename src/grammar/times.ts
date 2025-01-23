@@ -383,7 +383,7 @@ export function formatDate(date: Date): string {
  */
 export function dateToTime(
   date: Date | INanoDate,
-  precision: TimePrecision,
+  precision: TimePrecision
 ): string {
   const nano = asNanoDate(date);
   if (nano) {
@@ -400,7 +400,7 @@ export function dateToTime(
  */
 export function isoOrTimeToDate(
   stamp: string | number,
-  precision: TimePrecision = "n",
+  precision: TimePrecision = "n"
 ): INanoDate {
   if (typeof stamp === "string") {
     return nanoManipulator.isoToDate(stamp);
@@ -416,12 +416,12 @@ export function isoOrTimeToDate(
  */
 export function castTimestamp(
   timestamp: string | number | Date,
-  precision: TimePrecision,
+  precision: TimePrecision
 ): string {
   if (typeof timestamp === "string") {
     if (!isNumeric(timestamp)) {
       throw new Error(
-        `Expected numeric value for, timestamp, but got '${timestamp}'!`,
+        `Expected numeric value for, timestamp, but got '${timestamp}'!`
       );
     }
 

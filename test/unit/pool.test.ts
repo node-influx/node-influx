@@ -88,7 +88,7 @@ describe("pool", () => {
     const body = "\u00FF";
     p.addHost("https://httpbin.org");
     p.json({ method: "POST", path: "/post", body: body }).then((data) =>
-      expect(data.data).to.equal(body),
+      expect(data.data).to.equal(body)
     );
   });
 
@@ -97,7 +97,7 @@ describe("pool", () => {
     const body = "درود".repeat(40960);
     p.addHost("https://httpbin.org");
     p.json({ method: "POST", path: "/post", body: body }).then((data) =>
-      expect(data.data).to.equal(body),
+      expect(data.data).to.equal(body)
     );
   });
 
@@ -284,7 +284,7 @@ describe("pool", () => {
 
         for (let i = 0; i < hosts; i += 1) {
           p.addHost(
-            process.env.WEBPACK ? location.origin : `http://127.0.0.1:${3005}`,
+            process.env.WEBPACK ? location.origin : `http://127.0.0.1:${3005}`
           );
         }
 

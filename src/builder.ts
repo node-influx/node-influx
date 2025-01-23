@@ -206,7 +206,7 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
           if (regexHasFlags(value)) {
             throw new Error(
               "Attempted to query using a regex with flags, " +
-                "but Influx doesn't support flags in queries.",
+                "but Influx doesn't support flags in queries."
             );
           }
 
@@ -221,7 +221,7 @@ export class Expression implements IExpressionHead, IExpressionTail, IBinaryOp {
 
         throw new Error(
           "node-influx doesn't know how to encode the provided value into a " +
-            "query. If you think this is a bug, open an issue here: https://git.io/influx-err",
+            "query. If you think this is a bug, open an issue here: https://git.io/influx-err"
         );
     }
   }
@@ -398,7 +398,7 @@ export class Measurement {
   public toString(): string {
     if (!this._parts[2]) {
       throw new Error(
-        `You must specify a measurement name to query! Got \`${this._parts[2]}\``,
+        `You must specify a measurement name to query! Got \`${this._parts[2]}\``
       );
     }
 

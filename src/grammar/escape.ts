@@ -39,7 +39,7 @@ class Escaper {
   constructor(
     chars: string[],
     private readonly wrap: string = "",
-    private readonly escaper: string = "\\",
+    private readonly escaper: string = "\\"
   ) {
     const patterns = chars.join("").replace(reEscape, "\\$&");
     this._re = new RegExp("[" + patterns + "]", "g");

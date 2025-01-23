@@ -17,14 +17,14 @@ describe("grammar", () => {
 
   it("does not escape raw values", () => {
     expect(
-      grammar.escape.quoted(new grammar.Raw('don"t escape') as any),
+      grammar.escape.quoted(new grammar.Raw('don"t escape') as any)
     ).to.equal('don"t escape');
   });
 
   it("escapes backslashes (issues #486, #516)", () => {
     // eslint-disable-next-line quotes
     expect(grammar.escape.stringLit("GAZP()\\' or 1=1 --")).to.equal(
-      "'GAZP()\\\\\\' or 1=1 --'",
+      "'GAZP()\\\\\\' or 1=1 --'"
     );
     expect(grammar.escape.tag(1 as any)).to.equal("1");
   });
@@ -32,7 +32,7 @@ describe("grammar", () => {
   it("escapes complex values (issue #242)", () => {
     const original = JSON.stringify({ a: JSON.stringify({ b: "c c" }) });
     expect(grammar.escape.quoted(original)).to.equal(
-      '"{\\"a\\":\\"{\\\\\\"b\\\\\\":\\\\\\"c c\\\\\\"}\\"}"',
+      '"{\\"a\\":\\"{\\\\\\"b\\\\\\":\\\\\\"c c\\\\\\"}\\"}"'
     );
   });
 
@@ -61,12 +61,12 @@ describe("grammar", () => {
   describe("formatting", () => {
     it("formats nanosecond dates", () => {
       expect(grammar.formatDate(nanoDate)).to.equal(
-        '"2016-10-09 03:58:00.231035677"',
+        '"2016-10-09 03:58:00.231035677"'
       );
     });
     it("formats millisecond dates", () => {
       expect(grammar.formatDate(milliDate)).to.equal(
-        '"2016-10-09 03:58:00.231"',
+        '"2016-10-09 03:58:00.231"'
       );
     });
   });
@@ -75,12 +75,12 @@ describe("grammar", () => {
     it("parses ISO dates correctly", () => {
       const parsed = grammar.isoOrTimeToDate(
         "2016-10-09T03:58:00.231035677Z",
-        "n",
+        "n"
       );
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal("1475985480231035677");
       expect(parsed.toNanoISOString()).to.equal(
-        "2016-10-09T03:58:00.231035677Z",
+        "2016-10-09T03:58:00.231035677Z"
       );
     });
 
@@ -89,7 +89,7 @@ describe("grammar", () => {
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal("1475985480231035600"); // Precision is lost
       expect(parsed.toNanoISOString()).to.equal(
-        "2016-10-09T03:58:00.231035600Z",
+        "2016-10-09T03:58:00.231035600Z"
       );
     });
 
@@ -104,7 +104,7 @@ describe("grammar", () => {
       expect(parsed.getTime()).to.equal(1475985480231);
       expect(parsed.getNanoTime()).to.equal("1475985480231035000");
       expect(parsed.toNanoISOString()).to.equal(
-        "2016-10-09T03:58:00.231035000Z",
+        "2016-10-09T03:58:00.231035000Z"
       );
     });
 
@@ -156,10 +156,10 @@ describe("grammar", () => {
 
     it("accepts strings, numbers liternally", () => {
       expect(grammar.castTimestamp("1475985480231035600", "s")).to.equal(
-        "1475985480231035600",
+        "1475985480231035600"
       );
       expect(grammar.castTimestamp(1475985480231, "s")).to.equal(
-        "1475985480231",
+        "1475985480231"
       );
     });
 

@@ -48,7 +48,7 @@ export class ExponentialBackoff implements IBackoffStrategy {
       this._counter - Math.round(Math.random() * this.options.random); // Tslint:disable-line
     return Math.min(
       this.options.max,
-      this.options.initial * 2 ** Math.max(count, 0),
+      this.options.initial * 2 ** Math.max(count, 0)
     );
   }
 

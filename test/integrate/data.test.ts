@@ -26,7 +26,7 @@ describe("data operations", () => {
     return db
       .showShards("influx_test_db")
       .then((res) =>
-        expect(res[0]).to.have.property("database", "influx_test_db"),
+        expect(res[0]).to.have.property("database", "influx_test_db")
       );
   });
 
@@ -64,8 +64,8 @@ describe("data operations", () => {
       .then(() => db.getSeries())
       .then((res) =>
         expect(res).to.not.contain(
-          "h2o_quality,location=coyote_creek,randtag=1",
-        ),
+          "h2o_quality,location=coyote_creek,randtag=1"
+        )
       );
   });
   it("drops shard", () => {

@@ -22,7 +22,7 @@ describe("results", () => {
             },
           ],
         })
-        .slice(),
+        .slice()
     ).to.deep.equal([]);
   });
 
@@ -100,7 +100,7 @@ describe("results", () => {
           },
         ],
       },
-      "ms",
+      "ms"
     );
 
     expect(r1.slice()).to.deep.equal([
@@ -125,7 +125,7 @@ describe("results", () => {
           },
         ],
       },
-      "u",
+      "u"
     );
 
     expect(r2.slice()).to.deep.equal([
@@ -219,7 +219,7 @@ describe("results", () => {
     expect(() =>
       results.parseSingle({
         results: [{ error: "user already exists" }],
-      }),
+      })
     ).to.throw(/already exists/);
   });
 });

@@ -32,7 +32,7 @@ expect(myNanoDate.toNanoISOString()).to.equal("2016-10-09T03:58:00.231035677Z");
 ```js
 influx.query("select * from perf").then((results) => {
   results.forEach((row) =>
-    console.log(`Used ${row.cpu} at ${row.time.toNanoISOString()}`),
+    console.log(`Used ${row.cpu} at ${row.time.toNanoISOString()}`)
   );
 });
 ```
@@ -52,7 +52,7 @@ Finally, **if you want to embed a INanoDate into an Influx query, you should sho
 
 ```js
 influx.query(
-  `select * from perf where time > "${myNanoDate.toNanoISOString()}"`,
+  `select * from perf where time > "${myNanoDate.toNanoISOString()}"`
 );
 ```
 

@@ -29,7 +29,7 @@ describe("schema", () => {
           b: 42,
           a: true,
           c: 'hello"world',
-        }),
+        })
       ).to.deep.equal([
         ["a", "true"],
         ["b", "42"],
@@ -46,7 +46,7 @@ describe("schema", () => {
           float: 43,
           string: 'hello"world',
           bool: true,
-        }),
+        })
       ).to.deep.equal([
         ["bool", "T"],
         ["float", "43"],
@@ -59,7 +59,7 @@ describe("schema", () => {
       expect(
         schema.coerceFields({
           int: 42,
-        }),
+        })
       ).to.deep.equal([["int", "42i"]]);
     });
 
@@ -67,7 +67,7 @@ describe("schema", () => {
       expect(
         schema.coerceFields({
           int: "42",
-        }),
+        })
       ).to.deep.equal([["int", "42i"]]);
     });
 
@@ -77,34 +77,34 @@ describe("schema", () => {
           int: 42,
           float: undefined,
           bool: null,
-        }),
+        })
       ).to.deep.equal([["int", "42i"]]);
     });
 
     it("throws if wrong data type provided (bool)", () => {
       expect(() => schema.coerceFields({ bool: 42 })).to.throw(
-        /expected bool/i,
+        /expected bool/i
       );
       expect(() => schema.coerceFields({ bool: "asdf" })).to.throw(
-        /expected bool/i,
+        /expected bool/i
       );
     });
 
     it("throws if wrong data type provided (float)", () => {
       expect(() => schema.coerceFields({ float: true })).to.throw(
-        /expected numeric/i,
+        /expected numeric/i
       );
       expect(() => schema.coerceFields({ float: "asdf" })).to.throw(
-        /expected numeric/i,
+        /expected numeric/i
       );
     });
 
     it("throws if wrong data type provided (int)", () => {
       expect(() => schema.coerceFields({ int: true })).to.throw(
-        /expected numeric/i,
+        /expected numeric/i
       );
       expect(() => schema.coerceFields({ int: "asdf" })).to.throw(
-        /expected numeric/i,
+        /expected numeric/i
       );
     });
 
@@ -115,13 +115,13 @@ describe("schema", () => {
 
     it("throws if invalid tags are provided", () => {
       expect(() => schema.checkTags({ whatever: "value" })).to.throw(
-        /extraneous tags/i,
+        /extraneous tags/i
       );
     });
 
     it("throws if invalid fields are provided", () => {
       expect(() => expect(schema.coerceFields({ x: 42 }))).to.throw(
-        /extraneous fields/i,
+        /extraneous fields/i
       );
     });
   });

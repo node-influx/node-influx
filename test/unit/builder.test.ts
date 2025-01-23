@@ -8,13 +8,13 @@ describe("query builder", () => {
   describe("measurement builder", () => {
     it("builds with only name", () => {
       expect(new Measurement().name('my_"meas').toString()).to.equal(
-        '"my_\\"meas"',
+        '"my_\\"meas"'
       );
     });
 
     it("builds with name and rp", () => {
       expect(
-        new Measurement().name('my_"meas').policy('po"licy').toString(),
+        new Measurement().name('my_"meas').policy('po"licy').toString()
       ).to.equal('"po\\"licy"."my_\\"meas"');
     });
 
@@ -24,19 +24,19 @@ describe("query builder", () => {
           .name('my_"meas')
           .policy('po"licy')
           .db('my_"db')
-          .toString(),
+          .toString()
       ).to.equal('"my_\\"db"."po\\"licy"."my_\\"meas"');
     });
 
     it("builds with name and db", () => {
       expect(
-        new Measurement().name('my_"meas').db('my_"db').toString(),
+        new Measurement().name('my_"meas').db('my_"db').toString()
       ).to.equal('"my_\\"db"."my_\\"meas"');
     });
 
     it("throws when a name is omitted", () => {
       expect(() => new Measurement().db('my_"db').toString()).to.throw(
-        /must specify a measurement/,
+        /must specify a measurement/
       );
     });
   });
@@ -44,7 +44,7 @@ describe("query builder", () => {
   describe("expression builder", () => {
     it("creates basic queries", () => {
       expect(
-        new Expression().tag('my_"tag').equals.value("42").toString(),
+        new Expression().tag('my_"tag').equals.value("42").toString()
       ).to.equal('"my_\\"tag" = \'42\'');
     });
 
@@ -66,28 +66,28 @@ describe("query builder", () => {
           .or.field("f")
           .equals.value(true)
           .or.exp((e) =>
-            e.field("a").equals.value(1).or.field("b").equals.value(2),
+            e.field("a").equals.value(1).or.field("b").equals.value(2)
           )
           .or.field("f")
           .doesntMatch.value({ toString: () => "/my-custom-re/" })
-          .toString(),
+          .toString()
       ).to.equal(
         '"f" = \'str\\\'\' OR "f" =~ /[0-9]+/ OR "f" = 42 ' +
           'OR "f" = "my_\\"tag" OR "f" = "2016-10-09 03:58:00.231" ' +
           'OR "f" = "2016-10-09 03:58:00.231035600" OR "f" = TRUE ' +
-          'OR ("a" = 1 OR "b" = 2) OR "f" !~ /my-custom-re/',
+          'OR ("a" = 1 OR "b" = 2) OR "f" !~ /my-custom-re/'
       );
     });
 
     it("throws when using a flagged regex", () => {
       expect(() => new Expression().field("f").matches.value(/a/i)).to.throw(
-        /doesn't support flags/,
+        /doesn't support flags/
       );
     });
 
     it("throws when using un-stringifyable object", () => {
       expect(() =>
-        new Expression().field("f").equals.value(Object.create(null)),
+        new Expression().field("f").equals.value(Object.create(null))
       ).to.throw(/doesn't know how to encode/);
     });
 
@@ -112,7 +112,7 @@ describe("query builder", () => {
       it(`yields ${yields} from .${method}`, () => {
         const expr: any = new Expression().field("f");
         expect(expr[method].value(true).toString()).to.equal(
-          `"f" ${yields} TRUE`,
+          `"f" ${yields} TRUE`
         );
       });
     });

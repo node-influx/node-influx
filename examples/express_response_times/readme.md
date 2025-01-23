@@ -123,7 +123,7 @@ app.get("/times", function (req, res) {
     where host = ${Influx.escape.stringLit(os.hostname())}
     order by time desc
     limit 10
-  `,
+  `
     )
     .then((result) => {
       res.json(result);
