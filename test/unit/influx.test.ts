@@ -4,6 +4,7 @@ import * as sinon from "sinon";
 import { FieldType, InfluxDB, toNanoDate } from "../../src";
 import { Pool } from "../../src/pool";
 import { dbFixture } from "./helpers";
+import * as http from "http";
 
 describe("influxdb", () => {
   describe("constructor", () => {
@@ -165,6 +166,7 @@ describe("influxdb", () => {
       sinon.stub(pool, "discard");
       sinon.stub(pool, "json");
       sinon.stub(pool, "text");
+      sinon.stub(pool, "stream");
     });
 
     afterEach(() => {
@@ -177,8 +179,7 @@ describe("influxdb", () => {
       (influx as any)._options.database = db;
     };
 
-    const expectQuery = (
-      method: keyof Pool,
+    const expectJsonCall = (
       options: string | any,
       httpMethod: string = "POST",
       yields: any = { results: [{}] }
@@ -187,9 +188,9 @@ describe("influxdb", () => {
         options = { q: options };
       }
 
-      (pool[method] as any).returns(Promise.resolve(yields));
+      (pool.json as any).returns(Promise.resolve(yields));
       expectations.push(() => {
-        expect(pool[method]).to.have.been.calledWith({
+        expect(pool.json).to.have.been.calledWith({
           method: httpMethod,
           path: "/query",
           query: {
@@ -222,26 +223,26 @@ describe("influxdb", () => {
     };
 
     it(".createDatabase()", () => {
-      expectQuery("json", 'create database "foo"');
+      expectJsonCall('create database "foo"');
       influx.createDatabase("foo");
-      expectQuery("json", 'create database "f\\"oo"');
+      expectJsonCall('create database "f\\"oo"');
       influx.createDatabase('f"oo');
     });
 
     it(".dropDatabase()", () => {
-      expectQuery("json", 'drop database "foo"');
+      expectJsonCall('drop database "foo"');
       influx.dropDatabase("foo");
-      expectQuery("json", 'drop database "f\\"oo"');
+      expectJsonCall('drop database "f\\"oo"');
       influx.dropDatabase('f"oo');
     });
 
     it(".dropShard()", () => {
-      expectQuery("json", "drop shard 1");
+      expectJsonCall("drop shard 1");
       influx.dropShard(1);
     });
 
     it(".getDatabaseNames()", () => {
-      expectQuery("json", "show databases", "GET", dbFixture("showDatabases"));
+      expectJsonCall("show databases", "GET", dbFixture("showDatabases"));
       return influx.getDatabaseNames().then((names) => {
         expect(names).to.deep.equal(["_internal", "influx_test_gen"]);
       });
@@ -249,8 +250,7 @@ describe("influxdb", () => {
 
     it(".getMeasurements()", () => {
       setDefaultDB("mydb");
-      expectQuery(
-        "json",
+      expectJsonCall(
         {
           db: "mydb",
           q: "show measurements",
@@ -266,8 +266,7 @@ describe("influxdb", () => {
 
     it(".getSeries() from all", () => {
       setDefaultDB("mydb");
-      expectQuery(
-        "json",
+      expectJsonCall(
         {
           db: "mydb",
           q: "show series",
@@ -307,8 +306,7 @@ describe("influxdb", () => {
     });
 
     it(".getSeries() from single", () => {
-      expectQuery(
-        "json",
+      expectJsonCall(
         {
           db: "mydb",
           q: 'show series from "measure_1"',
@@ -336,7 +334,7 @@ describe("influxdb", () => {
     });
 
     it(".dropMeasurement()", () => {
-      expectQuery("json", {
+      expectJsonCall({
         db: "my_db",
         q: 'drop measurement "series_1"',
       });
@@ -347,17 +345,17 @@ describe("influxdb", () => {
       beforeEach(() => setDefaultDB("my_db"));
 
       it("drops with only from clause by string", () => {
-        expectQuery("json", { db: "my_db", q: 'drop series from "series_0"' });
+        expectJsonCall({ db: "my_db", q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: '"series_0"' });
       });
 
       it("drops with only from clause by builder", () => {
-        expectQuery("json", { db: "my_db", q: 'drop series from "series_0"' });
+        expectJsonCall({ db: "my_db", q: 'drop series from "series_0"' });
         influx.dropSeries({ measurement: (m) => m.name("series_0") });
       });
 
       it("drops with only where clause by string", () => {
-        expectQuery("json", {
+        expectJsonCall({
           db: "my_db",
           q: 'drop series where "my_tag" = 1',
         });
@@ -365,7 +363,7 @@ describe("influxdb", () => {
       });
 
       it("drops with only where clause by builder", () => {
-        expectQuery("json", {
+        expectJsonCall({
           db: "my_db",
           q: 'drop series where "my_tag" = 1',
         });
@@ -373,7 +371,7 @@ describe("influxdb", () => {
       });
 
       it("drops with both", () => {
-        expectQuery("json", {
+        expectJsonCall({
           db: "my_db",
           q: 'drop series from "series_0" where "my_tag" = 1',
         });
@@ -385,7 +383,7 @@ describe("influxdb", () => {
     });
 
     it(".getUsers()", () => {
-      expectQuery("json", "show users", "GET", dbFixture("showUsers"));
+      expectJsonCall("show users", "GET", dbFixture("showUsers"));
       return influx.getUsers().then((names) => {
         expect(names.slice()).to.deep.equal([
           { user: "john", admin: true },
@@ -396,22 +394,19 @@ describe("influxdb", () => {
 
     describe(".createUser()", () => {
       it("works with admin specified == true", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           "create user \"con\\\"nor\" with password 'pa55\\'word' with all privileges"
         );
         return influx.createUser('con"nor', "pa55'word", true);
       });
       it("works with admin specified == false", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           "create user \"con\\\"nor\" with password 'pa55\\'word'"
         );
         return influx.createUser('con"nor', "pa55'word", false);
       });
       it("works with admin unspecified", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           "create user \"con\\\"nor\" with password 'pa55\\'word'"
         );
         return influx.createUser('con"nor', "pa55'word");
@@ -420,7 +415,7 @@ describe("influxdb", () => {
 
     describe(".grantPrivilege()", () => {
       it("queries correctly", () => {
-        expectQuery("json", 'grant READ on "my_\\"_db" to "con\\"nor"');
+        expectJsonCall('grant READ on "my_\\"_db" to "con\\"nor"');
         return influx.grantPrivilege('con"nor', "READ", 'my_"_db');
       });
       it("throws if DB unspecified", () => {
@@ -430,14 +425,14 @@ describe("influxdb", () => {
       });
       it("fills in default DB", () => {
         setDefaultDB('my_\\"_db');
-        expectQuery("json", 'grant READ on "my_\\"_db" to "con\\"nor"');
+        expectJsonCall('grant READ on "my_\\"_db" to "con\\"nor"');
         return influx.grantPrivilege('con"nor', "READ", 'my_"_db');
       });
     });
 
     describe(".revokePrivilege()", () => {
       it("queries correctly", () => {
-        expectQuery("json", 'revoke READ on "my_\\"_db" from "con\\"nor"');
+        expectJsonCall('revoke READ on "my_\\"_db" from "con\\"nor"');
         return influx.revokePrivilege('con"nor', "READ", 'my_"_db');
       });
       it("throws if DB unspecified", () => {
@@ -447,37 +442,35 @@ describe("influxdb", () => {
       });
       it("fills in default DB", () => {
         setDefaultDB('my_\\"_db');
-        expectQuery("json", 'revoke READ on "my_\\"_db" from "con\\"nor"');
+        expectJsonCall('revoke READ on "my_\\"_db" from "con\\"nor"');
         return influx.revokePrivilege('con"nor', "READ", 'my_"_db');
       });
     });
 
     it(".grantAdminPrivilege()", () => {
-      expectQuery("json", 'grant all to "con\\"nor"');
+      expectJsonCall('grant all to "con\\"nor"');
       return influx.grantAdminPrivilege('con"nor');
     });
 
     it(".revokeAdminPrivilege()", () => {
-      expectQuery("json", 'revoke all from "con\\"nor"');
+      expectJsonCall('revoke all from "con\\"nor"');
       return influx.revokeAdminPrivilege('con"nor');
     });
 
     it(".dropUser()", () => {
-      expectQuery("json", 'drop user "con\\"nor"');
+      expectJsonCall('drop user "con\\"nor"');
       return influx.dropUser('con"nor');
     });
 
     describe(".createContinuousQuery()", () => {
       it("queries correctly no resample", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'create continuous query "my_\\"q" on "my_\\"_db"  begin foo end'
         );
         return influx.createContinuousQuery('my_"q', "foo", 'my_"_db');
       });
       it("queries correctly with resample", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'create continuous query "my_\\"q" on "my_\\"_db" resample for 4m begin foo end'
         );
         return influx.createContinuousQuery(
@@ -494,8 +487,7 @@ describe("influxdb", () => {
       });
       it("fills in default DB", () => {
         setDefaultDB('my_"_db');
-        expectQuery(
-          "json",
+        expectJsonCall(
           'create continuous query "my_\\"q" on "my_\\"_db"  begin foo end'
         );
         return influx.createContinuousQuery('my_"q', "foo");
@@ -504,7 +496,7 @@ describe("influxdb", () => {
 
     describe(".dropContinuousQuery()", () => {
       it("queries correctly", () => {
-        expectQuery("json", 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        expectJsonCall('drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q', 'my_"_db');
       });
       it("throws if DB unspecified", () => {
@@ -514,18 +506,14 @@ describe("influxdb", () => {
       });
       it("fills in default DB", () => {
         setDefaultDB('my_"_db');
-        expectQuery("json", 'drop continuous query "my_\\"q" on "my_\\"_db"');
+        expectJsonCall('drop continuous query "my_\\"q" on "my_\\"_db"');
         return influx.dropContinuousQuery('my_"q');
       });
     });
 
     describe(".showContinousQueries()", () => {
       it("queries correctly", () => {
-        expectQuery(
-          "json",
-          { q: "show continuous queries", db: "my_db" },
-          "GET"
-        );
+        expectJsonCall({ q: "show continuous queries", db: "my_db" }, "GET");
         return influx.showContinousQueries("my_db");
       });
       it("throws if DB unspecified", () => {
@@ -535,11 +523,7 @@ describe("influxdb", () => {
       });
       it("fills in default DB", () => {
         setDefaultDB("my_db");
-        expectQuery(
-          "json",
-          { q: "show continuous queries", db: "my_db" },
-          "GET"
-        );
+        expectJsonCall({ q: "show continuous queries", db: "my_db" }, "GET");
         return influx.showContinousQueries();
       });
     });
@@ -869,8 +853,7 @@ describe("influxdb", () => {
       beforeEach(() => setDefaultDB("my_db"));
 
       it("runs raw queries", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0",
             epoch: undefined,
@@ -888,8 +871,7 @@ describe("influxdb", () => {
       });
 
       it("parses query output", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0",
             epoch: undefined,
@@ -918,8 +900,7 @@ describe("influxdb", () => {
       });
 
       it("selects from multiple", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0;select * from series_1",
             epoch: undefined,
@@ -938,8 +919,7 @@ describe("influxdb", () => {
       });
 
       it("passes in options", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0",
             epoch: "ms",
@@ -958,8 +938,7 @@ describe("influxdb", () => {
       });
 
       it("rewrites nanosecond precisions", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0",
             epoch: undefined,
@@ -978,8 +957,7 @@ describe("influxdb", () => {
       });
 
       it("uses placeholders", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           {
             q: "select * from series_0 WHERE time > now() - $<since> AND value >= $<minimumValue>",
             epoch: undefined,
@@ -1007,12 +985,39 @@ describe("influxdb", () => {
       });
     });
 
+    describe(".stream", () => {
+      beforeEach(() => setDefaultDB("my_db"));
+
+      it("calls the pools stream method correctly", () => {
+        const callback = (_err: Error, _res: http.IncomingMessage) => {};
+
+        influx.stream("select * from series_0", callback, { csv: true });
+
+        expect(pool.stream).to.have.been.calledWith(
+          {
+            method: "GET",
+            path: "/query",
+            query: {
+              u: "root",
+              p: "root",
+              q: "select * from series_0",
+              epoch: undefined,
+              rp: undefined,
+              db: "my_db",
+              params: "{}",
+            },
+            csv: true,
+          },
+          callback
+        );
+      });
+    });
+
     describe(".createRetentionPolicy", () => {
       beforeEach(() => setDefaultDB("my_db"));
 
       it("creates non-default policies", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'create retention policy "7d\\"" on "test" duration 7d replication 1'
         );
 
@@ -1024,8 +1029,7 @@ describe("influxdb", () => {
       });
 
       it("creates default policies", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'create retention policy "7d\\"" on "my_db" duration 7d replication 1 default'
         );
 
@@ -1041,8 +1045,7 @@ describe("influxdb", () => {
       beforeEach(() => setDefaultDB("my_db"));
 
       it("creates non-default policies", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'alter retention policy "7d\\"" on "test" duration 7d replication 1'
         );
 
@@ -1054,8 +1057,7 @@ describe("influxdb", () => {
       });
 
       it("creates default policies", () => {
-        expectQuery(
-          "json",
+        expectJsonCall(
           'alter retention policy "7d\\"" on "my_db" duration 7d replication 1 default'
         );
 
@@ -1069,16 +1071,16 @@ describe("influxdb", () => {
 
     it("drops retention policies", () => {
       setDefaultDB("my_db");
-      expectQuery("json", 'drop retention policy "7d\\"" on "my_db"');
+      expectJsonCall('drop retention policy "7d\\"" on "my_db"');
       return influx.dropRetentionPolicy('7d"');
     });
 
     it("shows retention policies", () => {
       const data = dbFixture("showRetentionPolicies");
-      expectQuery("json", 'show retention policies on "my\\"db"', "GET", data);
+      expectJsonCall('show retention policies on "my\\"db"', "GET", data);
       influx.showRetentionPolicies('my"db');
       setDefaultDB("my_db");
-      expectQuery("json", 'show retention policies on "my_db"', "GET", data);
+      expectJsonCall('show retention policies on "my_db"', "GET", data);
 
       return influx.showRetentionPolicies().then((res) => {
         expect(res.slice()).to.deep.equal([
@@ -1102,7 +1104,7 @@ describe("influxdb", () => {
 
     it("shows shards", () => {
       setDefaultDB("_internal");
-      expectQuery("json", "show shards ", "GET", dbFixture("showShards"));
+      expectJsonCall("show shards ", "GET", dbFixture("showShards"));
       return influx.showShards().then((res) => {
         expect(res.slice()).to.deep.equal([
           {
