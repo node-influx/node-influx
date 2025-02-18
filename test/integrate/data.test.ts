@@ -55,6 +55,20 @@ describe("data operations", () => {
     });
   });
 
+  it("queries with POST request", () => {
+    const expected = ["2015-08-18T00:48:00Z", 56, "coyote_creek", "3"];
+    return db
+      .queryRaw(
+        "SELECT * FROM h2o_quality WHERE time = '2015-08-18T00:48:00Z'",
+        {
+          method: "POST",
+        },
+      )
+      .then((res) => {
+        expect(res.results[0].series[0].values[0]).to.deep.equal(expected);
+      });
+  });
+
   it("drops series", () => {
     return db
       .dropSeries({
