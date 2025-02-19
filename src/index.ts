@@ -1580,23 +1580,26 @@ export class InfluxDB {
    * @private
    */
   private _getQueryOpts(params: any, method = "GET", partOfBody = false): any {
-    const query = {
+    const authCredentials = {
       u: this._options.username,
       p: this._options.password,
-      ...params,
-    };
+    }
 
     if (method === "POST" && partOfBody) {
       return {
         method,
         path: "/query",
-        body: querystring.stringify(query),
+        query: authCredentials,
+        body: querystring.stringify(params),
       };
     } else {
       return {
         method,
         path: "/query",
-        query,
+        query: {
+          ...authCredentials,
+          ...params
+        }
       };
     }
   }

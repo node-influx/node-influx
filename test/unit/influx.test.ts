@@ -191,10 +191,9 @@ describe("influxdb", () => {
 
       (pool[method] as any).returns(Promise.resolve(yields));
       expectations.push(() => {
-        const baseParams = {
+        const authParams = {
           u: "root",
           p: "root",
-          ...options,
         };
 
         const callOptions: any = {
@@ -203,9 +202,10 @@ describe("influxdb", () => {
         };
 
         if (hasBody) {
-          callOptions.body = querystring.stringify(baseParams);
+          callOptions.query = authParams;
+          callOptions.body = querystring.stringify(options);
         } else {
-          callOptions.query = baseParams;
+          callOptions.query = { ...authParams, ...options };
         }
 
         expect(pool[method]).to.have.been.calledWith(callOptions);
