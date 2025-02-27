@@ -6,6 +6,7 @@ import * as url from "url";
 
 import * as b from "./builder";
 import * as grammar from "./grammar";
+import * as querystring from "querystring";
 import { IPingStats, IPoolOptions, Pool } from "./pool";
 import { assertNoErrors, IResults, parse, parseSingle } from "./results";
 import { coerceBadly, ISchemaOptions, Schema } from "./schema";
@@ -206,6 +207,11 @@ export interface IQueryOptions {
    * to avoid injection attacks.
    */
   placeholders?: Record<string, string | number>;
+
+  /**
+   * Execute a query as a HTTP GET or POST request
+   */
+  method?: "GET" | "POST";
 }
 
 export interface IParseOptions {
@@ -1514,13 +1520,17 @@ export class InfluxDB {
     }
 
     return this._pool.json(
-      this._getQueryOpts({
-        db: database,
-        epoch: options.precision,
-        q: query,
-        rp: retentionPolicy,
-        params: JSON.stringify(placeholders),
-      })
+      this._getQueryOpts(
+        {
+          db: database,
+          epoch: options.precision,
+          q: query,
+          rp: retentionPolicy,
+          params: JSON.stringify(placeholders),
+        },
+        options.method,
+        true,
+      ),
     );
   }
 
@@ -1569,16 +1579,29 @@ export class InfluxDB {
    * Creates options to be passed into the pool to query databases.
    * @private
    */
-  private _getQueryOpts(params: any, method = "GET"): any {
-    return {
-      method,
-      path: "/query",
-      query: {
-        p: this._options.password,
-        u: this._options.username,
-        ...params,
-      },
-    };
+  private _getQueryOpts(params: any, method = "GET", partOfBody = false): any {
+    const authCredentials = {
+      u: this._options.username,
+      p: this._options.password,
+    }
+
+    if (method === "POST" && partOfBody) {
+      return {
+        method,
+        path: "/query",
+        query: authCredentials,
+        body: querystring.stringify(params),
+      };
+    } else {
+      return {
+        method,
+        path: "/query",
+        query: {
+          ...authCredentials,
+          ...params
+        }
+      };
+    }
   }
 
   /**

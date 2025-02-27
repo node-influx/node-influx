@@ -378,6 +378,9 @@ export class Pool {
       {
         headers: {
           "content-length": options.body ? Buffer.from(options.body).length : 0,
+          ...(options.body && options.path === "/query"
+            ? { "Content-Type": "application/x-www-form-urlencoded" }
+            : {}),
         },
         hostname: host.url.hostname,
         method: options.method,

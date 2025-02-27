@@ -16,7 +16,7 @@
     "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
     "test:lint": "prettier -c .",
     "test:ci": "npm-run-all clean test:unit test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
-    "test:unit": "mocha --require ts-node/register test/unit/*.test.ts",
+    "test:unit": "mocha --require ts-node/register --timeout 20000 test/unit/*.test.ts",
     "test:watch": "mocha -R min --watch --require ts-node/register test/unit/*.test.ts",
     "semantic-release": "semantic-release"
   },

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import * as sinon from "sinon";
+import * as querystring from "querystring";
 
 import { FieldType, InfluxDB, toNanoDate } from "../../src";
 import { Pool } from "../../src/pool";
@@ -181,7 +182,8 @@ describe("influxdb", () => {
       method: keyof Pool,
       options: string | any,
       httpMethod: string = "POST",
-      yields: any = { results: [{}] }
+      yields: any = { results: [{}] },
+      hasBody = false,
     ): void => {
       if (typeof options === "string") {
         options = { q: options };
@@ -189,15 +191,24 @@ describe("influxdb", () => {
 
       (pool[method] as any).returns(Promise.resolve(yields));
       expectations.push(() => {
-        expect(pool[method]).to.have.been.calledWith({
+        const authParams = {
+          u: "root",
+          p: "root",
+        };
+
+        const callOptions: any = {
           method: httpMethod,
           path: "/query",
-          query: {
-            u: "root",
-            p: "root",
-            ...options,
-          },
-        });
+        };
+
+        if (hasBody) {
+          callOptions.query = authParams;
+          callOptions.body = querystring.stringify(options);
+        } else {
+          callOptions.query = { ...authParams, ...options };
+        }
+
+        expect(pool[method]).to.have.been.calledWith(callOptions);
       });
     };
 
@@ -1002,8 +1013,31 @@ describe("influxdb", () => {
               since: "10s",
               minimumValue: 12,
             },
-          }
+          },
         );
+      });
+
+      it("queryRaw with POST request", () => {
+        expectQuery(
+          "json",
+          {
+            db: "my_db",
+            epoch: undefined,
+            q: "select * from series_0",
+            rp: undefined,
+            params: "{}",
+          },
+          "POST",
+          dbFixture("selectFromOne"),
+          true,
+        );
+        return influx
+          .queryRaw("select * from series_0", {
+            method: "POST",
+          })
+          .then((res) => {
+            expect(res).to.deep.equal(dbFixture("selectFromOne"));
+          });
       });
     });
 
