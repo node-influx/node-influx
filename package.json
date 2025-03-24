@@ -68,7 +68,7 @@
     "prettier": "^3.4.2",
     "puppeteer": "^24.1.1",
     "semantic-release": "^24.2.1",
-    "sinon": "^15.0.0",
+    "sinon": "^20.0.0",
     "sinon-chai": "^3.5.0",
     "stream-http": "github:node-influx/stream-http",
     "ts-node": "^10.0.0",
