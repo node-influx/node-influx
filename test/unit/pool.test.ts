@@ -135,6 +135,16 @@ describe("pool", () => {
         .then((data) => expect(data).to.deep.equal({ ok: true }));
     });
 
+    it("sends Basic Authorization header when auth is set", () => {
+      const auth = "user:pass";
+      const expected = Buffer.from(auth).toString("base64");
+      return pool
+        .json({ method: "GET", path: "/pool/echo-headers", auth })
+        .then((data) => {
+          expect(data.headers["authorization"]).to.equal(`Basic ${expected}`);
+        });
+    });
+
     it("errors if JSON parsing fails", () => {
       return pool
         .json({ method: "GET", path: "/pool/badjson" })

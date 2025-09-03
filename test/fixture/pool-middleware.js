@@ -70,6 +70,15 @@ module.exports = function () {
         });
         break;
 
+      case "echo-headers":
+        res.end(
+          JSON.stringify({
+            headers: req.headers,
+            url: url,
+          })
+        );
+        break;
+
       case "json":
         res.end(JSON.stringify({ ok: true }));
         break;

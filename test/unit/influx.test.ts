@@ -191,21 +191,16 @@ describe("influxdb", () => {
 
       (pool[method] as any).returns(Promise.resolve(yields));
       expectations.push(() => {
-        const authParams = {
-          u: "root",
-          p: "root",
-        };
-
         const callOptions: any = {
           method: httpMethod,
           path: "/query",
+          auth: "root:root",
         };
 
         if (hasBody) {
-          callOptions.query = authParams;
           callOptions.body = querystring.stringify(options);
         } else {
-          callOptions.query = { ...authParams, ...options };
+          callOptions.query = { ...options };
         }
 
         expect(pool[method]).to.have.been.calledWith(callOptions);
@@ -224,10 +219,9 @@ describe("influxdb", () => {
           path: "/write",
           body,
           query: {
-            u: "root",
-            p: "root",
             ...options,
           },
+          auth: "root:root",
         });
       });
     };
