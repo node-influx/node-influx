@@ -1343,11 +1343,13 @@ export class InfluxDB {
       path: "/write",
       query: {
         db: database,
-        p: this._options.password,
         precision,
         rp: retentionPolicy,
-        u: this._options.username,
       },
+      auth:
+        typeof this._options.username === "string"
+          ? `${this._options.username}:${this._options.password || ""}`
+          : undefined,
     });
   }
 
@@ -1580,26 +1582,26 @@ export class InfluxDB {
    * @private
    */
   private _getQueryOpts(params: any, method = "GET", partOfBody = false): any {
-    const authCredentials = {
-      u: this._options.username,
-      p: this._options.password,
+    let auth: string = undefined;
+    if (typeof this._options.username === "string") {
+      auth = `${this._options.username}:${this._options.password || ""}`;
     }
 
     if (method === "POST" && partOfBody) {
       return {
         method,
         path: "/query",
-        query: authCredentials,
+        auth,
         body: querystring.stringify(params),
       };
     } else {
       return {
         method,
         path: "/query",
+        auth,
         query: {
-          ...authCredentials,
-          ...params
-        }
+          ...params,
+        },
       };
     }
   }

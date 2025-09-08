@@ -66,6 +66,17 @@ export interface IPoolRequestOptions {
    * running this request.
    */
   retries?: number;
+
+  /**
+   * Optional Basic auth in the form `username:password`.
+   * When provided, Pool will set the `Authorization: Basic ...` header.
+   */
+  auth?: string;
+
+  /**
+   * Optional extra headers to include in the request.
+   */
+  headers?: http.OutgoingHttpHeaders;
 }
 
 /**
@@ -374,21 +385,36 @@ export class Pool {
       path += "?" + querystring.stringify(options.query);
     }
 
+    // Merge headers from defaults, host options, and call options.
+    const hostHeaders: http.OutgoingHttpHeaders = (host.options && (host.options as any).headers) || {};
+    const defaultHeaders: http.OutgoingHttpHeaders = {
+      "content-length": options.body ? Buffer.from(options.body).length : 0,
+      ...(options.body && options.path === "/query"
+        ? { "Content-Type": "application/x-www-form-urlencoded" }
+        : {}),
+    };
+    const mergedHeaders: http.OutgoingHttpHeaders = {
+      ...hostHeaders,
+      ...defaultHeaders,
+      ...(options.headers || {}),
+    };
+    if (typeof options.auth !== "undefined") {
+      const encodedAuth = Buffer.from(options.auth).toString("base64");
+      mergedHeaders["Authorization"] = `Basic ${encodedAuth}`;
+    }
+
+    const { headers: _ignoredHostHeaders, ...hostReqOptions } = (host.options || {}) as any;
+
     const req = request(
       {
-        headers: {
-          "content-length": options.body ? Buffer.from(options.body).length : 0,
-          ...(options.body && options.path === "/query"
-            ? { "Content-Type": "application/x-www-form-urlencoded" }
-            : {}),
-        },
+        headers: mergedHeaders,
         hostname: host.url.hostname,
         method: options.method,
         path,
         port: Number(host.url.port),
         protocol: host.url.protocol,
         timeout: this._timeout,
-        ...host.options,
+        ...hostReqOptions,
       },
       once((res: http.IncomingMessage) => {
         res.setEncoding("utf8");
