@@ -1347,7 +1347,7 @@ export class InfluxDB {
         rp: retentionPolicy,
       },
       auth:
-        typeof this._options.username === "string"
+        hasUsernameAndPassword(this._options)
           ? `${this._options.username}:${this._options.password || ""}`
           : undefined,
     });
@@ -1554,7 +1554,7 @@ export class InfluxDB {
   public ping(timeout: number): Promise<IPingStats[]> {
     let auth: string = undefined;
 
-    if (typeof this._options.username === "string") {
+    if (hasUsernameAndPassword(this._options)) {
       auth = `${this._options.username}:${this._options.password || ""}`;
     }
 
@@ -1570,7 +1570,7 @@ export class InfluxDB {
     if (!this._options.database) {
       throw new Error(
         "Attempted to run an influx query without a default" +
-          " database specified or an explicit database provided."
+        " database specified or an explicit database provided."
       );
     }
 
@@ -1583,7 +1583,7 @@ export class InfluxDB {
    */
   private _getQueryOpts(params: any, method = "GET", partOfBody = false): any {
     let auth: string = undefined;
-    if (typeof this._options.username === "string") {
+    if (hasUsernameAndPassword(this._options)) {
       auth = `${this._options.username}:${this._options.password || ""}`;
     }
 
@@ -1618,7 +1618,7 @@ export class InfluxDB {
     if (!schema.database) {
       throw new Error(
         `Schema ${schema.measurement} doesn't have a database specified,` +
-          "and no default database is provided!"
+        "and no default database is provided!"
       );
     }
 
@@ -1628,4 +1628,9 @@ export class InfluxDB {
 
     this._schema[schema.database][schema.measurement] = new Schema(schema);
   }
+}
+
+function hasUsernameAndPassword(_options: IClusterConfig) {
+  const { username, password } = _options;
+  return username?.length > 0 && password?.length > 0;
 }
