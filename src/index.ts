@@ -1591,7 +1591,7 @@ export class InfluxDB {
     params: any,
     method = "GET",
     partOfBody = false,
-    signal: AbortSignal = undefined
+    signal: AbortSignal = undefined,
   ): any {
     let auth: string = undefined;
     if (typeof this._options.username === "string") {

@@ -410,20 +410,18 @@ export class Pool {
 
     const { headers: _ignoredHostHeaders, ...hostReqOptions } = (host.options || {}) as any;
 
-    let opts = {
-      headers: mergedHeaders,
-      hostname: host.url.hostname,
-      method: options.method,
-      path,
-      port: Number(host.url.port),
-      protocol: host.url.protocol,
-      timeout: this._timeout,
-      ...hostReqOptions,
-    };
-    if (options.signal) opts.signal = options.signal;
-
     const req = request(
-      opts,
+      {
+        headers: mergedHeaders,
+        hostname: host.url.hostname,
+        method: options.method,
+        signal: options.signal,
+        path,
+        port: Number(host.url.port),
+        protocol: host.url.protocol,
+        timeout: this._timeout,
+        ...hostReqOptions,
+      },
       once((res: http.IncomingMessage) => {
         res.setEncoding("utf8");
         if (res.statusCode >= 500) {

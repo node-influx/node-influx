@@ -184,6 +184,7 @@ describe("influxdb", () => {
       httpMethod: string = "POST",
       yields: any = { results: [{}] },
       hasBody = false,
+      signal: AbortSignal = undefined,
     ): void => {
       if (typeof options === "string") {
         options = { q: options };
@@ -193,6 +194,7 @@ describe("influxdb", () => {
       expectations.push(() => {
         const callOptions: any = {
           method: httpMethod,
+          signal: signal,
           path: "/query",
           auth: "root:root",
         };
@@ -943,6 +945,7 @@ describe("influxdb", () => {
       });
 
       it("passes in options", () => {
+        const signal = new AbortController().signal;
         expectQuery(
           "json",
           {
@@ -953,12 +956,15 @@ describe("influxdb", () => {
             params: "{}",
           },
           "GET",
-          dbFixture("selectFromOne")
+          dbFixture("selectFromOne"),
+          undefined,
+          signal
         );
 
         return influx.query(["select * from series_0"], {
           precision: "ms",
           retentionPolicy: "asdf",
+          signal,
         });
       });
 
