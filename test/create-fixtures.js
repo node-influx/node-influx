@@ -45,12 +45,12 @@ const queries = [
   fixture(
     "selectFromOne",
     "select * from series_0 where my_tag = '1' order by time desc",
-    { db }
+    { db },
   ),
   fixture(
     "selectFromGroup",
     "select top(my_value, 1) from series_0 group by my_tag order by time desc",
-    { db }
+    { db },
   ),
   fixture("error", "this is not a valid query!"),
 
@@ -111,7 +111,7 @@ function update(query, params = {}) {
       if (!res.ok) {
         return res.text().then((body) => {
           throw new Error(
-            `Unsuccessful update. Response: ${res.status}, body: ${body}`
+            `Unsuccessful update. Response: ${res.status}, body: ${body}`,
           );
         });
       }
