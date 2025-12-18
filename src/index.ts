@@ -212,6 +212,11 @@ export interface IQueryOptions {
    * Execute a query as a HTTP GET or POST request
    */
   method?: "GET" | "POST";
+
+  /**
+   * Abort Signal to cancel the query request
+   */
+  signal?: AbortSignal;
 }
 
 export interface IParseOptions {
@@ -1532,6 +1537,7 @@ export class InfluxDB {
         },
         options.method,
         true,
+        options.signal,
       ),
     );
   }
@@ -1581,7 +1587,12 @@ export class InfluxDB {
    * Creates options to be passed into the pool to query databases.
    * @private
    */
-  private _getQueryOpts(params: any, method = "GET", partOfBody = false): any {
+  private _getQueryOpts(
+    params: any,
+    method = "GET",
+    partOfBody = false,
+    signal: AbortSignal = undefined
+  ): any {
     let auth: string = undefined;
     if (typeof this._options.username === "string") {
       auth = `${this._options.username}:${this._options.password || ""}`;
@@ -1590,6 +1601,7 @@ export class InfluxDB {
     if (method === "POST" && partOfBody) {
       return {
         method,
+        signal,
         path: "/query",
         auth,
         body: querystring.stringify(params),
@@ -1597,6 +1609,7 @@ export class InfluxDB {
     } else {
       return {
         method,
+        signal,
         path: "/query",
         auth,
         query: {
