@@ -65,7 +65,7 @@ module.exports = function () {
               method: req.method,
               query: url.query,
               body,
-            })
+            }),
           );
         });
         break;
@@ -75,7 +75,7 @@ module.exports = function () {
           JSON.stringify({
             headers: req.headers,
             url: url,
-          })
+          }),
         );
         break;
 
