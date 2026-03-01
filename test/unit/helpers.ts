@@ -2,9 +2,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import { use } from "chai";
-import * as sinonChai from "sinon-chai";
 
-use(sinonChai);
+const sinonChaiModule = require("sinon-chai");
+
+use(sinonChaiModule.default || sinonChaiModule);
 
 const influxVersion = process.env.INFLUX_VERSION || "v1.0.0";
 

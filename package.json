@@ -13,11 +13,11 @@
     "test": "npm-run-all --parallel test:lint test:unit test:integrate",
     "test:browser": "karma start test/karma.conf.js",
     "test:cover": "npm run build:dist && istanbul cover _mocha -- lib/test/unit/*.test.js && open-cli coverage/lcov-report/index.html",
-    "test:integrate": "mocha --require ts-node/register --timeout 20000 test/integrate/*.test.ts",
+    "test:integrate": "tsx ./node_modules/mocha/bin/mocha --timeout 20000 test/integrate/*.test.ts",
     "test:lint": "prettier -c .",
     "test:ci": "npm-run-all clean test:unit test:integrate build:dist && istanbul cover _mocha --report lcovonly -- lib/test/unit/*.test.js",
-    "test:unit": "mocha --require ts-node/register --timeout 20000 test/unit/*.test.ts",
-    "test:watch": "mocha -R min --watch --require ts-node/register test/unit/*.test.ts",
+    "test:unit": "tsx ./node_modules/mocha/bin/mocha --timeout 20000 test/unit/*.test.ts",
+    "test:watch": "tsx ./node_modules/mocha/bin/mocha -R min --watch test/unit/*.test.ts",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -42,12 +42,12 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
-    "@types/chai": "^4.3.20",
+    "@types/chai": "^5.2.3",
     "@types/freeport": "1.0.24",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.19.130",
-    "@types/sinon": "^10.0.20",
-    "@types/sinon-chai": "^3.2.12",
+    "@types/node": "^25.3.3",
+    "@types/sinon": "^21.0.0",
+    "@types/sinon-chai": "^4.0.0",
     "babel-loader": "^8.4.1",
     "buffer": "^6.0.3",
     "chai": "4.5.0",
@@ -78,7 +78,8 @@
     "stream-http": "github:node-influx/stream-http",
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
-    "typescript": "^4.9.5",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
     "url": "^0.11.4",
     "webpack": "^5.105.3"
   }

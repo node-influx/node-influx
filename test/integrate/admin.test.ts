@@ -22,7 +22,7 @@ describe("administrative actions", () => {
             { user: name, admin },
           ]),
         )
-        .then(() => undefined);
+        .then((): void => undefined);
     };
 
     beforeEach(() => db.createUser("connor", "foo", false));
@@ -69,7 +69,7 @@ describe("administrative actions", () => {
         .then((rps) =>
           expect(rps.find((p) => p.name === policy.name)).to.deep.equal(policy),
         )
-        .then(() => undefined);
+        .then((): void => undefined);
     };
 
     beforeEach(() => {
