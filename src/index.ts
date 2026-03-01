@@ -535,7 +535,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -556,7 +556,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -662,7 +662,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -707,7 +707,7 @@ export class InfluxDB {
     return this._pool
       .json(this._getQueryOpts({ db, q }, "POST"))
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -761,7 +761,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -785,7 +785,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -814,7 +814,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -844,7 +844,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -865,7 +865,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -886,7 +886,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -907,7 +907,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -943,7 +943,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -998,7 +998,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -1037,7 +1037,7 @@ export class InfluxDB {
     return this._pool
       .json(this._getQueryOpts({ q }, "POST"))
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -1075,7 +1075,7 @@ export class InfluxDB {
     return this._pool
       .json(this._getQueryOpts({ q }, "POST"))
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -1106,7 +1106,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**
@@ -1241,7 +1241,7 @@ export class InfluxDB {
         ),
       )
       .then(assertNoErrors)
-      .then(() => undefined);
+      .then((): void => undefined);
   }
 
   /**

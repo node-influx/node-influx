@@ -5,13 +5,13 @@
 import { expect } from "chai";
 import * as http from "http";
 import * as sinon from "sinon";
-import * as https from "https";
 
 import { ExponentialBackoff } from "../../src/backoff/exponential";
 import { IBackoffStrategy } from "../../src/backoff/backoff";
 import { ConstantBackoff, IConstantOptions } from "../../src/backoff/constant";
 import { Pool, RequestError, ServiceNotAvailableError } from "../../src/pool";
 
+const https = require("https");
 const hosts = 2;
 
 describe("pool", () => {

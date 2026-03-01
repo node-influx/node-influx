@@ -206,7 +206,7 @@ describe("influxdb", () => {
           callOptions.query = { ...options };
         }
 
-        expect(pool[method]).to.have.been.calledWith(callOptions);
+        sinon.assert.calledWith(pool[method] as any, callOptions);
       });
     };
 
@@ -217,7 +217,7 @@ describe("influxdb", () => {
 
       (pool.discard as any).returns(Promise.resolve());
       expectations.push(() => {
-        expect(pool.discard).to.have.been.calledWith({
+        sinon.assert.calledWith(pool.discard as any, {
           method: "POST",
           path: "/write",
           body,
