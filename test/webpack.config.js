@@ -8,7 +8,17 @@ module.exports = (() => {
 
   config.resolve = {
     extensions: [".ts", ".js", ".json"],
-    alias: { http, https: http },
+    alias: {
+      http,
+      https: http,
+      process: require.resolve("process/browser.js"),
+      "process/browser": require.resolve("process/browser.js"),
+    },
+    fallback: {
+      buffer: require.resolve("buffer/"),
+      querystring: require.resolve("querystring-es3"),
+      url: require.resolve("url/"),
+    },
   };
 
   config.module = {
@@ -42,6 +52,10 @@ module.exports = (() => {
   };
 
   config.plugins = [
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+      process: require.resolve("process/browser.js"),
+    }),
     new webpack.DefinePlugin({
       "process.env": {
         WEBPACK: '"1"',
