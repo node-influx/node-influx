@@ -40,6 +40,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
     "@types/chai": "^4.3.20",
     "@types/freeport": "1.0.24",
     "@types/mocha": "^10.0.0",
@@ -47,6 +49,7 @@
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "chai": "4.5.0",
+    "babel-loader": "^8.4.1",
     "coveralls": "^3.1.0",
     "esdoc": "1.1.0",
     "esdoc-standard-plugin": "1.0.0",

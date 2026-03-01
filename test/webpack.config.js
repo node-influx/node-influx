@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const path = require("path");
 const http = path.resolve(__dirname, "../node_modules/stream-http/index.js");
+const samsam = path.resolve(__dirname, "../node_modules/@sinonjs/samsam");
 
 module.exports = (() => {
   const config = {};
@@ -18,6 +19,23 @@ module.exports = (() => {
         options: {
           transpileOnly: true,
           configFile: path.resolve(__dirname, "../tsconfig.json"),
+        },
+      },
+      {
+        test: /\.js$/,
+        include: [samsam],
+        loader: "babel-loader",
+        options: {
+          presets: [
+            [
+              "@babel/preset-env",
+              {
+                targets: {
+                  chrome: "80",
+                },
+              },
+            ],
+          ],
         },
       },
     ],
