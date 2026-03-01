@@ -221,15 +221,15 @@ describe("pool", () => {
   });
 
   describe("backoff", () => {
-      describe("exponential", () => {
-        beforeEach(() => {
-          clock = sinon.useFakeTimers({
-            toFake: ["Date", "setTimeout", "clearTimeout"],
-          });
-          return pool.discard({ method: "GET", path: "/pool/502" }).catch(() => {
-            /* ignore */
-          });
+    describe("exponential", () => {
+      beforeEach(() => {
+        clock = sinon.useFakeTimers({
+          toFake: ["Date", "setTimeout", "clearTimeout"],
         });
+        return pool.discard({ method: "GET", path: "/pool/502" }).catch(() => {
+          /* ignore */
+        });
+      });
 
       it("should error if there are no available hosts", () => {
         return pool
