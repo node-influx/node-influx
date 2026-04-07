@@ -82,5 +82,9 @@
     "typescript": "^5.9.3",
     "url": "^0.11.4",
     "webpack": "^5.105.3"
+  },
+  "dependencies": {
+    "@types/json-bigint": "^1.0.4",
+    "json-bigint": "^1.0.0"
   }
 }
