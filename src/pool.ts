@@ -6,6 +6,9 @@ import * as http from "http";
 import * as https from "https";
 import * as querystring from "querystring";
 import * as urlModule from "url";
+import JSONbig from "json-bigint";
+
+const jsonParse = JSONbig({ useNativeBigInt: true }).parse;
 
 /**
  * Status codes that will cause a host to be marked as 'failed' if we get
@@ -249,7 +252,7 @@ export class Pool {
    * An error is returned on a non-2xx status code or on a parsing exception.
    */
   public json(options: IPoolRequestOptions): Promise<any> {
-    return this.text(options).then((res) => JSON.parse(res));
+    return this.text(options).then((res) => jsonParse(res));
   }
 
   /**
