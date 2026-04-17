@@ -969,12 +969,12 @@ describe("influxdb", () => {
         });
       });
 
-      it("rewrites nanosecond precisions", () => {
+      it("doesn't rewrite nanosecond precisions", () => {
         expectQuery(
           "json",
           {
             q: "select * from series_0",
-            epoch: undefined,
+            epoch: "n",
             rp: "asdf",
             db: "my_db",
             params: "{}",
@@ -994,7 +994,7 @@ describe("influxdb", () => {
           "json",
           {
             q: "select * from series_0 WHERE time > now() - $<since> AND value >= $<minimumValue>",
-            epoch: undefined,
+            epoch: "n",
             rp: "asdf",
             db: "my_db",
             params: '{"since":"10s","minimumValue":12}',
