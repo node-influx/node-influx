@@ -101,7 +101,7 @@ function parseInner(
       const obj: Row = {};
       for (let j = 0; j < columns.length; j += 1) {
         if (columns[j] === "time") {
-          obj.time = isoOrTimeToDate(value[j] as number | string, precision);
+          obj.time = isoOrTimeToDate(value[j] as number | bigint | string, precision);
         } else {
           obj[columns[j]] = value[j];
         }

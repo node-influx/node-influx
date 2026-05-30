@@ -1486,14 +1486,6 @@ export class InfluxDB {
       query = query.join(";");
     }
 
-    // If the consumer asked explicitly for nanosecond precision parsing,
-    // remove that to cause Influx to give us ISO dates that
-    // we can parse correctly.
-    if (options.precision === "n") {
-      options = { ...options }; // Avoid mutating
-      delete options.precision;
-    }
-
     return this.queryRaw(query, options).then((res) =>
       parse<T>(res, options.precision),
     );

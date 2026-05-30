@@ -85,11 +85,11 @@ describe("grammar", () => {
     });
 
     it("parses numeric `ns` timestamps", () => {
-      const parsed = grammar.isoOrTimeToDate(1475985480231035677, "n");
+      const parsed = grammar.isoOrTimeToDate(1475985480231035677n, "n");
       expect(parsed.getTime()).to.equal(1475985480231);
-      expect(parsed.getNanoTime()).to.equal("1475985480231035600"); // Precision is lost
+      expect(parsed.getNanoTime()).to.equal("1475985480231035677"); // Precision is not lost
       expect(parsed.toNanoISOString()).to.equal(
-        "2016-10-09T03:58:00.231035600Z",
+        "2016-10-09T03:58:00.231035677Z",
       );
     });
 

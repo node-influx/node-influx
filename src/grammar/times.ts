@@ -116,7 +116,7 @@ interface IDateManipulator<T> {
   /**
    * Converts a numeric timestamp with the specified precision to a date.
    */
-  timetoDate: (timestamp: number, precision: TimePrecision) => T;
+  timetoDate: (timestamp: number | bigint, precision: TimePrecision) => T;
 }
 
 class MillisecondDateManipulator implements IDateManipulator<Date> {
@@ -335,20 +335,29 @@ class NanosecondsDateManipulator implements IDateManipulator<INanoDate> {
     return date;
   }
 
-  public timetoDate(timestamp: number, precision: TimePrecision): INanoDate {
+  public timetoDate(
+    timestamp: number | bigint,
+    precision: TimePrecision,
+  ): INanoDate {
+    if (typeof timestamp === "number") {
+      timestamp = BigInt(timestamp);
+    }
+
     switch (precision) {
       case "h":
-        timestamp *= 60;
+        timestamp *= 60n;
       case "m":
-        timestamp *= 60;
+        timestamp *= 60n;
       case "s":
-        timestamp *= 1000;
+        timestamp *= 1000n;
       case "ms":
-        timestamp *= 1000;
+        timestamp *= 1000n;
       case "u":
-        timestamp *= 1000;
+        timestamp *= 1000n;
       case "n": {
-        const date = new Date(Math.round(timestamp / nsPer.ms)) as any;
+        const date = new Date(
+          Number((timestamp + BigInt(nsPer.ms) / 2n) / BigInt(nsPer.ms)),
+        ) as any;
         date._nanoTime = String(timestamp);
         date.getNanoTime = nanoDateMethods.getNanoTimeFromStamp;
         date.toNanoISOString = nanoDateMethods.toNanoISOStringFromStamp;
@@ -399,7 +408,7 @@ export function dateToTime(
  * @private
  */
 export function isoOrTimeToDate(
-  stamp: string | number,
+  stamp: string | number | bigint,
   precision: TimePrecision = "n",
 ): INanoDate {
   if (typeof stamp === "string") {

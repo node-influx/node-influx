@@ -151,7 +151,19 @@ describe("pool", () => {
         .then(() => {
           throw new Error("Expected to have thrown");
         })
-        .catch((err) => expect(err).to.be.an.instanceof(SyntaxError));
+        .catch((err) => expect(err.name).to.equal("SyntaxError"));
+    });
+
+    it("doesn't lose nanosecond precision on numeric timestamps larger than MAX_SAFE_INTEGER", async () => {
+      const exactNanoTs = "1775533756123456789";
+      const rawResponse = `{"results":[{"series":[{"name":"s","columns":["time"],"values":[[${exactNanoTs}]]}]}]}`;
+
+      const stub = sinon.stub(pool, "text").resolves(rawResponse);
+      const parsed = await pool.json({ method: "GET", path: "/" });
+      stub.restore();
+
+      const returnedTs = String(parsed.results[0].series[0].values[0][0]);
+      expect(returnedTs).to.equal(exactNanoTs);
     });
   });
 
