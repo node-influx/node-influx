@@ -242,6 +242,7 @@ export interface IRetentionOptions {
   database?: string;
   duration: string;
   replication: number;
+  shardGroupDuration?: string;
   isDefault?: boolean;
 }
 
@@ -1015,6 +1016,8 @@ export class InfluxDB {
    *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
    * @param options.replication How many servers data in the series
    *     should be replicated to.
+   * @param [options.shardGroupDuration] The time range covered by a shard
+   *     group, in a format like `1h`.
    * @param [options.isDefault] Whether the retention policy should
    *     be the default policy on the database.
    * @return
@@ -1032,6 +1035,9 @@ export class InfluxDB {
       `create retention policy ${grammar.escape.quoted(name)} on ` +
       grammar.escape.quoted(options.database || this._defaultDB()) +
       ` duration ${options.duration} replication ${options.replication}` +
+      (options.shardGroupDuration
+        ? ` shard duration ${options.shardGroupDuration}`
+        : "") +
       (options.isDefault ? " default" : "");
 
     return this._pool
@@ -1052,6 +1058,8 @@ export class InfluxDB {
    *     [here](https://docs.influxdata.com/influxdb/v1.0/query_language/spec/#durations)
    * @param options.replication How many servers data in the series
    *     should be replicated to.
+   * @param [options.shardGroupDuration] The time range covered by a shard
+   *     group, in a format like `1h`.
    * @param [options.default] Whether the retention policy should
    *     be the default policy on the database.
    * @return
@@ -1070,6 +1078,9 @@ export class InfluxDB {
       `alter retention policy ${grammar.escape.quoted(name)} on ` +
       grammar.escape.quoted(options.database || this._defaultDB()) +
       ` duration ${options.duration} replication ${options.replication}` +
+      (options.shardGroupDuration
+        ? ` shard duration ${options.shardGroupDuration}`
+        : "") +
       (options.isDefault ? " default" : "");
 
     return this._pool

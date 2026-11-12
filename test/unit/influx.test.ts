@@ -1070,6 +1070,19 @@ describe("influxdb", () => {
           isDefault: true,
         });
       });
+
+      it("creates policies with a custom shard group duration", () => {
+        expectQuery(
+          "json",
+          'create retention policy "7d\\"" on "my_db" duration 7d replication 1 shard duration 1h',
+        );
+
+        return influx.createRetentionPolicy('7d"', {
+          duration: "7d",
+          replication: 1,
+          shardGroupDuration: "1h",
+        });
+      });
     });
 
     describe(".alterRetentionPolicy", () => {
@@ -1097,6 +1110,20 @@ describe("influxdb", () => {
         return influx.alterRetentionPolicy('7d"', {
           duration: "7d",
           replication: 1,
+          isDefault: true,
+        });
+      });
+
+      it("alters policies with a custom shard group duration", () => {
+        expectQuery(
+          "json",
+          'alter retention policy "7d\\"" on "my_db" duration 7d replication 1 shard duration 2h default',
+        );
+
+        return influx.alterRetentionPolicy('7d"', {
+          duration: "7d",
+          replication: 1,
+          shardGroupDuration: "2h",
           isDefault: true,
         });
       });
