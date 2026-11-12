@@ -74,14 +74,17 @@ describe("pool", () => {
     return p.json({ method: "GET", path: "/get" });
   });
 
-  it("passes through request options", () => {
+  it("passes through request options", async () => {
     const spy = sinon.spy(https, "request");
     const p = createPool();
     p.addHost("https://httpbin.org", { rejectUnauthorized: false });
 
-    return p.json({ method: "GET", path: "/get" }).then(() => {
+    try {
+      await p.json({ method: "GET", path: "/get" });
       expect((spy.args[0][0] as any).rejectUnauthorized).to.be.false;
-    });
+    } finally {
+      spy.restore();
+    }
   });
 
   it("valid request data content length", () => {
