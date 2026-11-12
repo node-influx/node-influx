@@ -308,6 +308,10 @@ export class Pool {
         const start = Date.now();
         const url = host.url;
         const once = doOnce();
+        const requestPath = `${url.pathname.replace(/\/+$/, "")}/${path.replace(
+          /^\/+/,
+          "",
+        )}`;
 
         return todo.push(
           new Promise((resolve) => {
@@ -321,7 +325,7 @@ export class Pool {
               {
                 hostname: url.hostname,
                 method: "GET",
-                path,
+                path: requestPath,
                 port: Number(url.port),
                 protocol: url.protocol,
                 timeout,
