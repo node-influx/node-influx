@@ -12,6 +12,7 @@ import { ConstantBackoff, IConstantOptions } from "../../src/backoff/constant";
 import { Pool, RequestError, ServiceNotAvailableError } from "../../src/pool";
 
 const https = require("https");
+const httpRequest = require("http");
 const hosts = 2;
 
 describe("pool", () => {
@@ -211,6 +212,27 @@ describe("pool", () => {
       expect(results[1].online).to.be.true;
       expect(results[1].version).to.equal("v1.0.0");
     });
+  });
+
+  it("includes the host base path when pinging servers", async () => {
+    const spy = sinon.spy(httpRequest, "request");
+    const p = createPool();
+    p.addHost(
+      process.env.WEBPACK
+        ? `${location.origin}/pool/`
+        : `http://127.0.0.1:${3005}/pool/`,
+    );
+
+    try {
+      const results = await p.ping(1000);
+      expect((spy.args[0][0] as http.RequestOptions).path).to.equal(
+        "/pool/ping",
+      );
+      expect(results[0].online).to.be.true;
+      expect(results[0].version).to.equal("v1.0.0");
+    } finally {
+      spy.restore();
+    }
   });
 
   it("times out in pings", () => {
