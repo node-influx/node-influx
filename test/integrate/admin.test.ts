@@ -76,6 +76,7 @@ describe("administrative actions", () => {
       return db.createRetentionPolicy("7d", {
         duration: "7d",
         replication: 1,
+        shardGroupDuration: "2h",
       });
     });
 
@@ -91,7 +92,7 @@ describe("administrative actions", () => {
         duration: "168h0m0s",
         name: "7d",
         replicaN: 1,
-        shardGroupDuration: "24h0m0s",
+        shardGroupDuration: "2h0m0s",
       });
     });
 
@@ -100,6 +101,7 @@ describe("administrative actions", () => {
         .alterRetentionPolicy("7d", {
           duration: "7d",
           replication: 1,
+          shardGroupDuration: "1h",
           isDefault: true,
         })
         .then(() => {
@@ -108,7 +110,7 @@ describe("administrative actions", () => {
             duration: "168h0m0s",
             name: "7d",
             replicaN: 1,
-            shardGroupDuration: "24h0m0s",
+            shardGroupDuration: "1h0m0s",
           });
         });
     });
